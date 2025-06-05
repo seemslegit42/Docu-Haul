@@ -19,11 +19,9 @@ import { Loader2, ShieldCheck, AlertTriangle, CheckCircle2 } from 'lucide-react'
 
 const documentTypeOptions = [
   { value: "VIN Label", label: "VIN Label" },
-  { value: "Shipping Manifest", label: "Shipping Manifest" },
-  { value: "Customs Declaration", label: "Customs Declaration" },
-  { value: "Vehicle Registration", label: "Vehicle Registration" },
-  { value: "Bill of Lading", label: "Bill of Lading" },
-  { value: "Other Vehicle Document", label: "Other Vehicle Document" },
+  { value: "NVIS Certificate", label: "NVIS Certificate" },
+  { value: "Bill of Sale", label: "Bill of Sale" },
+  { value: "Other Vehicle Document", label: "Other Related Document" },
 ];
 
 export default function ComplianceCheckPage() {
@@ -49,7 +47,7 @@ export default function ComplianceCheckPage() {
       setResult(complianceResult);
       toast({
         title: "Compliance Check Complete",
-        description: `Status: ${complianceResult.complianceStatus}`,
+        description: `Status for ${data.documentType}: ${complianceResult.complianceStatus}`,
       });
     } catch (error) {
       console.error("Error performing compliance check:", error);
@@ -80,7 +78,7 @@ export default function ComplianceCheckPage() {
     <AppLayout>
       <PageHeader 
         title="Compliance Checker"
-        description="AI-powered analysis of your documents against transport regulations."
+        description="AI-powered validation for your VIN labels, NVIS certificates, and Bills of Sale."
       />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card className="shadow-lg">
@@ -136,12 +134,12 @@ export default function ComplianceCheckPage() {
                   name="targetRegulations"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="font-headline">Target Regulations</FormLabel>
+                      <FormLabel className="font-headline">Target Regulations/Standards</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., FMVSS Part 567, 49 CFR, ADR Chapter 5.3" {...field} className="font-body"/>
+                        <Input placeholder="e.g., FMVSS Part 567, State titling laws" {...field} className="font-body"/>
                       </FormControl>
                       <FormDescription className="font-body text-xs">
-                        Specify the regulations or standards to check against.
+                        Specify the regulations relevant to the document type.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -154,10 +152,10 @@ export default function ComplianceCheckPage() {
                     <FormItem>
                       <FormLabel className="font-headline">Country/Region of Operation</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., USA, European Union, Canada" {...field} className="font-body"/>
+                        <Input placeholder="e.g., USA, Canada (or specific state/province)" {...field} className="font-body"/>
                       </FormControl>
                       <FormDescription className="font-body text-xs">
-                        This helps tailor the compliance check to relevant jurisdictions.
+                        This helps tailor the compliance check.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>

@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
   title: 'DocuHaul',
-  description: 'DocuHaul: AI-powered document logistics automating creation, validation, and delivery of transport & compliance documents for vehicle manufacturers.',
+  description: 'DocuHaul: AI-powered creation of VIN labels, NVIS certificates, and Bills of Sale for vehicle manufacturers.',
 };
 
 export default function RootLayout({
