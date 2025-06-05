@@ -31,7 +31,7 @@ export function SidebarNav() {
       <SidebarHeader className="flex items-center justify-between p-3 border-b border-sidebar-border">
         <Link href="/" className="flex items-center gap-2">
           <CarFront className="w-7 h-7 text-primary" />
-          {open && <span className="font-headline text-xl font-bold text-primary">VINscribe</span>}
+          {open && <span className="font-headline text-xl font-bold text-primary">DocuHaul</span>}
         </Link>
         <SidebarTrigger className="md:hidden" />
       </SidebarHeader>
@@ -60,7 +60,7 @@ export function SidebarNav() {
       <SidebarFooter className="p-3 border-t border-sidebar-border">
         {open && (
           <p className="text-xs text-sidebar-foreground/70 font-body">
-            © {new Date().getFullYear()} VINscribe
+            © {new Date().getFullYear()} DocuHaul
           </p>
         )}
       </SidebarFooter>

@@ -9,8 +9,8 @@ export default function HomePage() {
   return (
     <AppLayout>
       <PageHeader 
-        title="Welcome to VINscribe" 
-        description="Your intelligent solution for VIN documentation and label generation."
+        title="Welcome to DocuHaul" 
+        description="Your intelligent solution for transport documentation and compliance."
       />
       <div className="space-y-8">
         <Card className="shadow-lg">
@@ -22,19 +22,19 @@ export default function HomePage() {
           </CardHeader>
           <CardContent>
             <p className="font-body mb-6">
-              VINscribe leverages cutting-edge AI to help you generate compliant documentation and labels effortlessly. Explore the features below:
+              DocuHaul leverages cutting-edge AI to help you generate compliant documentation and labels effortlessly. Explore the features below:
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <FeatureCard
                 icon={<FileText className="w-8 h-8 text-primary" />}
                 title="Smart Docs"
-                description="AI-powered document generation based on VIN and trailer specs."
+                description="AI-powered document generation based on vehicle and cargo specs."
                 href="/smart-docs"
               />
               <FeatureCard
                 icon={<Tags className="w-8 h-8 text-primary" />}
                 title="Label Forge"
-                description="Create compliant VIN labels with AI-optimized information placement."
+                description="Create compliant labels with AI-optimized information placement."
                 href="/label-forge"
               />
               <FeatureCard
@@ -52,7 +52,7 @@ export default function HomePage() {
             <CardTitle className="font-headline text-2xl">How it Works</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 font-body">
-            <p><strong>1. Input Data:</strong> Provide Vehicle Identification Numbers (VINs) and trailer specifications.</p>
+            <p><strong>1. Input Data:</strong> Provide vehicle, cargo, and shipment specifications.</p>
             <p><strong>2. AI Processing:</strong> Our GenAI models analyze your data and relevant standards.</p>
             <p><strong>3. Generate & Preview:</strong> Instantly create documents and labels. Preview and make edits as needed.</p>
             <p><strong>4. Ensure Compliance:</strong> Utilize the compliance checker for peace of mind.</p>

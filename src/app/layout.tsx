@@ -3,8 +3,8 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
-  title: 'VINscribe',
-  description: 'Smart VIN Documentation and Labeling',
+  title: 'DocuHaul',
+  description: 'Smart Documentation for Transportation',
 };
 
 export default function RootLayout({
