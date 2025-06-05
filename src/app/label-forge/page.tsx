@@ -58,6 +58,48 @@ export default function LabelForgePage() {
     }
   };
 
+  const handleDownload = () => {
+    if (!generatedLabel || !generatedLabel.labelDataUri) return;
+
+    const link = document.createElement('a');
+    link.href = generatedLabel.labelDataUri;
+
+    let extension = 'png'; // Default extension
+    const dataUriPrefix = 'data:image/';
+    if (generatedLabel.labelDataUri.startsWith(dataUriPrefix)) {
+      const mimeTypePart = generatedLabel.labelDataUri.substring(
+        dataUriPrefix.length,
+        generatedLabel.labelDataUri.indexOf(';base64')
+      );
+      switch (mimeTypePart.toLowerCase()) {
+        case 'jpeg':
+        case 'jpg':
+          extension = 'jpg';
+          break;
+        case 'gif':
+          extension = 'gif';
+          break;
+        case 'webp':
+          extension = 'webp';
+          break;
+        case 'svg+xml':
+          extension = 'svg';
+          break;
+        // Add more cases as needed, 'png' is a common default from Gemini
+        case 'png':
+        default:
+          extension = 'png';
+          break;
+      }
+    }
+    
+    link.download = `vin_label.${extension}`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast({ title: "Download Started", description: "Label download initiated." });
+  };
+
   return (
     <AppLayout>
       <PageHeader 
@@ -176,16 +218,7 @@ export default function LabelForgePage() {
           </CardContent>
            {generatedLabel && (
             <CardFooter>
-               <Button variant="outline" className="w-full" onClick={() => {
-                  // Basic conceptual download, in a real app this would be more robust
-                  const link = document.createElement('a');
-                  link.href = generatedLabel.labelDataUri;
-                  link.download = 'vin_label.png'; // Assuming PNG, might need to parse from data URI
-                  document.body.appendChild(link);
-                  link.click();
-                  document.body.removeChild(link);
-                  toast({ title: "Download Started", description: "Label download initiated (conceptual)." });
-               }}>
+               <Button variant="outline" className="w-full" onClick={handleDownload}>
                 Download Label
               </Button>
             </CardFooter>
