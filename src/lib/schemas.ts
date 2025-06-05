@@ -15,3 +15,12 @@ export const LabelForgeSchema = z.object({
 });
 
 export type LabelForgeInput = z.infer<typeof LabelForgeSchema>;
+
+export const ComplianceCheckSchema = z.object({
+  documentType: z.string().min(1, { message: "Document type is required." }),
+  documentContent: z.string().min(10, { message: "Document content must be at least 10 characters long." }),
+  targetRegulations: z.string().min(1, { message: "Target regulations are required." }),
+  countryOfOperation: z.string().min(1, { message: "Country of operation is required." }),
+});
+
+export type ComplianceCheckInput = z.infer<typeof ComplianceCheckSchema>;
