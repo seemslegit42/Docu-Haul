@@ -14,13 +14,14 @@ import {z}from 'genkit';
 
 const GenerateDocumentationInputSchema = z.object({
   vin: z.string().describe('The Vehicle Identification Number.'),
-  trailerSpecs: z.string().describe('The trailer specifications, or buyer/seller/price details for a Bill of Sale.'),
+  trailerSpecs: z.string().describe('The trailer specifications, or buyer/seller/price/vehicle details for a Bill of Sale. Can be plain text, key-value pairs, or a JSON string.'),
   documentType: z.enum(['NVIS', 'BillOfSale']).describe('The type of document to generate: NVIS or Bill of Sale.'),
+  tone: z.string().optional().describe('The desired tone for the document (e.g., professional, legal, formal, friendly). Defaults to professional/formal if not specified.'),
 });
 export type GenerateDocumentationInput = z.infer<typeof GenerateDocumentationInputSchema>;
 
 const GenerateDocumentationOutputSchema = z.object({
-  documentText: z.string().describe('The generated vehicle documentation text.'),
+  documentText: z.string().describe('The generated vehicle documentation text. May contain an error message if generation failed.'),
 });
 export type GenerateDocumentationOutput = z.infer<typeof GenerateDocumentationOutputSchema>;
 
@@ -34,10 +35,13 @@ const nvisPrompt = ai.definePrompt({
   output: {schema: GenerateDocumentationOutputSchema},
   prompt: `You are an expert in generating New Vehicle Information Statements (NVIS) for trailers.
 Your task is to create a complete and accurate NVIS document text.
+Adopt the following tone: {{#if tone}}{{{tone}}}{{else}}professional and formal{{/if}}.
 
 Use the following information:
 VIN: {{{vin}}}
 Trailer Specifications: {{{trailerSpecs}}}
+
+The 'Trailer Specifications' ({{{trailerSpecs}}}) may be a plain text description, a list of key-value pairs (e.g., 'GVWR: 7000 lbs, Axles: 2'), or a JSON formatted string. Parse it carefully to extract all relevant vehicle details.
 
 The NVIS must include at least the following sections and information, clearly labeled:
 - Statement: "NEW VEHICLE INFORMATION STATEMENT (NVIS)"
@@ -58,7 +62,9 @@ The NVIS must include at least the following sections and information, clearly l
 - Space for Seller/Dealer Signature and Date
 - Space for Purchaser Signature and Date
 
-Extract as much information as possible from the provided '{{{trailerSpecs}}}'. If critical information (like Manufacturer, Model, Year, GVWR, GAWR, Overall Dimensions) is missing or not inferable, use clear placeholders like "[Manufacturer Name]", "[Model]", "[YYYY]", "[GVWR Value]", "[Overall Dimensions LWH]", etc. Do not omit these standard fields.
+It is crucial that you do not hallucinate or invent values for any fields.
+If specific information for a required field (e.g., VIN, Manufacturer's Name and Address, Make, Model, Year, GVWR, GAWRs, Overall Dimensions, Date of Manufacture) is not found or inferable from the provided 'Trailer Specifications', you MUST use a clear placeholder like "[Manufacturer Name]", "[Model]", "[YYYY]", "[GVWR Value]", "[Overall Dimensions LWH]", etc. Do not omit these standard fields.
+For purely optional fields not provided, you may omit them. Do not invent information under any circumstances.
 Format the document logically with clear headings and line breaks for readability. The output should be plain text.
 Ensure the final document is suitable for official use.
 `,
@@ -70,10 +76,13 @@ const billOfSalePrompt = ai.definePrompt({
   output: {schema: GenerateDocumentationOutputSchema},
   prompt: `You are an expert in drafting Bills of Sale for vehicles/trailers.
 Your task is to create a comprehensive Bill of Sale document text.
+Adopt the following tone: {{#if tone}}{{{tone}}}{{else}}professional and formal{{/if}}.
 
 Use the following information:
 VIN: {{{vin}}}
 Transaction & Vehicle Details: {{{trailerSpecs}}}
+
+The 'Transaction & Vehicle Details' ({{{trailerSpecs}}}) may be a plain text description, a list of key-value pairs (e.g., 'Seller: John Doe, Price: $5000'), or a JSON formatted string. Parse it carefully to extract buyer, seller, price, date, and specific vehicle details.
 
 The Bill of Sale must include at least the following sections and information, clearly labeled:
 - Title: "BILL OF SALE"
@@ -102,7 +111,9 @@ The Bill of Sale must include at least the following sections and information, c
   - Buyer's Signature & Date
   - Witness Signature(s) & Date (Optional, include space for one)
 
-Extract buyer, seller, price, and specific vehicle details from '{{{trailerSpecs}}}'. If any critical information is missing (e.g., Seller Name, Buyer Name, Sale Price, Date of Sale), use clear placeholders like "[Seller Full Name]", "[Buyer Full Name]", "[Sale Price]", "[Date of Sale]", etc.
+It is crucial that you do not hallucinate or invent values.
+If critical information (e.g., Seller Full Name, Seller Address, Buyer Full Name, Buyer Address, Sale Price, Date of Sale, VIN, Make, Model, Year) is missing from 'Transaction & Vehicle Details', you MUST use clear placeholders like "[Seller Full Name]", "[Buyer Full Name]", "[Sale Price]", "[Date of Sale]", etc.
+For optional fields not provided, you may omit them. Do not invent information under any circumstances.
 Format the document logically with clear headings and line breaks for readability. The output should be plain text.
 Ensure the final document is suitable for a legal transfer of ownership.
 `,
@@ -122,18 +133,21 @@ const generateDocumentationFlow = ai.defineFlow(
     } else if (input.documentType === 'BillOfSale') {
       promptToUse = billOfSalePrompt;
     } else {
-      console.error(`Unsupported document type received in generateDocumentationFlow: ${input.documentType}`);
-      throw new Error(`Unsupported document type: ${input.documentType}`);
+      // This case should ideally be prevented by the enum in the schema
+      const errorMessage = `Unsupported document type received: ${input.documentType}`;
+      console.error(errorMessage, { input });
+      return { documentText: `ERROR: ${errorMessage}. Supported types are NVIS and BillOfSale.` };
     }
 
-    const {output} = await promptToUse(input);
+    const {output: aiModelOutput} = await promptToUse(input);
     
-    if (!output || !output.documentText) {
-      const errorMessage = `AI failed to generate the ${input.documentType} document. Output was null or documentText was missing.`;
-      console.error(errorMessage, { input });
-      throw new Error(`AI failed to generate the ${input.documentType} document. Please check your input or try again.`);
+    if (!aiModelOutput || !aiModelOutput.documentText) {
+      const errorMessage = `AI failed to generate the ${input.documentType} document. Output from AI model was null or documentText was missing.`;
+      console.error(errorMessage, { input, receivedOutput: aiModelOutput });
+      // Return an error message within the documentText field as per the new requirement
+      return { documentText: `ERROR: Document generation for ${input.documentType} failed. Please check your input or try again.` };
     }
-    return output;
+    return aiModelOutput; // Return the successful AI output
   }
 );
 
