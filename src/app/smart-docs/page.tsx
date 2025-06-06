@@ -28,7 +28,7 @@ export default function SmartDocsPage() {
     resolver: zodResolver(SmartDocsSchema),
     defaultValues: {
       vin: '',
-      trailerSpecs: '', // This field's label and placeholder will change based on documentType
+      trailerSpecs: '', 
       documentType: 'NVIS', 
     },
   });
@@ -38,7 +38,6 @@ export default function SmartDocsPage() {
     setGeneratedDoc(null);
     setEditableDocText('');
     try {
-      // The generateDocumentation flow now expects documentType in its input object
       const result = await generateDocumentation(data);
       setGeneratedDoc(result);
       setEditableDocText(result.documentText);
@@ -48,7 +47,9 @@ export default function SmartDocsPage() {
       });
     } catch (error) {
       console.error("Error generating documentation:", error);
-      let errorMessage = "Failed to generate documentation. Please try again.";
+      setGeneratedDoc(null); 
+      setEditableDocText(''); 
+      let errorMessage = "Failed to generate documentation. Please try again or check your input.";
       if (error instanceof Error) {
         errorMessage = error.message;
       }
@@ -73,14 +74,14 @@ export default function SmartDocsPage() {
     const vin = form.getValues('vin') || 'document';
     const filename = `${selectedDocType}_${vin}.txt`;
     
-    const blob = new Blob([editableDocText], { type: 'text/plain;charset=utf-8' });
+    const blob = new Blob([editableDocText.trim()], { type: 'text/plain;charset=utf-8' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = filename;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    URL.revokeObjectURL(link.href); // Clean up
+    URL.revokeObjectURL(link.href); 
     
     toast({
       title: "Download Started",
@@ -114,8 +115,6 @@ export default function SmartDocsPage() {
                       <Select 
                         onValueChange={(value) => {
                           field.onChange(value);
-                          // Optionally reset trailerSpecs when type changes if desired
-                          // form.resetField("trailerSpecs"); 
                         }} 
                         defaultValue={field.value}
                       >
@@ -213,13 +212,13 @@ export default function SmartDocsPage() {
               </div>
             )}
           </CardContent>
-          {generatedDoc && !isLoading && (
+          {generatedDoc && !isLoading && ( // Also ensure editableDocText has content if needed for download logic
             <CardFooter>
                <Button 
                   variant="outline" 
                   className="w-full" 
                   onClick={handleDownload} 
-                  disabled={!editableDocText}
+                  disabled={!generatedDoc || !editableDocText.trim()}
                 >
                 Download Document
               </Button>
@@ -230,4 +229,3 @@ export default function SmartDocsPage() {
     </AppLayout>
   );
 }
-

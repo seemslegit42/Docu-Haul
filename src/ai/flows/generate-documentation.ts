@@ -58,7 +58,7 @@ The NVIS must include at least the following sections and information, clearly l
 - Space for Seller/Dealer Signature and Date
 - Space for Purchaser Signature and Date
 
-Extract as much information as possible from the provided '{{{trailerSpecs}}}'. If critical information (like Manufacturer, Model, Year, GVWR, GAWR, Overall Dimensions) is missing or not inferable, use clear placeholders like "[Manufacturer Name]", "[Model]", "[YYYY]", "[GVWR Value]", "[Overall Dimensions LWH]", etc.
+Extract as much information as possible from the provided '{{{trailerSpecs}}}'. If critical information (like Manufacturer, Model, Year, GVWR, GAWR, Overall Dimensions) is missing or not inferable, use clear placeholders like "[Manufacturer Name]", "[Model]", "[YYYY]", "[GVWR Value]", "[Overall Dimensions LWH]", etc. Do not omit these standard fields.
 Format the document logically with clear headings and line breaks for readability. The output should be plain text.
 Ensure the final document is suitable for official use.
 `,
@@ -122,15 +122,15 @@ const generateDocumentationFlow = ai.defineFlow(
     } else if (input.documentType === 'BillOfSale') {
       promptToUse = billOfSalePrompt;
     } else {
-      // This case should ideally not be reached if input validation is done properly by the caller.
-      // However, as a safeguard:
+      console.error(`Unsupported document type received in generateDocumentationFlow: ${input.documentType}`);
       throw new Error(`Unsupported document type: ${input.documentType}`);
     }
 
     const {output} = await promptToUse(input);
     
     if (!output || !output.documentText) {
-      // The error message is specific to the document type that failed.
+      const errorMessage = `AI failed to generate the ${input.documentType} document. Output was null or documentText was missing.`;
+      console.error(errorMessage, { input });
       throw new Error(`AI failed to generate the ${input.documentType} document. Please check your input or try again.`);
     }
     return output;
