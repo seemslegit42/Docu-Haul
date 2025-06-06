@@ -9,8 +9,8 @@
  * - GenerateDocumentationOutput - The return type for the generateDocumentation function.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import {ai}from '@/ai/genkit';
+import {z}from 'genkit';
 
 const GenerateDocumentationInputSchema = z.object({
   vin: z.string().describe('The Vehicle Identification Number.'),
@@ -52,12 +52,13 @@ The NVIS must include at least the following sections and information, clearly l
 - Number of Axles
 - Tire Size
 - Rim Size
+- Overall Dimensions (Length, Width, Height)
 - Date of Manufacture
 - Certification Statement: A statement confirming the vehicle conforms to all applicable safety standards (e.g., FMVSS/CMVSS) in effect on the date of manufacture.
 - Space for Seller/Dealer Signature and Date
 - Space for Purchaser Signature and Date
 
-Extract as much information as possible from the provided '{{{trailerSpecs}}}'. If critical information (like Manufacturer, Model, Year, GVWR, GAWR) is missing or not inferable, use clear placeholders like "[Manufacturer Name]", "[Model]", "[YYYY]", "[GVWR Value]", etc.
+Extract as much information as possible from the provided '{{{trailerSpecs}}}'. If critical information (like Manufacturer, Model, Year, GVWR, GAWR, Overall Dimensions) is missing or not inferable, use clear placeholders like "[Manufacturer Name]", "[Model]", "[YYYY]", "[GVWR Value]", "[Overall Dimensions LWH]", etc.
 Format the document logically with clear headings and line breaks for readability. The output should be plain text.
 Ensure the final document is suitable for official use.
 `,
@@ -121,12 +122,15 @@ const generateDocumentationFlow = ai.defineFlow(
     } else if (input.documentType === 'BillOfSale') {
       promptToUse = billOfSalePrompt;
     } else {
+      // This case should ideally not be reached if input validation is done properly by the caller.
+      // However, as a safeguard:
       throw new Error(`Unsupported document type: ${input.documentType}`);
     }
 
     const {output} = await promptToUse(input);
     
     if (!output || !output.documentText) {
+      // The error message is specific to the document type that failed.
       throw new Error(`AI failed to generate the ${input.documentType} document. Please check your input or try again.`);
     }
     return output;
