@@ -15,7 +15,7 @@ import {z}from 'genkit';
 const GenerateDocumentationInputSchema = z.object({
   vin: z.string().describe('The Vehicle Identification Number.'),
   trailerSpecs: z.string().describe('The trailer specifications, or buyer/seller/price/vehicle details for a Bill of Sale. Can be plain text, key-value pairs, or a JSON string.'),
-  documentType: z.enum(['NVIS', 'BillOfSale']).describe('The type of document to generate: NVIS or Bill of Sale.'),
+  documentType: z.enum(['NVIS', 'BillOfSale']).describe('The type of document to generate: NVIS or Bill ofSale.'),
   tone: z.string().optional().describe('The desired tone for the document (e.g., professional, legal, formal, friendly). Defaults to professional/formal if not specified.'),
 });
 export type GenerateDocumentationInput = z.infer<typeof GenerateDocumentationInputSchema>;
@@ -28,6 +28,13 @@ export type GenerateDocumentationOutput = z.infer<typeof GenerateDocumentationOu
 export async function generateDocumentation(input: GenerateDocumentationInput): Promise<GenerateDocumentationOutput> {
   return generateDocumentationFlow(input);
 }
+
+const defaultSafetySettings = [
+  { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_ONLY_HIGH' },
+  { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+  { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_ONLY_HIGH' },
+  { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_ONLY_HIGH' },
+];
 
 const nvisPrompt = ai.definePrompt({
   name: 'generateNVISPrompt',
@@ -63,11 +70,14 @@ The NVIS must include at least the following sections and information, clearly l
 - Space for Purchaser Signature and Date
 
 It is crucial that you do not hallucinate or invent values for any fields.
-If specific information for a required field (e.g., VIN, Manufacturer's Name and Address, Make, Model, Year, GVWR, GAWRs, Overall Dimensions, Date of Manufacture) is not found or inferable from the provided 'Trailer Specifications', you MUST use a clear placeholder like "[Manufacturer Name]", "[Model]", "[YYYY]", "[GVWR Value]", "[Overall Dimensions LWH]", etc. Do not omit these standard fields.
+If specific information for a required field (e.g., VIN, Manufacturer's Name and Address, Make, Model, Year, GVWR, GAWRs, Overall Dimensions, Date of Manufacture) is not found or inferable from the provided 'Trailer Specifications', you MUST use a clear placeholder like "[Manufacturer Name]", "[Model]", "[YYYY]", "[GVWR Value]", "[Overall Dimensions LWH]", "[MM/YYYY for Date of Manuf.]", etc. Do not omit these standard fields.
 For purely optional fields not provided, you may omit them. Do not invent information under any circumstances.
 Format the document logically with clear headings and line breaks for readability. The output should be plain text.
 Ensure the final document is suitable for official use.
 `,
+  config: {
+    safetySettings: defaultSafetySettings,
+  },
 });
 
 const billOfSalePrompt = ai.definePrompt({
@@ -117,6 +127,9 @@ For optional fields not provided, you may omit them. Do not invent information u
 Format the document logically with clear headings and line breaks for readability. The output should be plain text.
 Ensure the final document is suitable for a legal transfer of ownership.
 `,
+  config: {
+    safetySettings: defaultSafetySettings,
+  },
 });
 
 
@@ -144,10 +157,11 @@ const generateDocumentationFlow = ai.defineFlow(
     if (!aiModelOutput || !aiModelOutput.documentText) {
       const errorMessage = `AI failed to generate the ${input.documentType} document. Output from AI model was null or documentText was missing.`;
       console.error(errorMessage, { input, receivedOutput: aiModelOutput });
-      // Return an error message within the documentText field as per the new requirement
+      // Return an error message within the documentText field
       return { documentText: `ERROR: Document generation for ${input.documentType} failed. Please check your input or try again.` };
     }
     return aiModelOutput; // Return the successful AI output
   }
 );
 
+    

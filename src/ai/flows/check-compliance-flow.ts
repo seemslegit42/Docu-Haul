@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview A flow for checking document compliance against specified regulations.
@@ -55,6 +56,14 @@ Please perform a thorough compliance check and provide:
 Structure your report clearly. Be precise and refer to general regulatory principles if specific clauses are not known, but emphasize the {{{targetRegulations}}}.
 If the document content is insufficient for a full check, state that in the report.
 `,
+  config: {
+    safetySettings: [
+      { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_ONLY_HIGH' },
+      { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+      { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_ONLY_HIGH' },
+      { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_ONLY_HIGH' },
+    ],
+  },
 });
 
 const checkComplianceFlow = ai.defineFlow(
@@ -66,8 +75,15 @@ const checkComplianceFlow = ai.defineFlow(
   async input => {
     const {output} = await prompt(input);
     if (!output) {
+      console.error('Compliance check AI model returned null output.', {input});
       throw new Error('Compliance check failed to produce an output from the AI model.');
+    }
+    if (!output.complianceStatus || !output.complianceReport) {
+      console.error('Compliance check AI model output is missing required fields.', {input, output});
+      throw new Error('AI model output is incomplete. Compliance status or report is missing.');
     }
     return output;
   }
 );
+
+    

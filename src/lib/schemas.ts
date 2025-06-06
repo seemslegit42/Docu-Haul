@@ -5,6 +5,7 @@ export const SmartDocsSchema = z.object({
   documentType: z.enum(['NVIS', 'BillOfSale'], { required_error: "Document type is required." }),
   vin: z.string().length(17, { message: "VIN must be exactly 17 characters long." }),
   trailerSpecs: z.string().min(10, { message: "Details must be at least 10 characters long." }), // Generic name, label/placeholder will change in UI
+  tone: z.string().optional(),
 });
 
 export type SmartDocsInput = z.infer<typeof SmartDocsSchema>;
@@ -27,3 +28,4 @@ export const ComplianceCheckSchema = z.object({
 
 export type ComplianceCheckInput = z.infer<typeof ComplianceCheckSchema>;
 
+    
