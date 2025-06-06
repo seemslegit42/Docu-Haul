@@ -15,8 +15,9 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, AlertTriangle } from 'lucide-react';
+import { Loader2, AlertTriangle, FileText, Download } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import jsPDF from 'jspdf';
 
 
 export default function SmartDocsPage() {
@@ -45,8 +46,8 @@ export default function SmartDocsPage() {
       const result = await generateDocumentation(data);
       if (result.documentText.startsWith("ERROR:")) {
         setAiError(result.documentText);
-        setGeneratedDoc(null); // Ensure no doc is considered generated
-        setEditableDocText(''); // Clear textarea
+        setGeneratedDoc(null); 
+        setEditableDocText(''); 
       } else {
         setGeneratedDoc(result);
         setEditableDocText(result.documentText);
@@ -65,7 +66,7 @@ export default function SmartDocsPage() {
       if (error instanceof Error) {
         errorMessage = error.message;
       }
-      setAiError(errorMessage); // Display caught error as well
+      setAiError(errorMessage); 
       toast({
         title: "Error Generating Document",
         description: errorMessage,
@@ -98,6 +99,27 @@ export default function SmartDocsPage() {
     
     toast({
       title: "Download Started",
+      description: `${filename} is being downloaded.`,
+    });
+  };
+
+  const handlePdfDownload = () => {
+    if (!editableDocText || !generatedDoc || aiError) return;
+
+    const selectedDocType = form.getValues('documentType');
+    const vin = form.getValues('vin') || 'document';
+    const filename = `${selectedDocType}_${vin}.pdf`;
+
+    const doc = new jsPDF();
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(10);
+    // Split text into lines and add to PDF, handling basic wrapping
+    const lines = doc.splitTextToSize(editableDocText.trim(), 180); // 180 is approx width in mm for A4
+    doc.text(lines, 15, 20); // 15mm left margin, 20mm top margin
+    doc.save(filename);
+
+    toast({
+      title: "PDF Download Started",
       description: `${filename} is being downloaded.`,
     });
   };
@@ -215,7 +237,7 @@ export default function SmartDocsPage() {
               </CardContent>
               <CardFooter>
                 <Button type="submit" disabled={isLoading} className="w-full">
-                  {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                  {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <FileText />}
                   Generate Document
                 </Button>
               </CardFooter>
@@ -260,14 +282,24 @@ export default function SmartDocsPage() {
             )}
           </CardContent>
           {generatedDoc && !isLoading && !aiError && (
-            <CardFooter>
+            <CardFooter className="flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
                <Button 
                   variant="outline" 
                   className="w-full" 
                   onClick={handleDownload} 
                   disabled={!generatedDoc || !editableDocText.trim() || !!aiError}
                 >
-                Download Document
+                <Download className="mr-2 h-4 w-4" />
+                Download .txt
+              </Button>
+              <Button 
+                  variant="outline" 
+                  className="w-full" 
+                  onClick={handlePdfDownload} 
+                  disabled={!generatedDoc || !editableDocText.trim() || !!aiError}
+                >
+                <Download className="mr-2 h-4 w-4" />
+                Download .pdf
               </Button>
             </CardFooter>
           )}
@@ -276,5 +308,3 @@ export default function SmartDocsPage() {
     </AppLayout>
   );
 }
-
-    
