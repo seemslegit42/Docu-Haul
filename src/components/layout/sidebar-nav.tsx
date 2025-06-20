@@ -1,8 +1,9 @@
+
 "use client";
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, FileText, Tags, ShieldCheck, FileCheck2 } from 'lucide-react';
+import { Home, FileText, Tags, ShieldCheck, FileCheck2, Hash } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   SidebarMenu,
@@ -19,6 +20,7 @@ const navItems = [
   { href: '/smart-docs', label: 'Smart Docs', icon: FileText },
   { href: '/label-forge', label: 'Label Forge', icon: Tags },
   { href: '/compliance-check', label: 'Compliance Check', icon: ShieldCheck },
+  { href: '/vin-decoder', label: 'VIN Decoder', icon: Hash },
 ];
 
 export function SidebarNav() {

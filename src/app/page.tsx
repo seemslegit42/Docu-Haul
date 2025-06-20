@@ -1,7 +1,8 @@
+
 import { AppLayout } from '@/components/layout/app-layout';
 import { PageHeader } from '@/components/layout/page-header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { FileText, Tags, ShieldCheck } from 'lucide-react';
+import { FileText, Tags, ShieldCheck, Hash } from 'lucide-react';
 import Link from 'next/link';
 
 export default function HomePage() {
@@ -16,14 +17,14 @@ export default function HomePage() {
           <CardHeader>
             <CardTitle className="font-headline text-2xl">Focus on Essential Documents</CardTitle>
             <CardDescription className="font-body">
-              DocuHaul simplifies your document workflow by automating the generation of critical documents: VIN labels, NVIS certificates, and Bills of Sale.
+              DocuHaul simplifies your document workflow by automating the generation and validation of critical vehicle documents.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <p className="font-body mb-6">
-              Leverage AI to effortlessly create and validate your key vehicle documents. Explore our core features:
+              Leverage AI to effortlessly create, validate, and understand your key vehicle documents. Explore our core features:
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <FeatureCard
                 icon={<FileText className="w-8 h-8 text-primary" />}
                 title="Smart Docs"
@@ -39,8 +40,14 @@ export default function HomePage() {
               <FeatureCard
                 icon={<ShieldCheck className="w-8 h-8 text-primary" />}
                 title="Compliance Check"
-                description="Automated validation of your VIN labels, NVIS, and Bills of Sale."
+                description="Automated validation of your documents against regulations."
                 href="/compliance-check"
+              />
+              <FeatureCard
+                icon={<Hash className="w-8 h-8 text-primary" />}
+                title="VIN Decoder"
+                description="Break down and understand the structure of any VIN."
+                href="/vin-decoder"
               />
             </div>
           </CardContent>
@@ -53,7 +60,7 @@ export default function HomePage() {
           <CardContent className="space-y-4 font-body">
             <p><strong>1. Input Data:</strong> Provide essential vehicle and transaction specifications.</p>
             <p><strong>2. AI Processing:</strong> Our GenAI models analyze your data to generate accurate VIN labels, NVIS certificates, or Bills of Sale.</p>
-            <p><strong>3. Generate & Validate:</strong> Instantly create your documents. Use AI to cross-validate them for compliance with relevant standards.</p>
+            <p><strong>3. Generate & Validate:</strong> Instantly create your documents. Use our tools to decode VINs and cross-validate for compliance.</p>
             <p><strong>4. Manage & Deliver:</strong> Access, download, and manage all your generated documents in one centralized platform.</p>
           </CardContent>
         </Card>

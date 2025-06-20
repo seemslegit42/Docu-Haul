@@ -29,8 +29,15 @@ export const ComplianceCheckSchema = z.object({
 });
 export type ComplianceCheckInput = z.infer<typeof ComplianceCheckSchema>;
 
+// Schema for VIN Decoder
+export const DecodeVinSchema = z.object({
+    vin: z.string().length(17, { message: "VIN must be exactly 17 characters long." }),
+});
+export type DecodeVinInput = z.infer<typeof DecodeVinSchema>;
+
+
 // AI Flow Schemas (for backend consistency)
 export { SmartDocsSchema as GenerateDocumentationInputSchema };
 export { LabelForgeSchema as CreateCompliantVinLabelInputSchema };
 export { ComplianceCheckSchema as CheckComplianceInputSchema };
-
+export { DecodeVinSchema as DecodeVinInputSchema };
