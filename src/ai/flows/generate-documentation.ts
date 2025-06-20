@@ -18,7 +18,7 @@ import { GenerateDocumentationInputSchema } from '@/lib/schemas';
 export type GenerateDocumentationInput = z.infer<typeof GenerateDocumentationInputSchema>;
 
 const GenerateDocumentationOutputSchema = z.object({
-  documentText: z.string().describe('The generated vehicle documentation text. May contain an error message if generation failed.'),
+  documentText: z.string().describe('The generated vehicle documentation text.'),
 });
 export type GenerateDocumentationOutput = z.infer<typeof GenerateDocumentationOutputSchema>;
 
@@ -143,24 +143,17 @@ const generateDocumentationFlow = ai.defineFlow(
     } else if (input.documentType === 'BillOfSale') {
       promptToUse = billOfSalePrompt;
     } else {
-      // This case should ideally be prevented by the enum in the schema
-      const errorMessage = `Unsupported document type received: ${input.documentType}`;
-      console.error(errorMessage, { input });
-      return { documentText: `ERROR: ${errorMessage}. Supported types are NVIS and BillOfSale.` };
+      // This case should ideally be prevented by the enum in the schema, but as a safeguard:
+      throw new Error(`Unsupported document type received: ${input.documentType}`);
     }
 
     const {output: aiModelOutput} = await promptToUse(input);
     
-    if (!aiModelOutput || !aiModelOutput.documentText) {
-      const errorMessage = `AI failed to generate the ${input.documentType} document. Output from AI model was null or documentText was missing.`;
+    // Check for null/undefined output or empty/whitespace-only documentText
+    if (!aiModelOutput || !aiModelOutput.documentText?.trim()) {
+      const errorMessage = `AI failed to generate a valid document for ${input.documentType}. The output was empty or invalid. Please check your input and try again.`;
       console.error(errorMessage, { input, receivedOutput: aiModelOutput });
-      return { documentText: `ERROR: Document generation for ${input.documentType} failed. Please check your input or try again.` };
-    }
-
-    if (aiModelOutput.documentText.trim() === "") {
-       const errorMessage = `AI generated an empty document for ${input.documentType}.`;
-      console.error(errorMessage, { input, receivedOutput: aiModelOutput });
-      return { documentText: `ERROR: AI produced an empty document for ${input.documentType}. Please check your input or try again.` };
+      throw new Error(errorMessage);
     }
     
     return aiModelOutput; // Return the successful AI output

@@ -17,7 +17,6 @@ export default function SmartDocsPage() {
   const [generatedDoc, setGeneratedDoc] = useState<GenerateDocumentationOutput | null>(null);
   const [editableDocText, setEditableDocText] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
-  const [aiError, setAiError] = useState<string | null>(null);
   const { toast } = useToast();
 
   const form = useForm<SmartDocsInput>({
@@ -34,32 +33,18 @@ export default function SmartDocsPage() {
     setIsLoading(true);
     setGeneratedDoc(null);
     setEditableDocText('');
-    setAiError(null);
+
     try {
       const result = await generateDocumentation(data);
-      if (result.documentText.startsWith("ERROR:")) {
-        setAiError(result.documentText);
-        setGeneratedDoc(null);
-        setEditableDocText('');
-      } else {
-        setGeneratedDoc(result);
-        setEditableDocText(result.documentText);
-        setAiError(null);
-      }
+      setGeneratedDoc(result);
+      setEditableDocText(result.documentText);
       toast({
-        title: result.documentText.startsWith("ERROR:") ? "Document Generation Failed" : `${data.documentType} Generated`,
-        description: result.documentText.startsWith("ERROR:") ? "The AI encountered an issue. Please check the error message." : `The ${data.documentType === 'NVIS' ? 'NVIS certificate' : 'Bill of Sale'} has been successfully generated.`,
-        variant: result.documentText.startsWith("ERROR:") ? "destructive" : "default",
+        title: `${data.documentType} Generated Successfully`,
+        description: `The ${data.documentType === 'NVIS' ? 'NVIS certificate' : 'Bill of Sale'} has been created.`,
       });
     } catch (error) {
       console.error("Error generating documentation:", error);
-      setGeneratedDoc(null);
-      setEditableDocText('');
-      let errorMessage = "Failed to generate documentation. Please try again or check your input.";
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      setAiError(errorMessage);
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred during document generation.";
       toast({
         title: "Error Generating Document",
         description: errorMessage,
@@ -75,13 +60,13 @@ export default function SmartDocsPage() {
   };
 
   const handleTxtDownload = () => {
-    if (!editableDocText || !generatedDoc || aiError) return;
+    if (!editableDocText || !generatedDoc) return;
 
     const selectedDocType = form.getValues('documentType');
     const vin = form.getValues('vin') || 'document';
     const filename = `${selectedDocType}_${vin}.txt`;
     
-    const blob = new Blob([editableDocText.trim()], { type: 'text/plain;charset=utf-8' });
+    const blob = new Blob([editableDocText.trim()], { type: 'text/plain;charset=utf-f' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = filename;
@@ -97,7 +82,7 @@ export default function SmartDocsPage() {
   };
 
   const handlePdfDownload = () => {
-    if (!editableDocText || !generatedDoc || aiError) return;
+    if (!editableDocText || !generatedDoc) return;
 
     const selectedDocType = form.getValues('documentType');
     const vin = form.getValues('vin') || 'document';
@@ -126,7 +111,6 @@ export default function SmartDocsPage() {
         <SmartDocsForm form={form} onSubmit={onSubmit} isLoading={isLoading} />
         <GeneratedDocument
           isLoading={isLoading}
-          aiError={aiError}
           generatedDoc={generatedDoc}
           editableDocText={editableDocText}
           onTextChange={handleTextChange}
