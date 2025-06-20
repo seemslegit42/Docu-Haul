@@ -42,7 +42,7 @@ export default function GeneratedLabel({ generatedLabel, isLoading, onDownload }
             </div>
             <div>
               <h4 className="font-headline text-lg text-primary">Placement Rationale:</h4>
-              <p className="font-body text-sm text-muted-foreground bg-background p-3 rounded-md border whitespace-pre-wrap">
+              <p className="font-body text-sm text-muted-foreground bg-muted/30 p-3 rounded-md border whitespace-pre-wrap">
                 {generatedLabel.placementRationale}
               </p>
             </div>

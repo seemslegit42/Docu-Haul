@@ -28,7 +28,7 @@ export default function VinDecoderPage() {
     setIsLoading(true);
     setResult(null);
     try {
-      const decodedResult = await decodeVin({ vin: data.vin.toUpperCase() });
+      const decodedResult = await decodeVin({ vin: data.vin });
       setResult(decodedResult);
       toast({
         title: "VIN Decode Complete",
