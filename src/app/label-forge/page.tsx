@@ -9,13 +9,17 @@ import { createCompliantVinLabel, type CreateCompliantVinLabelOutput } from '@/a
 import { AppLayout } from '@/components/layout/app-layout';
 import { PageHeader } from '@/components/layout/page-header';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/use-auth';
+import { PaywallPrompt } from '@/components/layout/PaywallPrompt';
+import { Skeleton } from '@/components/ui/skeleton';
 import LabelForgeForm from './components/LabelForgeForm';
 import GeneratedLabel from './components/GeneratedLabel';
 
 export default function LabelForgePage() {
   const [generatedLabel, setGeneratedLabel] = useState<CreateCompliantVinLabelOutput | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   const { toast } = useToast();
+  const { isPremium, isLoading: isAuthLoading } = useAuth();
 
   const form = useForm<LabelForgeInput>({
     resolver: zodResolver(LabelForgeSchema),
@@ -28,7 +32,7 @@ export default function LabelForgePage() {
   });
 
   const onSubmit = async (data: LabelForgeInput) => {
-    setIsLoading(true);
+    setIsGenerating(true);
     setGeneratedLabel(null);
     try {
       const result = await createCompliantVinLabel(data);
@@ -46,7 +50,7 @@ export default function LabelForgePage() {
         variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      setIsGenerating(false);
     }
   };
 
@@ -75,20 +79,39 @@ export default function LabelForgePage() {
     toast({ title: "Download Started", description: `Label ${link.download} download initiated.` });
   };
 
+  const renderContent = () => {
+    if (isAuthLoading) {
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Skeleton className="h-[500px] w-full" />
+          <Skeleton className="h-[500px] w-full" />
+        </div>
+      );
+    }
+
+    if (!isPremium) {
+        return <PaywallPrompt />;
+    }
+
+    return (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <LabelForgeForm form={form} onSubmit={onSubmit} isLoading={isGenerating} />
+            <GeneratedLabel 
+                generatedLabel={generatedLabel} 
+                isLoading={isGenerating} 
+                onDownload={handleDownload} 
+            />
+        </div>
+    );
+  }
+
   return (
     <AppLayout>
       <PageHeader 
         title="Label Forge"
         description="AI-powered VIN label creation with optimized information placement."
       />
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <LabelForgeForm form={form} onSubmit={onSubmit} isLoading={isLoading} />
-        <GeneratedLabel 
-          generatedLabel={generatedLabel} 
-          isLoading={isLoading} 
-          onDownload={handleDownload} 
-        />
-      </div>
+      {renderContent()}
     </AppLayout>
   );
 }

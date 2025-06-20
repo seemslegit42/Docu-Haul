@@ -6,17 +6,18 @@ import type { ReactNode } from 'react';
 import { createContext, useContext, useEffect, useState } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
-import { Loader2 } from 'lucide-react';
 
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
+  isPremium: boolean;
 }
 
-const AuthContext = createContext<AuthContextType>({ user: null, isLoading: true });
+const AuthContext = createContext<AuthContextType>({ user: null, isLoading: true, isPremium: false });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [isPremium, setIsPremium] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -28,8 +29,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
 
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        setUser(user);
+        // Check for custom claims to determine premium status
+        const idTokenResult = await user.getIdTokenResult();
+        // A backend function (e.g., a Cloud Function triggered by Stripe)
+        // would be needed to set this custom claim.
+        const isUserPremium = idTokenResult.claims.premium === true;
+        setIsPremium(isUserPremium);
+      } else {
+        setUser(null);
+        setIsPremium(false);
+      }
       setIsLoading(false);
     });
     
@@ -37,7 +49,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, isLoading }}>
+    <AuthContext.Provider value={{ user, isLoading, isPremium }}>
       {children}
     </AuthContext.Provider>
   );
