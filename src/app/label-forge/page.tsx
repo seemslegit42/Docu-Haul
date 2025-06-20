@@ -60,17 +60,10 @@ export default function LabelForgePage() {
     const link = document.createElement('a');
     link.href = generatedLabel.labelDataUri;
 
-    let extension = 'png';
-    const dataUriPrefix = 'data:image/';
-    if (generatedLabel.labelDataUri.startsWith(dataUriPrefix)) {
-      const mimeTypePart = generatedLabel.labelDataUri.substring(
-        dataUriPrefix.length,
-        generatedLabel.labelDataUri.indexOf(';base64')
-      );
-      if (mimeTypePart) {
-        extension = mimeTypePart.split('+')[0]; // Handles svg+xml
-      }
-    }
+    // Use a regex to extract the file extension from the data URI mime type
+    const match = generatedLabel.labelDataUri.match(/data:image\/([\w+]+);/);
+    const mimeType = match ? match[1] : 'png';
+    const extension = mimeType.split('+')[0]; // Handles cases like 'svg+xml' -> 'svg'
     
     link.download = `vin_label_${form.getValues('vinData') || 'generated'}.${extension}`;
     document.body.appendChild(link);
