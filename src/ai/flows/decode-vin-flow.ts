@@ -10,9 +10,10 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import type { DecodeVinInput } from '@/lib/schemas';
 import { DecodeVinInputSchema } from '@/lib/schemas';
 
-export type DecodeVinInput = z.infer<typeof DecodeVinInputSchema>;
+export type { DecodeVinInput };
 
 const VinPartSchema = z.object({
   value: z.string().describe("The substring of the VIN corresponding to this part."),
@@ -89,7 +90,7 @@ const decodeVinFlow = ai.defineFlow(
     const {output} = await prompt(input);
     if (!output) {
       console.error('VIN decoder AI model returned null output.', {input});
-      throw new Error('VIN decoding failed to produce an output from the AI model.');
+      throw new Error('VIN decoding failed: The AI model did not produce an output.');
     }
     return output;
   }

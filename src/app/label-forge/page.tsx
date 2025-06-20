@@ -39,10 +39,7 @@ export default function LabelForgePage() {
       });
     } catch (error) {
       console.error("Error generating label:", error);
-      let errorMessage = "Failed to generate label. Please try again.";
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      }
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
       toast({
         title: "Error Generating Label",
         description: errorMessage,

@@ -50,7 +50,7 @@ export default function GeneratedLabel({ generatedLabel, isLoading, onDownload }
         )}
         {!isLoading && !generatedLabel && (
             <div className="text-center text-muted-foreground font-body p-4 border border-dashed rounded-md h-60 flex items-center justify-center">
-            Your AI-generated label and rationale will appear here once you submit the data.
+            Your AI-generated label and rationale will appear here.
           </div>
         )}
       </CardContent>

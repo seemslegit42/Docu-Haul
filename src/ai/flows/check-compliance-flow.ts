@@ -10,10 +10,11 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import type { CheckComplianceInput } from '@/lib/schemas';
 import { CheckComplianceInputSchema } from '@/lib/schemas';
 
 // Re-exporting the schema type for clarity in this context.
-export type CheckComplianceInput = z.infer<typeof CheckComplianceInputSchema>;
+export type { CheckComplianceInput };
 
 const CheckComplianceOutputSchema = z.object({
   complianceStatus: z.string().describe('A concise status of the compliance check (e.g., "Compliant", "Potential Issues Found", "Non-Compliant").'),
@@ -72,11 +73,11 @@ const checkComplianceFlow = ai.defineFlow(
     const {output} = await prompt(input);
     if (!output) {
       console.error('Compliance check AI model returned null output.', {input});
-      throw new Error('Compliance check failed to produce an output from the AI model.');
+      throw new Error('Compliance check failed: The AI model did not produce an output.');
     }
     if (!output.complianceStatus || !output.complianceReport) {
       console.error('Compliance check AI model output is missing required fields.', {input, output});
-      throw new Error('AI model output is incomplete. Compliance status or report is missing.');
+      throw new Error('Compliance check failed: The AI model output is incomplete.');
     }
     return output;
   }

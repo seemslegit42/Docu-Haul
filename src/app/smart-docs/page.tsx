@@ -44,7 +44,7 @@ export default function SmartDocsPage() {
       });
     } catch (error) {
       console.error("Error generating documentation:", error);
-      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred during document generation.";
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
       toast({
         title: "Error Generating Document",
         description: errorMessage,
@@ -60,7 +60,7 @@ export default function SmartDocsPage() {
   };
 
   const handleTxtDownload = () => {
-    if (!editableDocText || !generatedDoc) return;
+    if (!editableDocText.trim() || !generatedDoc) return;
 
     const selectedDocType = form.getValues('documentType');
     const vin = form.getValues('vin') || 'document';
@@ -82,7 +82,7 @@ export default function SmartDocsPage() {
   };
 
   const handlePdfDownload = () => {
-    if (!editableDocText || !generatedDoc) return;
+    if (!editableDocText.trim() || !generatedDoc) return;
 
     const selectedDocType = form.getValues('documentType');
     const vin = form.getValues('vin') || 'document';

@@ -56,7 +56,7 @@ export default function ComplianceReport({ result, isLoading }: ComplianceReport
         )}
         {!isLoading && !result && (
           <div className="text-center text-muted-foreground font-body p-4 border border-dashed rounded-md h-60 flex items-center justify-center">
-            Your compliance report will appear here after submitting the details.
+            Your compliance report will appear here once you submit the form.
           </div>
         )}
       </CardContent>

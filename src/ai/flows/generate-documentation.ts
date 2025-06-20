@@ -12,10 +12,11 @@
 import {ai}from '@/ai/genkit';
 import {z}from 'genkit';
 import { DOCUMENT_TYPES } from '@/lib/constants';
+import type { GenerateDocumentationInput } from '@/lib/schemas';
 import { GenerateDocumentationInputSchema } from '@/lib/schemas';
 
 // Re-exporting the schema type for clarity in this context.
-export type GenerateDocumentationInput = z.infer<typeof GenerateDocumentationInputSchema>;
+export type { GenerateDocumentationInput };
 
 const GenerateDocumentationOutputSchema = z.object({
   documentText: z.string().describe('The generated vehicle documentation text.'),

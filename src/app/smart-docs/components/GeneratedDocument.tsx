@@ -50,7 +50,7 @@ export default function GeneratedDocument({
         )}
         {!isLoading && !generatedDoc && (
             <div className="text-center text-muted-foreground font-body p-4 border border-dashed rounded-md h-60 flex items-center justify-center">
-            Your AI-generated NVIS or Bill of Sale will appear here after submitting the details.
+            Your AI-generated document will appear here.
           </div>
         )}
       </CardContent>

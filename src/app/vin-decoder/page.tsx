@@ -28,7 +28,7 @@ export default function VinDecoderPage() {
     setIsLoading(true);
     setResult(null);
     try {
-      const decodedResult = await decodeVin({ vin: data.vin });
+      const decodedResult = await decodeVin({ vin: data.vin.toUpperCase() });
       setResult(decodedResult);
       toast({
         title: "VIN Decode Complete",
@@ -36,10 +36,7 @@ export default function VinDecoderPage() {
       });
     } catch (error) {
       console.error("Error decoding VIN:", error);
-      let errorMessage = "Failed to decode VIN. Please try again.";
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      }
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
       toast({
         title: "Error Decoding VIN",
         description: errorMessage,

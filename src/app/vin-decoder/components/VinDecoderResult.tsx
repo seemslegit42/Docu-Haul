@@ -29,6 +29,35 @@ const ResultRow = ({ label, value, description, isMono = true }: ResultRowProps)
   </div>
 );
 
+const ResultSkeleton = () => (
+    <div className="space-y-4">
+        <div className="space-y-2">
+            <Skeleton className="h-5 w-1/4" />
+            <Skeleton className="h-8 w-full" />
+        </div>
+        <Separator/>
+        <div className="space-y-2">
+            <Skeleton className="h-5 w-1/4" />
+            <Skeleton className="h-8 w-2/3" />
+        </div>
+        <Separator/>
+        <div className="space-y-2">
+            <Skeleton className="h-5 w-1/4" />
+            <Skeleton className="h-8 w-1/2" />
+        </div>
+         <Separator/>
+        <div className="space-y-2">
+            <Skeleton className="h-5 w-1/4" />
+            <Skeleton className="h-8 w-3/4" />
+        </div>
+        <Separator/>
+        <div className="space-y-2">
+            <Skeleton className="h-5 w-1/4" />
+            <Skeleton className="h-8 w-2/5" />
+        </div>
+    </div>
+);
+
 export default function VinDecoderResult({ result, isLoading }: VinDecoderResultProps) {
   return (
     <Card>
@@ -37,18 +66,7 @@ export default function VinDecoderResult({ result, isLoading }: VinDecoderResult
         <CardDescription className="font-body">The VIN has been broken down into its core components below.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {isLoading && (
-          <div className="flex flex-col justify-center items-center h-96">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="font-body mt-2">Decoding VIN...</p>
-            <div className="w-full mt-6 space-y-4">
-              <Skeleton className="h-8 w-full" />
-              <Skeleton className="h-8 w-3/4" />
-              <Skeleton className="h-8 w-full" />
-              <Skeleton className="h-8 w-4/5" />
-            </div>
-          </div>
-        )}
+        {isLoading && <ResultSkeleton />}
         {!isLoading && result && (
           <dl className="divide-y divide-border">
             <ResultRow label="Full VIN" value={result.fullVin} />

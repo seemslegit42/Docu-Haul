@@ -39,10 +39,7 @@ export default function ComplianceCheckPage() {
       });
     } catch (error) {
       console.error("Error performing compliance check:", error);
-      let errorMessage = "Failed to perform compliance check. Please try again.";
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      }
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
       toast({
         title: "Error Performing Check",
         description: errorMessage,
