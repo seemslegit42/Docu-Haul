@@ -7,49 +7,6 @@
 
 @layer base {
   :root {
-    --background: 210 40% 98%; /* Almost white, cool tone */
-    --foreground: 222 47% 11%; /* Dark blue */
-    --card: 220 50% 100%; /* White */
-    --card-foreground: 222 47% 11%;
-    --popover: 220 50% 100%;
-    --popover-foreground: 222 47% 11%;
-    --primary: 221 83% 53%; /* Vibrant Blue */
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%; /* Light gray-blue */
-    --secondary-foreground: 222 47% 11%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215 20% 65.1%; /* Muted gray-blue */
-    --accent: 210 40% 96.1%; /* Re-using secondary for subtle accents */
-    --accent-foreground: 222 47% 11%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 214 32% 91%; /* Lighter border */
-    --input: 214 32% 91%;
-    --ring: 221 83% 53%; /* Vibrant blue for focus */
-    --radius: 0.75rem; /* Slightly larger radius for a softer look */
-    --success: 142 76% 36%;
-    --success-foreground: 0 0% 100%;
-    --warning: 45 93% 47%;
-    --warning-foreground: 45 93% 10%;
-
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    
-    /* Sidebar specific colors aligned with the theme */
-    --sidebar-background: 210 40% 98%; /* Same as app background for inset/floating */
-    --sidebar-foreground: 222 47% 11%;
-    --sidebar-primary: 221 83% 53%;
-    --sidebar-primary-foreground: 210 40% 98%;
-    --sidebar-accent: 217 91% 96%; /* Very light blue for hover */
-    --sidebar-accent-foreground: 221 83% 53%;
-    --sidebar-border: 214 32% 91%;
-    --sidebar-ring: 221 83% 53%;
-  }
-
-  .dark {
     --background: 222 47% 11%; /* Dark blue */
     --foreground: 210 40% 98%; /* Almost white */
     --card: 222 47% 15%; /* Slightly lighter dark blue */
@@ -69,6 +26,7 @@
     --border: 217 32% 27%;
     --input: 217 32% 27%;
     --ring: 217 91% 60%;
+    --radius: 0.75rem; /* Slightly larger radius for a softer look */
     --success: 142 70% 45%;
     --success-foreground: 0 0% 100%;
     --warning: 45 85% 55%;
