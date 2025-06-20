@@ -22,8 +22,8 @@ export default function ComplianceCheckForm({ form, onSubmit, isLoading }: Compl
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-headline">Compliance Input</CardTitle>
-        <CardDescription className="font-body">Provide document details for AI compliance analysis.</CardDescription>
+        <CardTitle>Compliance Input</CardTitle>
+        <CardDescription className="font-body">Enter the details of the document you want to check. The AI will analyze the content against the specified regulations.</CardDescription>
       </CardHeader>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>

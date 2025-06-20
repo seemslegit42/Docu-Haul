@@ -11,13 +11,9 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { CreateCompliantVinLabelInputSchema } from '@/lib/schemas';
 
-const CreateCompliantVinLabelInputSchema = z.object({
-  vinData: z.string().describe('The VIN data to be included on the label.'),
-  trailerSpecs: z.string().describe('The specifications of the trailer.'),
-  regulatoryStandards: z.string().optional().describe('Any relevant regulatory standards.'),
-  labelDimensions: z.string().describe('Label dimensions like width and height (e.g., "100mm x 50mm", "4in x 2in").'),
-});
+// Re-exporting the schema type for clarity in this context.
 export type CreateCompliantVinLabelInput = z.infer<typeof CreateCompliantVinLabelInputSchema>;
 
 const CreateCompliantVinLabelOutputSchema = z.object({

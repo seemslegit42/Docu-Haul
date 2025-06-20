@@ -20,8 +20,8 @@ export default function LabelForgeForm({ form, onSubmit, isLoading }: LabelForge
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-headline">Label Data Input</CardTitle>
-        <CardDescription className="font-body">Provide all necessary information for VIN label generation. The AI will attempt to infer and use placeholders for missing standard fields.</CardDescription>
+        <CardTitle>Label Data Input</CardTitle>
+        <CardDescription className="font-body">Enter the data for your VIN label. The AI will generate a compliant label image, using placeholders for any missing standard information.</CardDescription>
       </CardHeader>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>

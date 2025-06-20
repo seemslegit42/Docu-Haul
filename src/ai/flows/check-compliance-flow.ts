@@ -10,13 +10,9 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { CheckComplianceInputSchema } from '@/lib/schemas';
 
-const CheckComplianceInputSchema = z.object({
-  documentType: z.string().describe('The type of document being checked (e.g., "VIN Label", "Shipping Manifest").'),
-  documentContent: z.string().describe('The full text content of the document or label to be checked.'),
-  targetRegulations: z.string().describe('The specific regulations or standards to check against (e.g., "FMVSS Part 567", "49 CFR Part 172").'),
-  countryOfOperation: z.string().describe('The country or region of operation to consider for compliance (e.g., "USA", "EU", "Canada").'),
-});
+// Re-exporting the schema type for clarity in this context.
 export type CheckComplianceInput = z.infer<typeof CheckComplianceInputSchema>;
 
 const CheckComplianceOutputSchema = z.object({
@@ -85,5 +81,3 @@ const checkComplianceFlow = ai.defineFlow(
     return output;
   }
 );
-
-    

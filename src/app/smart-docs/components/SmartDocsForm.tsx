@@ -24,8 +24,8 @@ export default function SmartDocsForm({ form, onSubmit, isLoading }: SmartDocsFo
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-headline">Document Details</CardTitle>
-        <CardDescription className="font-body">Select document type and enter details for AI generation.</CardDescription>
+        <CardTitle>Document Details</CardTitle>
+        <CardDescription className="font-body">Choose a document type and provide the necessary details. The AI will generate a complete NVIS or Bill of Sale.</CardDescription>
       </CardHeader>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
