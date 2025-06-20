@@ -1,7 +1,7 @@
 
 import Link from 'next/link';
 import { FileText, Tags, ShieldCheck, Hash, ArrowRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { AuthAwareButton } from '@/components/layout/AuthAwareButton';
 
 export default function LandingPage() {
   return (
@@ -14,11 +14,7 @@ export default function LandingPage() {
             <span className="font-headline text-xl font-bold text-primary tracking-tight">DocuHaul</span>
           </Link>
           <nav className="flex-1 flex justify-end">
-            <Link href="/dashboard" passHref legacyBehavior>
-              <Button>
-                Go to App <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
+            <AuthAwareButton text="Go to App" />
           </nav>
         </div>
       </header>
@@ -41,11 +37,7 @@ export default function LandingPage() {
               DocuHaul leverages Generative AI to automate the creation, validation, and management of essential vehicle documents. Save time, ensure compliance, and streamline your workflow.
             </p>
             <div className="mt-8 flex justify-center gap-4">
-              <Link href="/dashboard" passHref legacyBehavior>
-                <Button size="lg">
-                  Get Started Now <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
+              <AuthAwareButton text="Get Started Now" buttonProps={{ size: "lg" }} />
             </div>
           </div>
         </section>

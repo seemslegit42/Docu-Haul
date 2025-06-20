@@ -2,8 +2,8 @@
 "use client";
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Home, FileText, Tags, ShieldCheck, FileCheck2, Hash } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { Home, FileText, Tags, ShieldCheck, FileCheck2, Hash, LogOut, User as UserIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   SidebarMenu,
@@ -14,6 +14,12 @@ import {
   SidebarTrigger,
   useSidebar,
 } from '@/components/ui/sidebar';
+import { useAuth } from '@/hooks/use-auth';
+import { auth } from '@/lib/firebase';
+import { signOut } from 'firebase/auth';
+import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: Home },
@@ -25,7 +31,18 @@ const navItems = [
 
 export function SidebarNav() {
   const pathname = usePathname();
+  const router = useRouter();
   const { open } = useSidebar();
+  const { user } = useAuth();
+
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+      router.push('/login');
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
 
   return (
     <>
@@ -58,9 +75,36 @@ export function SidebarNav() {
           </SidebarMenuItem>
         ))}
       </SidebarMenu>
-      <SidebarFooter className="p-3 border-t border-sidebar-border">
+      <SidebarFooter className="p-2 border-t border-sidebar-border">
+        {user && (
+          <div className="mb-2">
+            {open ? (
+              <div className="flex items-center gap-2 p-1 rounded-md">
+                <UserIcon className="w-5 h-5 shrink-0 text-muted-foreground" />
+                <span className="text-sm font-medium truncate flex-1">{user.email}</span>
+                 <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleSignOut}>
+                        <LogOut className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="right">Sign Out</TooltipContent>
+                 </Tooltip>
+              </div>
+            ) : (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon" className="w-full" onClick={handleSignOut}>
+                    <LogOut className="h-5 w-5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="right">Sign Out</TooltipContent>
+              </Tooltip>
+            )}
+          </div>
+        )}
         {open && (
-          <p className="text-xs text-sidebar-foreground/70 font-body">
+          <p className="text-xs text-sidebar-foreground/70 font-body text-center">
             © {new Date().getFullYear()} DocuHaul
           </p>
         )}
