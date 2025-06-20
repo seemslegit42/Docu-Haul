@@ -5,16 +5,12 @@
  * @fileOverview Flow to create compliant VIN labels from provided data, using generative AI to determine content and layout, and then generate an image.
  *
  * - createCompliantVinLabel - A function that handles the VIN label creation process.
- * - CreateCompliantVinLabelInput - The input type for the createCompliantVinLabel function.
  * - CreateCompliantVinLabelOutput - The return type for the createCompliantVinLabel function.
  */
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { CreateCompliantVinLabelInputSchema } from '@/lib/schemas';
-
-// Re-exporting the schema type for clarity in this context.
-export type CreateCompliantVinLabelInput = z.infer<typeof CreateCompliantVinLabelInputSchema>;
+import { type LabelForgeInput, LabelForgeSchema } from '@/lib/schemas';
 
 const CreateCompliantVinLabelOutputSchema = z.object({
   labelDataUri: z.string().describe('The data URI of the generated VIN label image.'),
@@ -43,7 +39,7 @@ const defaultSafetySettings = [
 // Prompt for designing label content and rationale
 const vinLabelDesignPrompt = ai.definePrompt({
   name: 'vinLabelDesignPrompt',
-  input: {schema: CreateCompliantVinLabelInputSchema},
+  input: {schema: LabelForgeSchema},
   output: {schema: VinLabelDesignSchema},
   prompt: `You are an expert in designing compliant VIN (Vehicle Identification Number) labels.
 Your task is to determine the optimal text content and its formatting for a VIN label, and provide a rationale.
@@ -89,14 +85,14 @@ Focus on textual content and its logical structure. The actual visual rendering 
   },
 });
 
-export async function createCompliantVinLabel(input: CreateCompliantVinLabelInput): Promise<CreateCompliantVinLabelOutput> {
+export async function createCompliantVinLabel(input: LabelForgeInput): Promise<CreateCompliantVinLabelOutput> {
   return createCompliantVinLabelFlow(input);
 }
 
 const createCompliantVinLabelFlow = ai.defineFlow(
   {
     name: 'createCompliantVinLabelFlow',
-    inputSchema: CreateCompliantVinLabelInputSchema,
+    inputSchema: LabelForgeSchema,
     outputSchema: CreateCompliantVinLabelOutputSchema,
   },
   async (input) => {

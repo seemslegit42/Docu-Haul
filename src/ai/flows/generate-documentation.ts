@@ -5,25 +5,20 @@
  * @fileOverview A flow for generating vehicle documentation (NVIS or Bill of Sale) from VIN and other specifications.
  *
  * - generateDocumentation - A function that generates the documentation.
- * - GenerateDocumentationInput - The input type for the generateDocumentation function.
  * - GenerateDocumentationOutput - The return type for the generateDocumentation function.
  */
 
 import {ai}from '@/ai/genkit';
 import {z}from 'genkit';
 import { DOCUMENT_TYPES } from '@/lib/constants';
-import type { GenerateDocumentationInput } from '@/lib/schemas';
-import { GenerateDocumentationInputSchema } from '@/lib/schemas';
-
-// Re-exporting the schema type for clarity in this context.
-export type { GenerateDocumentationInput };
+import { type SmartDocsInput, SmartDocsSchema } from '@/lib/schemas';
 
 const GenerateDocumentationOutputSchema = z.object({
   documentText: z.string().describe('The generated vehicle documentation text.'),
 });
 export type GenerateDocumentationOutput = z.infer<typeof GenerateDocumentationOutputSchema>;
 
-export async function generateDocumentation(input: GenerateDocumentationInput): Promise<GenerateDocumentationOutput> {
+export async function generateDocumentation(input: SmartDocsInput): Promise<GenerateDocumentationOutput> {
   return generateDocumentationFlow(input);
 }
 
@@ -36,7 +31,7 @@ const defaultSafetySettings = [
 
 const nvisPrompt = ai.definePrompt({
   name: 'generateNVISPrompt',
-  input: {schema: GenerateDocumentationInputSchema},
+  input: {schema: SmartDocsSchema},
   output: {schema: GenerateDocumentationOutputSchema},
   prompt: `You are an expert in generating New Vehicle Information Statements (NVIS) for trailers.
 Your task is to create a complete and accurate NVIS document text.
@@ -80,7 +75,7 @@ Ensure the final document is suitable for official use.
 
 const billOfSalePrompt = ai.definePrompt({
   name: 'generateBillOfSalePrompt',
-  input: {schema: GenerateDocumentationInputSchema},
+  input: {schema: SmartDocsSchema},
   output: {schema: GenerateDocumentationOutputSchema},
   prompt: `You are an expert in drafting Bills of Sale for vehicles/trailers.
 Your task is to create a comprehensive Bill of Sale document text.
@@ -134,7 +129,7 @@ Ensure the final document is suitable for a legal transfer of ownership.
 const generateDocumentationFlow = ai.defineFlow(
   {
     name: 'generateDocumentationFlow',
-    inputSchema: GenerateDocumentationInputSchema,
+    inputSchema: SmartDocsSchema,
     outputSchema: GenerateDocumentationOutputSchema,
   },
   async (input) => {

@@ -4,17 +4,12 @@
  * @fileOverview A flow for checking document compliance against specified regulations.
  *
  * - checkCompliance - A function that performs the compliance check.
- * - CheckComplianceInput - The input type for the checkCompliance function.
  * - CheckComplianceOutput - The return type for the checkCompliance function.
  */
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import type { CheckComplianceInput } from '@/lib/schemas';
-import { CheckComplianceInputSchema } from '@/lib/schemas';
-
-// Re-exporting the schema type for clarity in this context.
-export type { CheckComplianceInput };
+import { type ComplianceCheckInput, ComplianceCheckSchema } from '@/lib/schemas';
 
 const CheckComplianceOutputSchema = z.object({
   complianceStatus: z.string().describe('A concise status of the compliance check (e.g., "Compliant", "Potential Issues Found", "Non-Compliant").'),
@@ -22,13 +17,13 @@ const CheckComplianceOutputSchema = z.object({
 });
 export type CheckComplianceOutput = z.infer<typeof CheckComplianceOutputSchema>;
 
-export async function checkCompliance(input: CheckComplianceInput): Promise<CheckComplianceOutput> {
+export async function checkCompliance(input: ComplianceCheckInput): Promise<CheckComplianceOutput> {
   return checkComplianceFlow(input);
 }
 
 const prompt = ai.definePrompt({
   name: 'checkCompliancePrompt',
-  input: {schema: CheckComplianceInputSchema},
+  input: {schema: ComplianceCheckSchema},
   output: {schema: CheckComplianceOutputSchema},
   prompt: `You are an AI compliance expert specializing in transportation and vehicle regulations.
 Your task is to analyze the provided document content against the specified regulations for the given country of operation.
@@ -66,7 +61,7 @@ If the document content is insufficient for a full check, state that in the repo
 const checkComplianceFlow = ai.defineFlow(
   {
     name: 'checkComplianceFlow',
-    inputSchema: CheckComplianceInputSchema,
+    inputSchema: ComplianceCheckSchema,
     outputSchema: CheckComplianceOutputSchema,
   },
   async input => {

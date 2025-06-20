@@ -4,16 +4,12 @@
  * @fileOverview A flow for decoding a Vehicle Identification Number (VIN) into its constituent parts.
  *
  * - decodeVin - A function that performs the VIN decoding.
- * - DecodeVinInput - The input type for the decodeVin function.
  * - DecodeVinOutput - The return type for the decodeVin function.
  */
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import type { DecodeVinInput } from '@/lib/schemas';
-import { DecodeVinInputSchema } from '@/lib/schemas';
-
-export type { DecodeVinInput };
+import { type DecodeVinInput, DecodeVinSchema } from '@/lib/schemas';
 
 const VinPartSchema = z.object({
   value: z.string().describe("The substring of the VIN corresponding to this part."),
@@ -44,7 +40,7 @@ export async function decodeVin(input: DecodeVinInput): Promise<DecodeVinOutput>
 
 const prompt = ai.definePrompt({
   name: 'decodeVinPrompt',
-  input: {schema: DecodeVinInputSchema},
+  input: {schema: DecodeVinSchema},
   output: {schema: DecodeVinOutputSchema},
   prompt: `You are an expert VIN (Vehicle Identification Number) decoder for trailers.
 Your task is to decode the provided 17-digit VIN based on the structural rules below.
@@ -83,7 +79,7 @@ The fullVin output field should be the original VIN '{{{vin}}}'.
 const decodeVinFlow = ai.defineFlow(
   {
     name: 'decodeVinFlow',
-    inputSchema: DecodeVinInputSchema,
+    inputSchema: DecodeVinSchema,
     outputSchema: DecodeVinOutputSchema,
   },
   async input => {
