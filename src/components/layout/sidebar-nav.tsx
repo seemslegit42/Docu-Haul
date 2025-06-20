@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/sidebar';
 
 const navItems = [
-  { href: '/', label: 'Dashboard', icon: Home },
+  { href: '/dashboard', label: 'Dashboard', icon: Home },
   { href: '/smart-docs', label: 'Smart Docs', icon: FileText },
   { href: '/label-forge', label: 'Label Forge', icon: Tags },
   { href: '/compliance-check', label: 'Compliance Check', icon: ShieldCheck },
