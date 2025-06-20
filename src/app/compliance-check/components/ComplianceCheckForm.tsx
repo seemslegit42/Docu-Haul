@@ -75,7 +75,7 @@ export default function ComplianceCheckForm({ form, onSubmit, isLoading }: Compl
                 <FormItem>
                   <FormLabel className="font-headline">Target Regulations/Standards</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., FMVSS Part 567, State titling laws" {...field} className="font-body"/>
+                    <Input placeholder="Enter relevant regulations" {...field} className="font-body"/>
                   </FormControl>
                   <FormDescription className="font-body text-xs">
                     Specify the regulations relevant to the document type.
@@ -91,7 +91,7 @@ export default function ComplianceCheckForm({ form, onSubmit, isLoading }: Compl
                 <FormItem>
                   <FormLabel className="font-headline">Country/Region of Operation</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., USA, Canada (or specific state/province)" {...field} className="font-body"/>
+                    <Input placeholder="Enter country/region of operation" {...field} className="font-body"/>
                   </FormControl>
                   <FormDescription className="font-body text-xs">
                     This helps tailor the compliance check.

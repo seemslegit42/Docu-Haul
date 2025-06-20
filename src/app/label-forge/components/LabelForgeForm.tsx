@@ -47,7 +47,7 @@ export default function LabelForgeForm({ form, onSubmit, isLoading }: LabelForge
                   <FormLabel className="font-headline">Trailer Specifications</FormLabel>
                   <FormControl>
                     <Textarea 
-                      placeholder="e.g., GVWR: 10000 lbs, Axles: 2, Tires: ST225/75R15, Manufacturer: Acme Trailers, DOM: 03/2024. Provide as much detail as possible." 
+                      placeholder="Enter all known vehicle and manufacturer specifications." 
                       {...field} 
                       rows={4} 
                       className="font-body"
@@ -67,7 +67,7 @@ export default function LabelForgeForm({ form, onSubmit, isLoading }: LabelForge
                 <FormItem>
                   <FormLabel className="font-headline">Regulatory Standards (Optional)</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., FMVSS, CMVSS specific clauses" {...field} className="font-body"/>
+                    <Input placeholder="Enter applicable standards (optional)" {...field} className="font-body"/>
                   </FormControl>
                     <FormDescription className="font-body text-xs">
                     If blank, a general compliance statement will be used.
@@ -83,7 +83,7 @@ export default function LabelForgeForm({ form, onSubmit, isLoading }: LabelForge
                 <FormItem>
                   <FormLabel className="font-headline">Target Label Dimensions</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., 100mm x 50mm or 4in x 2in" {...field} className="font-body"/>
+                    <Input placeholder="Enter approximate physical dimensions" {...field} className="font-body"/>
                   </FormControl>
                     <FormDescription className="font-body text-xs">
                     Approximate dimensions for the AI to consider for layout.

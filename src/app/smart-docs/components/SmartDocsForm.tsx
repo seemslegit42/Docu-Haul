@@ -75,11 +75,7 @@ export default function SmartDocsForm({ form, onSubmit, isLoading }: SmartDocsFo
                   </FormLabel>
                   <FormControl>
                     <Textarea 
-                      placeholder={
-                        watchedDocumentType === DOCUMENT_TYPES.BILL_OF_SALE
-                          ? "e.g., Seller: John Doe, 123 Main St; Buyer: Jane Smith, 456 Oak Ave; Price: $5000; Vehicle: 2023 Utility Trailer. Provide as much detail as possible." 
-                          : "e.g., Manufacturer: Acme Trailers, Model: UT-200, GVWR: 7000 lbs, Axles: 2, DOM: 03/2024. Provide comprehensive trailer details."
-                      } 
+                      placeholder="Enter all required specifications for the selected document."
                       {...field} 
                       rows={5} 
                       className="font-body"

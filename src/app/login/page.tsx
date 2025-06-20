@@ -183,7 +183,7 @@ function AuthForm({ form, onSubmit, isLoading, isOtherLoading, buttonText }: { f
                                     <FormLabel>Email</FormLabel>
 
                                     <FormControl>
-                                        <Input type="email" placeholder="you@example.com" {...field} disabled={anyLoading} />
+                                        <Input type="email" {...field} disabled={anyLoading} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
