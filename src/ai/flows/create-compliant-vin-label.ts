@@ -33,6 +33,13 @@ const VinLabelDesignSchema = z.object({
   placementRationale: z.string().describe('The AI\'s rationale for the information placement and content selection.'),
 });
 
+const defaultSafetySettings = [
+  { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_ONLY_HIGH' },
+  { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+  { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_ONLY_HIGH' },
+  { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_ONLY_HIGH' },
+];
+
 // Prompt for designing label content and rationale
 const vinLabelDesignPrompt = ai.definePrompt({
   name: 'vinLabelDesignPrompt',
@@ -77,6 +84,9 @@ THIS VEHICLE CONFORMS TO ALL APPLICABLE U.S. FEDERAL MOTOR VEHICLE SAFETY STANDA
 
 Ensure the 'formattedLabelText' is ready to be placed onto an image.
 Focus on textual content and its logical structure. The actual visual rendering into an image will be a subsequent step.`,
+  config: {
+    safetySettings: defaultSafetySettings,
+  },
 });
 
 export async function createCompliantVinLabel(input: CreateCompliantVinLabelInput): Promise<CreateCompliantVinLabelOutput> {
@@ -114,12 +124,7 @@ If the text mentions "barcode" or implies its necessity, include a realistic pla
       prompt: imagePrompt,
       config: {
         responseModalities: ['TEXT', 'IMAGE'],
-         safetySettings: [ // Added safety settings to reduce potential blocking for official document content
-          { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_ONLY_HIGH' },
-          { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' }, // Adjusted for potentially sensitive but necessary compliance terms
-          { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_ONLY_HIGH' },
-          { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_ONLY_HIGH' },
-        ],
+        safetySettings: defaultSafetySettings,
       },
     });
 
