@@ -30,7 +30,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, FileText } from 'lucide-react';
+import { Loader2, FileCheck2 } from 'lucide-react';
 import Link from 'next/link';
 
 const formSchema = z.object({
@@ -83,7 +83,7 @@ export default function LoginPage() {
     <div className="flex items-center justify-center min-h-screen bg-background p-4">
         <div className="w-full max-w-md">
              <Link href="/" className="flex items-center justify-center gap-2 mb-6">
-                <FileText className="w-8 h-8 text-primary" />
+                <FileCheck2 className="w-8 h-8 text-primary" />
                 <span className="font-headline text-2xl font-bold text-primary tracking-tight">DocuHaul</span>
             </Link>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">

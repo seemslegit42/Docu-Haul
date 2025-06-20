@@ -46,7 +46,7 @@ export default function ComplianceReport({ result, isLoading }: ComplianceReport
             </div>
             <div>
               <h4 className="font-headline text-lg text-primary mt-4">Detailed Findings:</h4>
-              <ScrollArea className="h-96 w-full rounded-md border p-3 bg-background">
+              <ScrollArea className="h-96 w-full rounded-md border p-3 bg-muted/30">
                 <pre className="font-mono text-sm text-muted-foreground whitespace-pre-wrap">
                   {result.complianceReport}
                 </pre>

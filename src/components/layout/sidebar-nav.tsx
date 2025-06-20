@@ -98,7 +98,7 @@ export function SidebarNav() {
                     <LogOut className="h-5 w-5" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent side="right">Sign Out</TooltipContent>
+                <TooltipContent side="right">Sign out {user.email}</TooltipContent>
               </Tooltip>
             )}
           </div>
