@@ -2,10 +2,12 @@
 "use client";
 
 import type { DecodeVinOutput } from '@/ai/flows/decode-vin-flow';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Loader2 } from 'lucide-react';
+import { Loader2, FilePlus2 } from 'lucide-react';
 
 interface VinDecoderResultProps {
   result: DecodeVinOutput | null;
@@ -93,6 +95,16 @@ export default function VinDecoderResult({ result, isLoading }: VinDecoderResult
           </div>
         )}
       </CardContent>
+      {result && !isLoading && (
+        <CardFooter>
+            <Button asChild className="w-full">
+              <Link href={`/smart-docs?vin=${result.fullVin}&modelYear=${result.modelYear.value}&axles=${result.vehicleDescriptors.numberOfAxles}`}>
+                <FilePlus2 className="mr-2 h-4 w-4" />
+                Generate Document for this VIN
+              </Link>
+            </Button>
+        </CardFooter>
+      )}
     </Card>
   );
 }

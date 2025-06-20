@@ -1,7 +1,8 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { SmartDocsSchema, type SmartDocsInput } from '@/lib/schemas';
@@ -18,6 +19,7 @@ export default function SmartDocsPage() {
   const [editableDocText, setEditableDocText] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const searchParams = useSearchParams();
 
   const form = useForm<SmartDocsInput>({
     resolver: zodResolver(SmartDocsSchema),
@@ -28,6 +30,36 @@ export default function SmartDocsPage() {
       tone: 'professional',
     },
   });
+
+  useEffect(() => {
+    const vin = searchParams.get('vin');
+    const modelYear = searchParams.get('modelYear');
+    const axles = searchParams.get('axles');
+
+    if (vin) {
+      form.setValue('vin', vin, { shouldValidate: true });
+      
+      const prefillHeader = '--- Pre-filled from VIN Decoder ---';
+      const existingSpecs = form.getValues('trailerSpecs');
+
+      if (existingSpecs.includes(prefillHeader)) {
+          return; // Already pre-filled
+      }
+      
+      const specsArray = [];
+      if (modelYear) specsArray.push(`Year: ${modelYear}`);
+      if (axles) specsArray.push(`Number of Axles: ${axles}`);
+      
+      if (specsArray.length > 0) {
+          const newSpecs = specsArray.join('\n');
+          const finalSpecs = existingSpecs 
+              ? `${prefillHeader}\n${newSpecs}\n\n${existingSpecs}`
+              : `${prefillHeader}\n${newSpecs}`;
+          
+          form.setValue('trailerSpecs', finalSpecs, { shouldValidate: true });
+      }
+    }
+  }, [searchParams, form]);
 
   const onSubmit = async (data: SmartDocsInput) => {
     setIsLoading(true);
