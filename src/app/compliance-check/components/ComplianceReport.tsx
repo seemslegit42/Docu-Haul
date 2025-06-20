@@ -21,7 +21,7 @@ export default function ComplianceReport({ result, isLoading }: ComplianceReport
   };
 
   return (
-    <Card className="shadow-lg">
+    <Card>
       <CardHeader>
         <CardTitle className="font-headline flex items-center">
           {getStatusIcon(result?.complianceStatus)}
@@ -47,7 +47,7 @@ export default function ComplianceReport({ result, isLoading }: ComplianceReport
             <div>
               <h4 className="font-headline text-lg text-primary mt-4">Detailed Findings:</h4>
               <ScrollArea className="h-96 w-full rounded-md border p-3 bg-background">
-                <pre className="font-body text-sm text-muted-foreground whitespace-pre-wrap">
+                <pre className="font-mono text-sm text-muted-foreground whitespace-pre-wrap">
                   {result.complianceReport}
                 </pre>
               </ScrollArea>

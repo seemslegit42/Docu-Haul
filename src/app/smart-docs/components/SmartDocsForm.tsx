@@ -22,7 +22,7 @@ export default function SmartDocsForm({ form, onSubmit, isLoading }: SmartDocsFo
   const watchedDocumentType = form.watch('documentType');
 
   return (
-    <Card className="shadow-lg">
+    <Card>
       <CardHeader>
         <CardTitle className="font-headline">Document Details</CardTitle>
         <CardDescription className="font-body">Select document type and enter details for AI generation.</CardDescription>

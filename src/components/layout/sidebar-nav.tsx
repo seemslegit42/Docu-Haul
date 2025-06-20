@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, FileText, Tags, ShieldCheck, CarFront } from 'lucide-react';
+import { Home, FileText, Tags, ShieldCheck, FileCheck2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   SidebarMenu,
@@ -13,7 +13,6 @@ import {
   SidebarTrigger,
   useSidebar,
 } from '@/components/ui/sidebar';
-import { Button } from '@/components/ui/button';
 
 const navItems = [
   { href: '/', label: 'Dashboard', icon: Home },
@@ -30,8 +29,8 @@ export function SidebarNav() {
     <>
       <SidebarHeader className="flex items-center justify-between p-3 border-b border-sidebar-border">
         <Link href="/" className="flex items-center gap-2">
-          <CarFront className="w-7 h-7 text-primary" />
-          {open && <span className="font-headline text-xl font-bold text-primary">DocuHaul</span>}
+          <FileCheck2 className="w-7 h-7 text-primary" />
+          {open && <span className="font-headline text-xl font-bold text-primary tracking-tight">DocuHaul</span>}
         </Link>
         <SidebarTrigger className="md:hidden" />
       </SidebarHeader>

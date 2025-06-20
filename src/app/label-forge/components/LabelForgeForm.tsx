@@ -18,7 +18,7 @@ interface LabelForgeFormProps {
 
 export default function LabelForgeForm({ form, onSubmit, isLoading }: LabelForgeFormProps) {
   return (
-    <Card className="shadow-lg">
+    <Card>
       <CardHeader>
         <CardTitle className="font-headline">Label Data Input</CardTitle>
         <CardDescription className="font-body">Provide all necessary information for VIN label generation. The AI will attempt to infer and use placeholders for missing standard fields.</CardDescription>

@@ -30,7 +30,7 @@ export default function GeneratedDocument({
   const canDownload = generatedDoc && editableDocText.trim() && !aiError;
 
   return (
-    <Card className="shadow-lg">
+    <Card>
       <CardHeader>
         <CardTitle className="font-headline">Generated Document</CardTitle>
         <CardDescription className="font-body">Preview and edit the AI-generated document below. You can download it once generated.</CardDescription>
@@ -54,7 +54,7 @@ export default function GeneratedDocument({
             value={editableDocText}
             onChange={onTextChange}
             rows={15}
-            className="font-body w-full p-3 border rounded-md bg-background shadow-inner"
+            className="font-mono text-sm w-full p-3 border rounded-md bg-muted/50 shadow-inner"
             placeholder="Generated document will appear here..."
           />
         )}

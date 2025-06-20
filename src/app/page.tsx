@@ -1,6 +1,5 @@
 import { AppLayout } from '@/components/layout/app-layout';
 import { PageHeader } from '@/components/layout/page-header';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileText, Tags, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
@@ -13,7 +12,7 @@ export default function HomePage() {
         description="AI-powered creation of VIN labels, NVIS certificates, and Bills of Sale for trailer and vehicle manufacturers."
       />
       <div className="space-y-8">
-        <Card className="shadow-lg">
+        <Card>
           <CardHeader>
             <CardTitle className="font-headline text-2xl">Focus on Essential Documents</CardTitle>
             <CardDescription className="font-body">
@@ -47,7 +46,7 @@ export default function HomePage() {
           </CardContent>
         </Card>
         
-        <Card className="shadow-lg">
+        <Card>
           <CardHeader>
             <CardTitle className="font-headline text-2xl">How DocuHaul Works</CardTitle>
           </CardHeader>
@@ -72,17 +71,20 @@ interface FeatureCardProps {
 
 function FeatureCard({ icon, title, description, href }: FeatureCardProps) {
   return (
-    <Card className="hover:shadow-xl transition-shadow">
-      <CardHeader className="flex flex-row items-center gap-4">
-        {icon}
-        <CardTitle className="font-headline text-xl">{title}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p className="text-muted-foreground font-body mb-4">{description}</p>
-        <Button asChild variant="outline" className="border-primary text-primary hover:bg-primary/10">
-          <Link href={href}>Go to {title}</Link>
-        </Button>
-      </CardContent>
-    </Card>
+    <Link href={href} className="group block">
+      <Card className="h-full group-hover:border-primary transition-colors duration-300">
+        <CardHeader className="flex flex-row items-center gap-4">
+          {icon}
+          <CardTitle className="font-headline text-xl">{title}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground font-body mb-4 min-h-[40px]">{description}</p>
+          <div className="text-sm font-semibold text-primary flex items-center gap-2">
+            Go to {title}
+            <span className="opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300">&rarr;</span>
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
   );
 }

@@ -20,7 +20,7 @@ interface ComplianceCheckFormProps {
 
 export default function ComplianceCheckForm({ form, onSubmit, isLoading }: ComplianceCheckFormProps) {
   return (
-    <Card className="shadow-lg">
+    <Card>
       <CardHeader>
         <CardTitle className="font-headline">Compliance Input</CardTitle>
         <CardDescription className="font-body">Provide document details for AI compliance analysis.</CardDescription>

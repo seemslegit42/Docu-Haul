@@ -15,7 +15,7 @@ interface GeneratedLabelProps {
 
 export default function GeneratedLabel({ generatedLabel, isLoading, onDownload }: GeneratedLabelProps) {
   return (
-    <Card className="shadow-lg">
+    <Card>
       <CardHeader>
         <CardTitle className="font-headline">Generated Label & Rationale</CardTitle>
         <CardDescription className="font-body">Preview the AI-generated label and its design rationale. Download available below.</CardDescription>
