@@ -1,28 +1,16 @@
+
 "use client";
 
 import { useState } from 'react';
-import { useForm, type SubmitHandler } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ComplianceCheckSchema, type ComplianceCheckInput } from '@/lib/schemas';
 import { checkCompliance, type CheckComplianceOutput } from '@/ai/flows/check-compliance-flow';
 import { AppLayout } from '@/components/layout/app-layout';
 import { PageHeader } from '@/components/layout/page-header';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, ShieldCheck, AlertTriangle, CheckCircle2 } from 'lucide-react';
-
-const documentTypeOptions = [
-  { value: "VIN Label", label: "VIN Label" },
-  { value: "NVIS Certificate", label: "NVIS Certificate" },
-  { value: "Bill of Sale", label: "Bill of Sale" },
-  { value: "Other Vehicle Document", label: "Other Related Document" },
-];
+import ComplianceCheckForm from './components/ComplianceCheckForm';
+import ComplianceReport from './components/ComplianceReport';
 
 export default function ComplianceCheckPage() {
   const [result, setResult] = useState<CheckComplianceOutput | null>(null);
@@ -39,7 +27,7 @@ export default function ComplianceCheckPage() {
     },
   });
 
-  const onSubmit: SubmitHandler<ComplianceCheckInput> = async (data) => {
+  const onSubmit = async (data: ComplianceCheckInput) => {
     setIsLoading(true);
     setResult(null);
     try {
@@ -65,15 +53,6 @@ export default function ComplianceCheckPage() {
     }
   };
 
-  const getStatusIcon = (status?: string) => {
-    if (!status) return <ShieldCheck className="w-7 h-7 text-muted-foreground mr-2" />;
-    if (status.toLowerCase().includes("compliant")) return <CheckCircle2 className="w-7 h-7 text-green-500 mr-2" />;
-    if (status.toLowerCase().includes("potential issues") || status.toLowerCase().includes("needs review")) return <AlertTriangle className="w-7 h-7 text-yellow-500 mr-2" />;
-    if (status.toLowerCase().includes("non-compliant")) return <AlertTriangle className="w-7 h-7 text-red-500 mr-2" />;
-    return <ShieldCheck className="w-7 h-7 text-primary mr-2" />;
-  };
-
-
   return (
     <AppLayout>
       <PageHeader 
@@ -81,137 +60,8 @@ export default function ComplianceCheckPage() {
         description="AI-powered validation for your VIN labels, NVIS certificates, and Bills of Sale."
       />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card className="shadow-lg">
-          <CardHeader>
-            <CardTitle className="font-headline">Compliance Input</CardTitle>
-            <CardDescription className="font-body">Provide document details for AI compliance analysis.</CardDescription>
-          </CardHeader>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
-              <CardContent className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="documentType"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="font-headline">Document Type</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger className="font-body">
-                            <SelectValue placeholder="Select document type" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {documentTypeOptions.map(option => (
-                            <SelectItem key={option.value} value={option.value} className="font-body">
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="documentContent"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="font-headline">Document Content</FormLabel>
-                      <FormControl>
-                        <Textarea placeholder="Paste the full text content of the document here..." {...field} rows={6} className="font-body"/>
-                      </FormControl>
-                      <FormDescription className="font-body text-xs">
-                        Ensure all relevant text from the document is included for accurate analysis.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="targetRegulations"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="font-headline">Target Regulations/Standards</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., FMVSS Part 567, State titling laws" {...field} className="font-body"/>
-                      </FormControl>
-                      <FormDescription className="font-body text-xs">
-                        Specify the regulations relevant to the document type.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="countryOfOperation"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="font-headline">Country/Region of Operation</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., USA, Canada (or specific state/province)" {...field} className="font-body"/>
-                      </FormControl>
-                      <FormDescription className="font-body text-xs">
-                        This helps tailor the compliance check.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-              <CardFooter>
-                <Button type="submit" disabled={isLoading} className="w-full">
-                  {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                  Check Compliance
-                </Button>
-              </CardFooter>
-            </form>
-          </Form>
-        </Card>
-
-        <Card className="shadow-lg">
-          <CardHeader>
-            <CardTitle className="font-headline flex items-center">
-              {getStatusIcon(result?.complianceStatus)}
-              Compliance Report
-            </CardTitle>
-            <CardDescription className="font-body">AI-generated compliance analysis and recommendations.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {isLoading && (
-              <div className="flex flex-col justify-center items-center h-60">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                <p className="font-body mt-2">Analyzing compliance...</p>
-              </div>
-            )}
-            {!isLoading && result && (
-              <>
-                <div>
-                  <h4 className="font-headline text-lg text-primary">Overall Status:</h4>
-                  <p className="font-body text-md font-semibold p-2 bg-muted/30 rounded-md border">
-                    {result.complianceStatus}
-                  </p>
-                </div>
-                <div>
-                  <h4 className="font-headline text-lg text-primary mt-4">Detailed Findings:</h4>
-                  <ScrollArea className="h-96 w-full rounded-md border p-3 bg-background">
-                    <pre className="font-body text-sm text-muted-foreground whitespace-pre-wrap">
-                      {result.complianceReport}
-                    </pre>
-                  </ScrollArea>
-                </div>
-              </>
-            )}
-            {!isLoading && !result && (
-               <div className="text-center text-muted-foreground font-body p-4 border border-dashed rounded-md h-60 flex items-center justify-center">
-                Your compliance report will appear here after submitting the details.
-              </div>
-            )}
-          </CardContent>
-        </Card>
+        <ComplianceCheckForm form={form} onSubmit={onSubmit} isLoading={isLoading} />
+        <ComplianceReport result={result} isLoading={isLoading} />
       </div>
     </AppLayout>
   );

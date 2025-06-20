@@ -114,7 +114,7 @@ The label shape should be rectangular.
 If the text mentions "barcode" or implies its necessity, include a realistic placeholder for a barcode area (e.g., a blank rectangular area or a generic barcode pattern). Otherwise, do not include a barcode.`;
 
     const { media } = await ai.generate({
-      model: 'googleai/gemini-2.0-flash-exp',
+      model: 'googleai/gemini-2.0-flash-preview-image-generation',
       prompt: imagePrompt,
       config: {
         responseModalities: ['TEXT', 'IMAGE'],

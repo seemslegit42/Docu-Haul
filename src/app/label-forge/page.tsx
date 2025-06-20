@@ -2,20 +2,15 @@
 "use client";
 
 import { useState } from 'react';
-import { useForm, type SubmitHandler } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import Image from 'next/image';
 import { LabelForgeSchema, type LabelForgeInput } from '@/lib/schemas';
 import { createCompliantVinLabel, type CreateCompliantVinLabelOutput } from '@/ai/flows/create-compliant-vin-label';
 import { AppLayout } from '@/components/layout/app-layout';
 import { PageHeader } from '@/components/layout/page-header';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
+import LabelForgeForm from './components/LabelForgeForm';
+import GeneratedLabel from './components/GeneratedLabel';
 
 export default function LabelForgePage() {
   const [generatedLabel, setGeneratedLabel] = useState<CreateCompliantVinLabelOutput | null>(null);
@@ -32,7 +27,7 @@ export default function LabelForgePage() {
     },
   });
 
-  const onSubmit: SubmitHandler<LabelForgeInput> = async (data) => {
+  const onSubmit = async (data: LabelForgeInput) => {
     setIsLoading(true);
     setGeneratedLabel(null);
     try {
@@ -46,7 +41,7 @@ export default function LabelForgePage() {
       console.error("Error generating label:", error);
       let errorMessage = "Failed to generate label. Please try again.";
       if (error instanceof Error) {
-        errorMessage = error.message; // Use the more specific error message from the flow
+        errorMessage = error.message;
       }
       toast({
         title: "Error Generating Label",
@@ -64,32 +59,15 @@ export default function LabelForgePage() {
     const link = document.createElement('a');
     link.href = generatedLabel.labelDataUri;
 
-    let extension = 'png'; // Default extension
+    let extension = 'png';
     const dataUriPrefix = 'data:image/';
     if (generatedLabel.labelDataUri.startsWith(dataUriPrefix)) {
       const mimeTypePart = generatedLabel.labelDataUri.substring(
         dataUriPrefix.length,
         generatedLabel.labelDataUri.indexOf(';base64')
       );
-      switch (mimeTypePart.toLowerCase()) {
-        case 'jpeg':
-        case 'jpg':
-          extension = 'jpg';
-          break;
-        case 'gif':
-          extension = 'gif';
-          break;
-        case 'webp':
-          extension = 'webp';
-          break;
-        case 'svg+xml':
-          extension = 'svg';
-          break;
-        // Add more cases as needed, 'png' is a common default from Gemini
-        case 'png':
-        default:
-          extension = 'png';
-          break;
+      if (mimeTypePart) {
+        extension = mimeTypePart.split('+')[0]; // Handles svg+xml
       }
     }
     
@@ -107,138 +85,12 @@ export default function LabelForgePage() {
         description="AI-powered VIN label creation with optimized information placement."
       />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card className="shadow-lg">
-          <CardHeader>
-            <CardTitle className="font-headline">Label Data Input</CardTitle>
-            <CardDescription className="font-body">Provide all necessary information for VIN label generation. The AI will attempt to infer and use placeholders for missing standard fields.</CardDescription>
-          </CardHeader>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
-              <CardContent className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="vinData"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="font-headline">Vehicle Identification Number (VIN)</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Enter 17-character VIN" {...field} className="font-body"/>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="trailerSpecs"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="font-headline">Trailer Specifications</FormLabel>
-                      <FormControl>
-                        <Textarea 
-                          placeholder="e.g., GVWR: 10000 lbs, Axles: 2, Tires: ST225/75R15, Manufacturer: Acme Trailers, DOM: 03/2024. Provide as much detail as possible." 
-                          {...field} 
-                          rows={4} 
-                          className="font-body"
-                        />
-                      </FormControl>
-                      <FormDescription className="font-body text-xs">
-                        Include details like GVWR, GAWRs, tire/rim specs, manufacturer, manufacture date, etc.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="regulatoryStandards"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="font-headline">Regulatory Standards (Optional)</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., FMVSS, CMVSS specific clauses" {...field} className="font-body"/>
-                      </FormControl>
-                       <FormDescription className="font-body text-xs">
-                        If blank, a general compliance statement will be used.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="labelDimensions"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="font-headline">Target Label Dimensions</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., 100mm x 50mm or 4in x 2in" {...field} className="font-body"/>
-                      </FormControl>
-                       <FormDescription className="font-body text-xs">
-                        Approximate dimensions for the AI to consider for layout.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </CardContent>
-              <CardFooter>
-                <Button type="submit" disabled={isLoading} className="w-full">
-                  {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                  Forge Label
-                </Button>
-              </CardFooter>
-            </form>
-          </Form>
-        </Card>
-
-        <Card className="shadow-lg">
-          <CardHeader>
-            <CardTitle className="font-headline">Generated Label & Rationale</CardTitle>
-            <CardDescription className="font-body">Preview the AI-generated label and its design rationale. Download available below.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {isLoading && (
-              <div className="flex flex-col justify-center items-center h-60">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                <p className="ml-2 font-body mt-2">Forging your label... This may take a moment.</p>
-              </div>
-            )}
-            {!isLoading && generatedLabel && (
-              <>
-                <div className="border rounded-md p-4 bg-muted/30 flex justify-center items-center min-h-[250px]">
-                  <Image
-                    src={generatedLabel.labelDataUri}
-                    alt="Generated VIN Label"
-                    width={400} 
-                    height={200}
-                    className="rounded-md shadow-md object-contain"
-                    data-ai-hint="vehicle identification label"
-                    style={{ maxWidth: '100%', height: 'auto' }} 
-                  />
-                </div>
-                <div>
-                  <h4 className="font-headline text-lg text-primary">Placement Rationale:</h4>
-                  <p className="font-body text-sm text-muted-foreground bg-background p-3 rounded-md border whitespace-pre-wrap">
-                    {generatedLabel.placementRationale}
-                  </p>
-                </div>
-              </>
-            )}
-            {!isLoading && !generatedLabel && (
-               <div className="text-center text-muted-foreground font-body p-4 border border-dashed rounded-md h-60 flex items-center justify-center">
-                Your AI-generated label and rationale will appear here once you submit the data.
-              </div>
-            )}
-          </CardContent>
-           {generatedLabel && !isLoading && (
-            <CardFooter>
-               <Button variant="outline" className="w-full" onClick={handleDownload} disabled={!generatedLabel?.labelDataUri}>
-                Download Label
-              </Button>
-            </CardFooter>
-          )}
-        </Card>
+        <LabelForgeForm form={form} onSubmit={onSubmit} isLoading={isLoading} />
+        <GeneratedLabel 
+          generatedLabel={generatedLabel} 
+          isLoading={isLoading} 
+          onDownload={handleDownload} 
+        />
       </div>
     </AppLayout>
   );

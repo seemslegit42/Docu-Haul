@@ -11,11 +11,12 @@
 
 import {ai}from '@/ai/genkit';
 import {z}from 'genkit';
+import { DOCUMENT_TYPES } from '@/lib/constants';
 
 const GenerateDocumentationInputSchema = z.object({
   vin: z.string().describe('The Vehicle Identification Number.'),
   trailerSpecs: z.string().describe('The trailer specifications, or buyer/seller/price/vehicle details for a Bill of Sale. Can be plain text, key-value pairs, or a JSON string.'),
-  documentType: z.enum(['NVIS', 'BillOfSale']).describe('The type of document to generate: NVIS or BillOfSale.'),
+  documentType: z.nativeEnum(DOCUMENT_TYPES).describe('The type of document to generate: NVIS or BillOfSale.'),
   tone: z.string().optional().describe('The desired tone for the document (e.g., professional, legal, formal, friendly). Defaults to professional/formal if not specified.'),
 });
 export type GenerateDocumentationInput = z.infer<typeof GenerateDocumentationInputSchema>;
@@ -169,4 +170,3 @@ const generateDocumentationFlow = ai.defineFlow(
     return aiModelOutput; // Return the successful AI output
   }
 );
-
