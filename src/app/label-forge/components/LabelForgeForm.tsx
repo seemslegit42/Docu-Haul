@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Loader2, Tags } from 'lucide-react';
 
 interface LabelForgeFormProps {
@@ -26,6 +27,41 @@ export default function LabelForgeForm({ form, onSubmit, isLoading }: LabelForge
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <CardContent className="space-y-4">
+            <FormField
+              control={form.control}
+              name="template"
+              render={({ field }) => (
+                <FormItem className="space-y-3">
+                  <FormLabel className="font-headline">Label Template</FormLabel>
+                  <FormControl>
+                    <RadioGroup
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+                    >
+                      <FormItem className="flex items-center space-x-3 space-y-0 p-4 border rounded-md has-[:checked]:border-primary">
+                        <FormControl>
+                          <RadioGroupItem value="standard" />
+                        </FormControl>
+                        <FormLabel className="font-normal">
+                          Standard US Label
+                        </FormLabel>
+                      </FormItem>
+                      <FormItem className="flex items-center space-x-3 space-y-0 p-4 border rounded-md has-[:checked]:border-primary">
+                        <FormControl>
+                          <RadioGroupItem value="bilingual_canadian" />
+                        </FormControl>
+                        <FormLabel className="font-normal">
+                          Bilingual Canadian Label
+                        </FormLabel>
+                      </FormItem>
+                    </RadioGroup>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name="vinData"

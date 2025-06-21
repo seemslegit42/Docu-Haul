@@ -29,10 +29,11 @@ export default function LabelForgePage() {
   const form = useForm<LabelForgeInput>({
     resolver: zodResolver(LabelForgeSchema),
     defaultValues: {
+      template: 'standard',
       vinData: '',
       trailerSpecs: '',
       regulatoryStandards: '',
-      labelDimensions: '',
+      labelDimensions: '4x2 inches',
     },
   });
 
