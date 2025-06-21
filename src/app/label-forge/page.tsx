@@ -2,6 +2,7 @@
 "use client";
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { LabelForgeSchema, type LabelForgeInput } from '@/lib/schemas';
@@ -20,6 +21,7 @@ export default function LabelForgePage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const { toast } = useToast();
   const { user, isPremium, isLoading: isAuthLoading } = useAuth();
+  const router = useRouter();
 
   const form = useForm<LabelForgeInput>({
     resolver: zodResolver(LabelForgeSchema),
@@ -77,6 +79,17 @@ export default function LabelForgePage() {
     toast({ title: "Download Started", description: `Label ${link.download} download initiated.` });
   };
 
+  const handleCheckCompliance = () => {
+    if (!generatedLabel || !generatedLabel.labelTextContent) return;
+
+    const query = new URLSearchParams({
+        documentType: 'VIN Label',
+        documentContent: generatedLabel.labelTextContent,
+    }).toString();
+
+    router.push(`/compliance-check?${query}`);
+  };
+
   const renderContent = () => {
     if (isAuthLoading) {
       return (
@@ -98,6 +111,7 @@ export default function LabelForgePage() {
                 generatedLabel={generatedLabel} 
                 isLoading={isGenerating} 
                 onDownload={handleDownload} 
+                onCheckCompliance={handleCheckCompliance}
             />
         </div>
     );

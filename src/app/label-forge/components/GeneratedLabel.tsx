@@ -5,20 +5,23 @@ import type { CreateCompliantVinLabelOutput } from '@/ai/flows/create-compliant-
 import Image from 'next/image';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Download, ShieldCheck } from 'lucide-react';
 
 interface GeneratedLabelProps {
   generatedLabel: CreateCompliantVinLabelOutput | null;
   isLoading: boolean;
   onDownload: () => void;
+  onCheckCompliance: () => void;
 }
 
-export default function GeneratedLabel({ generatedLabel, isLoading, onDownload }: GeneratedLabelProps) {
+export default function GeneratedLabel({ generatedLabel, isLoading, onDownload, onCheckCompliance }: GeneratedLabelProps) {
+  const canPerformActions = generatedLabel && !isLoading;
+
   return (
     <Card>
       <CardHeader>
         <CardTitle className="font-headline">Generated Label & Rationale</CardTitle>
-        <CardDescription className="font-body">Preview the AI-generated label and its design rationale. Download available below.</CardDescription>
+        <CardDescription className="font-body">Preview the AI-generated label and its design rationale. Download or check compliance below.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {isLoading && (
@@ -54,11 +57,25 @@ export default function GeneratedLabel({ generatedLabel, isLoading, onDownload }
           </div>
         )}
       </CardContent>
-      {generatedLabel && !isLoading && (
-        <CardFooter>
-            <Button variant="outline" className="w-full" onClick={onDownload} disabled={!generatedLabel?.labelDataUri}>
-            Download Label
-          </Button>
+      {canPerformActions && (
+        <CardFooter className="flex flex-col sm:flex-row gap-2 pt-4">
+            <Button 
+                className="w-full sm:flex-grow" 
+                onClick={onCheckCompliance} 
+                disabled={!canPerformActions}
+            >
+                <ShieldCheck className="mr-2 h-4 w-4" />
+                Check Compliance
+            </Button>
+            <Button 
+                variant="outline" 
+                className="w-full sm:w-auto" 
+                onClick={onDownload} 
+                disabled={!canPerformActions}
+            >
+                <Download className="mr-2 h-4 w-4" />
+                Download Label
+            </Button>
         </CardFooter>
       )}
     </Card>

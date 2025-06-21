@@ -17,6 +17,7 @@ import admin from '@/lib/firebase-admin';
 const CreateCompliantVinLabelOutputSchema = z.object({
   labelDataUri: z.string().describe('The data URI of the generated VIN label image.'),
   placementRationale: z.string().describe('The AI\'s rationale for the information placement on the label.'),
+  labelTextContent: z.string().describe('The formatted text content used to generate the label image.'),
 });
 export type CreateCompliantVinLabelOutput = z.infer<typeof CreateCompliantVinLabelOutputSchema>;
 
@@ -160,6 +161,7 @@ If the text mentions "barcode" or implies its necessity, include a realistic pla
     return {
       labelDataUri,
       placementRationale,
+      labelTextContent: formattedLabelText,
     };
   }
 );
