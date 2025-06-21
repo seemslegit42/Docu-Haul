@@ -13,7 +13,7 @@ import { type ComplianceCheckInput, ComplianceCheckSchema } from '@/lib/schemas'
 import { defaultSafetySettings } from '@/ai/safety-settings';
 
 const CheckComplianceOutputSchema = z.object({
-  complianceStatus: z.string().describe('A concise status of the compliance check (e.g., "Compliant", "Potential Issues Found", "Non-Compliant").'),
+  complianceStatus: z.string().describe('The compliance status, which must be one of the following exact strings: "Compliant", "Potential Issues", or "Non-Compliant".'),
   complianceReport: z.string().describe('A detailed report outlining the compliance findings, issues, and recommendations.'),
 });
 export type CheckComplianceOutput = z.infer<typeof CheckComplianceOutputSchema>;
@@ -39,7 +39,7 @@ Document Content to Analyze:
 \`\`\`
 
 Please perform a thorough compliance check and provide:
-1.  A 'complianceStatus' (e.g., "Compliant", "Potential Issues Found", "Non-Compliant").
+1.  A 'complianceStatus' that is strictly one of: "Compliant", "Potential Issues", or "Non-Compliant".
 2.  A detailed 'complianceReport' that includes:
     - An overall assessment summary.
     - A list of any identified compliance issues or areas of concern. For each issue, briefly explain why it's a concern in relation to the target regulations.

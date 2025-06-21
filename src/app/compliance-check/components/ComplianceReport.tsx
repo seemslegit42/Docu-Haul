@@ -12,25 +12,16 @@ interface ComplianceReportProps {
 }
 
 const StatusIconMap: Record<string, React.ReactNode> = {
-    compliant: <CheckCircle2 className="w-7 h-7 text-success mr-2" />,
-    "potential issues": <AlertTriangle className="w-7 h-7 text-warning mr-2" />,
-    "needs review": <AlertTriangle className="w-7 h-7 text-warning mr-2" />,
-    "non-compliant": <AlertTriangle className="w-7 h-7 text-destructive mr-2" />,
-    default: <ShieldCheck className="w-7 h-7 text-primary mr-2" />,
-    initial: <ShieldCheck className="w-7 h-7 text-muted-foreground mr-2" />,
+  "Compliant": <CheckCircle2 className="w-7 h-7 text-success mr-2" />,
+  "Potential Issues": <AlertTriangle className="w-7 h-7 text-warning mr-2" />,
+  "Non-Compliant": <AlertTriangle className="w-7 h-7 text-destructive mr-2" />,
 };
 
-const getStatusIcon = (status?: string) => {
+const getStatusIcon = (status?: string): React.ReactNode => {
     if (!status) {
-      return StatusIconMap.initial;
+      return <ShieldCheck className="w-7 h-7 text-muted-foreground mr-2" />; // Initial state
     }
-    const lowerStatus = status.toLowerCase();
-    for (const key in StatusIconMap) {
-      if (lowerStatus.includes(key)) {
-        return StatusIconMap[key];
-      }
-    }
-    return StatusIconMap.default;
+    return StatusIconMap[status] || <ShieldCheck className="w-7 h-7 text-primary mr-2" />; // Default/fallback
 };
 
 export default function ComplianceReport({ result, isLoading }: ComplianceReportProps) {
