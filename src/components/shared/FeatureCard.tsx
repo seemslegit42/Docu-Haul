@@ -20,7 +20,7 @@ export function FeatureCard({ icon, title, description, href, variant = 'default
         <Card className={cn("h-full transition-colors duration-300 group-hover:border-primary group-hover:bg-muted/30", className)}>
           <CardHeader className="flex flex-row items-center gap-4">
             {icon}
-            <CardTitle className="font-headline text-xl">{title}</CardTitle>
+            <CardTitle className="text-xl">{title}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground font-body mb-4 min-h-[40px]">{description}</p>
