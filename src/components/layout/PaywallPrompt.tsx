@@ -15,15 +15,15 @@ export function PaywallPrompt() {
             <div className="mx-auto bg-primary/10 p-3 rounded-full mb-4">
             <Lock className="w-8 h-8 text-primary" />
             </div>
-            <CardTitle className="text-2xl text-primary">Upgrade to Unlock Label Forge</CardTitle>
+            <CardTitle className="text-2xl text-primary">Premium Feature Locked</CardTitle>
             <CardDescription className="max-w-md mx-auto">
-            This is a premium feature. Please upgrade your plan to generate compliant VIN labels with AI-optimized content and layout.
+            AI-powered VIN label generation is a premium feature that requires a one-time purchase to unlock.
             </CardDescription>
         </CardHeader>
         <CardContent>
             <Button asChild size="lg">
                 <Link href={LEMON_SQUEEZY_CHECKOUT_URL} target="_blank">
-                    Upgrade to Pro <ArrowRight className="ml-2 h-4 w-4" />
+                    Purchase Access <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
             </Button>
             <p className="text-xs text-muted-foreground mt-3 max-w-sm mx-auto">

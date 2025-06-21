@@ -12,6 +12,7 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 import { type LabelForgeInput, LabelForgeSchema } from '@/lib/schemas';
 import { defaultSafetySettings } from '@/ai/safety-settings';
+import admin from '@/lib/firebase-admin';
 
 const CreateCompliantVinLabelOutputSchema = z.object({
   labelDataUri: z.string().describe('The data URI of the generated VIN label image.'),
@@ -63,8 +64,28 @@ Also, provide a 'placementRationale' explaining your choices for the content sel
   },
 });
 
-export async function createCompliantVinLabel(input: LabelForgeInput): Promise<CreateCompliantVinLabelOutput> {
-  return createCompliantVinLabelFlow(input);
+export async function createCompliantVinLabel(input: LabelForgeInput, authToken: string | undefined): Promise<CreateCompliantVinLabelOutput> {
+  // SERVER-SIDE AUTH CHECK: This is a critical security step.
+  if (!authToken) {
+    throw new Error('Authentication required. Access denied.');
+  }
+
+  try {
+    const decodedToken = await admin.auth().verifyIdToken(authToken);
+    const isPremium = decodedToken.premium === true;
+
+    if (!isPremium) {
+      throw new Error('This is a premium feature. Please upgrade your plan to generate VIN labels.');
+    }
+
+    // If authorized, proceed with the AI flow.
+    return await createCompliantVinLabelFlow(input);
+
+  } catch (error: any) {
+    console.error('Authorization check failed in createCompliantVinLabel:', error);
+    // Re-throw a generic error to avoid leaking implementation details to the client.
+    throw new Error('You are not authorized to perform this action. Please check your subscription status and try again.');
+  }
 }
 
 const createCompliantVinLabelFlow = ai.defineFlow(

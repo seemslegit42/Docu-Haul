@@ -19,7 +19,7 @@ export default function LabelForgePage() {
   const [generatedLabel, setGeneratedLabel] = useState<CreateCompliantVinLabelOutput | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const { toast } = useToast();
-  const { isPremium, isLoading: isAuthLoading } = useAuth();
+  const { user, isPremium, isLoading: isAuthLoading } = useAuth();
 
   const form = useForm<LabelForgeInput>({
     resolver: zodResolver(LabelForgeSchema),
@@ -35,7 +35,12 @@ export default function LabelForgePage() {
     setIsGenerating(true);
     setGeneratedLabel(null);
     try {
-      const result = await createCompliantVinLabel(data);
+      if (!user) {
+        throw new Error("You must be logged in to perform this action.");
+      }
+      // Get the Firebase auth token to send to the server for verification.
+      const authToken = await user.getIdToken();
+      const result = await createCompliantVinLabel(data, authToken);
       setGeneratedLabel(result);
       toast({
         title: "Label Generated Successfully",
