@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { SmartDocsSchema, type SmartDocsInput } from '@/lib/schemas';
@@ -20,6 +20,7 @@ export default function SmartDocsPage() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   const form = useForm<SmartDocsInput>({
     resolver: zodResolver(SmartDocsSchema),
@@ -137,6 +138,24 @@ export default function SmartDocsPage() {
     });
   };
 
+  const handleCheckCompliance = () => {
+    if (!generatedDoc || !editableDocText.trim()) return;
+
+    const docType = form.getValues('documentType');
+    const docContent = editableDocText.trim();
+    
+    // Map from internal enum to user-facing string for compliance form
+    const complianceDocType = docType === 'NVIS' ? 'NVIS Certificate' : 'Bill of Sale';
+
+    const query = new URLSearchParams({
+        documentType: complianceDocType,
+        documentContent: docContent,
+    }).toString();
+
+    router.push(`/compliance-check?${query}`);
+  };
+
+
   return (
     <AppLayout>
       <PageHeader 
@@ -152,6 +171,7 @@ export default function SmartDocsPage() {
           onTextChange={handleTextChange}
           onTxtDownload={handleTxtDownload}
           onPdfDownload={handlePdfDownload}
+          onCheckCompliance={handleCheckCompliance}
         />
       </div>
     </AppLayout>

@@ -1,7 +1,8 @@
 
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ComplianceCheckSchema, type ComplianceCheckInput } from '@/lib/schemas';
@@ -16,16 +17,30 @@ export default function ComplianceCheckPage() {
   const [result, setResult] = useState<CheckComplianceOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const searchParams = useSearchParams();
 
   const form = useForm<ComplianceCheckInput>({
     resolver: zodResolver(ComplianceCheckSchema),
     defaultValues: {
       documentType: '',
       documentContent: '',
-      targetRegulations: '',
-      countryOfOperation: '',
+      targetRegulations: 'FMVSS/CMVSS',
+      countryOfOperation: 'USA/Canada',
     },
   });
+
+  useEffect(() => {
+    const documentType = searchParams.get('documentType');
+    const documentContent = searchParams.get('documentContent');
+
+    if (documentType) {
+      form.setValue('documentType', documentType, { shouldValidate: true });
+    }
+    if (documentContent) {
+      form.setValue('documentContent', documentContent, { shouldValidate: true });
+    }
+  }, [searchParams, form]);
+
 
   const onSubmit = async (data: ComplianceCheckInput) => {
     setIsLoading(true);

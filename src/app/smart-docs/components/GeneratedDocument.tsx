@@ -5,7 +5,7 @@ import type { GenerateDocumentationOutput } from '@/ai/flows/generate-documentat
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Download } from 'lucide-react';
+import { Loader2, Download, ShieldCheck } from 'lucide-react';
 
 interface GeneratedDocumentProps {
   isLoading: boolean;
@@ -14,6 +14,7 @@ interface GeneratedDocumentProps {
   onTextChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   onTxtDownload: () => void;
   onPdfDownload: () => void;
+  onCheckCompliance: () => void;
 }
 
 export default function GeneratedDocument({
@@ -23,6 +24,7 @@ export default function GeneratedDocument({
   onTextChange,
   onTxtDownload,
   onPdfDownload,
+  onCheckCompliance
 }: GeneratedDocumentProps) {
   const canDownload = generatedDoc && editableDocText.trim() && !isLoading;
 
@@ -49,25 +51,35 @@ export default function GeneratedDocument({
         />
       </CardContent>
       {canDownload && (
-        <CardFooter className="flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">
+        <CardFooter className="flex flex-col sm:flex-row gap-2 pt-4">
             <Button 
-              variant="outline" 
-              className="w-full" 
-              onClick={onTxtDownload} 
-              disabled={!canDownload}
+                className="w-full sm:flex-grow" 
+                onClick={onCheckCompliance} 
+                disabled={!canDownload}
             >
-            <Download className="mr-2 h-4 w-4" />
-            Download .txt
-          </Button>
-          <Button 
-              variant="outline" 
-              className="w-full" 
-              onClick={onPdfDownload} 
-              disabled={!canDownload}
-            >
-            <Download className="mr-2 h-4 w-4" />
-            Download .pdf
-          </Button>
+                <ShieldCheck className="mr-2 h-4 w-4" />
+                Check Compliance
+            </Button>
+            <div className="flex w-full sm:w-auto gap-2">
+                <Button 
+                    variant="outline" 
+                    className="w-full" 
+                    onClick={onTxtDownload} 
+                    disabled={!canDownload}
+                >
+                    <Download className="mr-2 h-4 w-4" />
+                    .txt
+                </Button>
+                <Button 
+                    variant="outline" 
+                    className="w-full" 
+                    onClick={onPdfDownload} 
+                    disabled={!canDownload}
+                >
+                    <Download className="mr-2 h-4 w-4" />
+                    .pdf
+                </Button>
+            </div>
         </CardFooter>
       )}
     </Card>
