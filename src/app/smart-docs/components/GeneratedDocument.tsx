@@ -24,35 +24,29 @@ export default function GeneratedDocument({
   onTxtDownload,
   onPdfDownload,
 }: GeneratedDocumentProps) {
-  const canDownload = generatedDoc && editableDocText.trim();
+  const canDownload = generatedDoc && editableDocText.trim() && !isLoading;
 
   return (
-    <Card>
+    <Card className="flex flex-col">
       <CardHeader>
         <CardTitle>Generated Document</CardTitle>
         <CardDescription>Preview and edit the AI-generated document below. You can download it once generated.</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="flex-grow flex flex-col relative">
         {isLoading && (
-          <div className="flex flex-col justify-center items-center h-60">
+          <div className="absolute inset-0 flex flex-col justify-center items-center bg-card/80 backdrop-blur-sm z-10 rounded-b-xl">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
             <p className="font-body mt-2">Generating document...</p>
           </div>
         )}
-        {!isLoading && generatedDoc && (
-          <Textarea
-            value={editableDocText}
-            onChange={onTextChange}
-            rows={15}
-            className="font-mono text-sm w-full p-3 border rounded-md bg-muted/50 shadow-inner"
-            placeholder="Generated document will appear here..."
-          />
-        )}
-        {!isLoading && !generatedDoc && (
-            <div className="text-center text-muted-foreground font-body p-4 border border-dashed rounded-md h-60 flex items-center justify-center">
-            Your AI-generated document will appear here.
-          </div>
-        )}
+        <Textarea
+          value={editableDocText}
+          onChange={onTextChange}
+          rows={15}
+          className="font-mono text-sm w-full flex-grow p-3 border rounded-md bg-muted/50 shadow-inner"
+          placeholder="Your AI-generated document will appear here."
+          disabled={!generatedDoc || isLoading}
+        />
       </CardContent>
       {canDownload && (
         <CardFooter className="flex-col space-y-2 sm:flex-row sm:space-y-0 sm:space-x-2">

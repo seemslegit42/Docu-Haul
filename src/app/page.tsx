@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { FileText, Tags, ShieldCheck, Hash, ArrowRight } from 'lucide-react';
 import { AuthAwareButton } from '@/components/layout/AuthAwareButton';
+import { Card, CardContent } from '@/components/ui/card';
 
 export default function LandingPage() {
   return (
@@ -92,10 +93,12 @@ export default function LandingPage() {
 
 function FeatureCard({ icon, title, description }: { icon: React.ReactNode; title: string; description: string; }) {
   return (
-    <div className="flex flex-col items-center text-center p-6 rounded-xl bg-card border border-transparent transition-all duration-300 hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-2">
-      {icon}
-      <h3 className="font-headline text-xl font-bold mb-2">{title}</h3>
-      <p className="text-muted-foreground">{description}</p>
-    </div>
+    <Card className="text-center border-transparent transition-all duration-300 hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-2 flex flex-col">
+      <CardContent className="pt-6 flex flex-col items-center flex-grow">
+        {icon}
+        <h3 className="font-headline text-xl font-bold mt-4 mb-2">{title}</h3>
+        <p className="text-muted-foreground">{description}</p>
+      </CardContent>
+    </Card>
   );
 }

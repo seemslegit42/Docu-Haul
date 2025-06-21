@@ -98,7 +98,7 @@ export default function SmartDocsPage() {
     const vin = form.getValues('vin') || 'document';
     const filename = `${selectedDocType}_${vin}.txt`;
     
-    const blob = new Blob([editableDocText.trim()], { type: 'text/plain;charset=utf-f' });
+    const blob = new Blob([editableDocText.trim()], { type: 'text/plain;charset=utf-8' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = filename;
