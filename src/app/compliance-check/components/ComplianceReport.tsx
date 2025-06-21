@@ -55,8 +55,9 @@ export default function ComplianceReport({ result, isLoading }: ComplianceReport
           </>
         )}
         {!isLoading && !result && (
-          <div className="text-center text-muted-foreground font-body p-4 border border-dashed rounded-md h-60 flex items-center justify-center">
-            Your compliance report will appear here once you submit the form.
+          <div className="text-center text-muted-foreground font-body p-4 border border-dashed rounded-md h-60 flex flex-col items-center justify-center">
+            <ShieldCheck className="w-12 h-12 text-muted-foreground/50 mb-4" />
+            <p>Your compliance report will appear here once you submit the form.</p>
           </div>
         )}
       </CardContent>

@@ -10,7 +10,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ShieldCheck } from 'lucide-react';
 
 interface ComplianceCheckFormProps {
   form: UseFormReturn<ComplianceCheckInput>;
@@ -75,10 +75,10 @@ export default function ComplianceCheckForm({ form, onSubmit, isLoading }: Compl
                 <FormItem>
                   <FormLabel className="font-headline">Target Regulations/Standards</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter relevant regulations" {...field} className="font-body"/>
+                    <Input placeholder="Specify relevant regulations" {...field} className="font-body"/>
                   </FormControl>
                   <FormDescription className="font-body text-xs">
-                    Specify the regulations relevant to the document type.
+                    This helps the AI focus its compliance check.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -103,7 +103,7 @@ export default function ComplianceCheckForm({ form, onSubmit, isLoading }: Compl
           </CardContent>
           <CardFooter>
             <Button type="submit" disabled={isLoading} className="w-full">
-              {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ShieldCheck className="mr-2 h-4 w-4" />}
               Check Compliance
             </Button>
           </CardFooter>

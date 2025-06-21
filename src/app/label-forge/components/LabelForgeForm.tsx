@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Tags } from 'lucide-react';
 
 interface LabelForgeFormProps {
   form: UseFormReturn<LabelForgeInput>;
@@ -47,7 +47,7 @@ export default function LabelForgeForm({ form, onSubmit, isLoading }: LabelForge
                   <FormLabel className="font-headline">Trailer Specifications</FormLabel>
                   <FormControl>
                     <Textarea 
-                      placeholder="Enter all known vehicle and manufacturer specifications." 
+                      placeholder="Enter all known vehicle and manufacturer specifications" 
                       {...field} 
                       rows={4} 
                       className="font-body"
@@ -67,7 +67,7 @@ export default function LabelForgeForm({ form, onSubmit, isLoading }: LabelForge
                 <FormItem>
                   <FormLabel className="font-headline">Regulatory Standards (Optional)</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter applicable standards (optional)" {...field} className="font-body"/>
+                    <Input placeholder="Enter applicable standards" {...field} className="font-body"/>
                   </FormControl>
                     <FormDescription className="font-body text-xs">
                     If blank, a general compliance statement will be used.
@@ -83,10 +83,10 @@ export default function LabelForgeForm({ form, onSubmit, isLoading }: LabelForge
                 <FormItem>
                   <FormLabel className="font-headline">Target Label Dimensions</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter approximate physical dimensions" {...field} className="font-body"/>
+                    <Input placeholder="Approximate physical dimensions" {...field} className="font-body"/>
                   </FormControl>
                     <FormDescription className="font-body text-xs">
-                    Approximate dimensions for the AI to consider for layout.
+                    e.g., "4x2 inches", "100x50mm". Helps the AI with layout.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -95,7 +95,7 @@ export default function LabelForgeForm({ form, onSubmit, isLoading }: LabelForge
           </CardContent>
           <CardFooter>
             <Button type="submit" disabled={isLoading} className="w-full">
-              {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+              {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Tags className="mr-2 h-4 w-4" />}
               Forge Label
             </Button>
           </CardFooter>
