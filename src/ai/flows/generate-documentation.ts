@@ -2,57 +2,58 @@
 // src/ai/flows/generate-documentation.ts
 'use server';
 /**
- * @fileOverview A flow for generating vehicle documentation (NVIS or Bill of Sale) by first extracting structured data from user input, then formatting it into a document.
+ * @fileOverview A flow for generating vehicle documentation (NVIS or Bill of Sale).
+ * This flow uses a single, powerful AI prompt to both extract structured data from user input and format the final document text.
  *
- * - generateDocumentation - A function that generates the documentation.
+ * - generateDocumentation - The primary function to generate documentation.
  * - GenerateDocumentationOutput - The return type for the generateDocumentation function.
  */
 
-import {ai}from '@/ai/genkit';
+import {ai} from '@/ai/genkit';
 import {z}from 'genkit';
-import { DOCUMENT_TYPES } from '@/lib/constants';
 import { type SmartDocsInput, SmartDocsSchema } from '@/lib/schemas';
 import { defaultSafetySettings } from '@/ai/safety-settings';
 import admin from '@/lib/firebase-admin';
 
-// Structured schema for NVIS data
+// Structured schema for NVIS data with detailed descriptions to guide AI extraction.
 const NvisDataSchema = z.object({
-    manufacturerName: z.string().describe("Manufacturer's full legal name. Use placeholder '[Manufacturer Name]' if not provided in the source details."),
-    manufacturerAddress: z.string().describe("Manufacturer's full mailing address. Use placeholder '[Manufacturer Address]' if not provided."),
-    make: z.string().describe("Vehicle Make, typically the same as the manufacturer. Use placeholder '[Make]' if not provided."),
-    model: z.string().describe("Vehicle Model designation. Use placeholder '[Model]' if not provided."),
-    year: z.string().describe("Vehicle Model Year (YYYY). Use placeholder '[YYYY]' if not provided."),
-    bodyType: z.string().describe("Vehicle Body Type/Style (e.g., Flatbed, Gooseneck, Utility). Use placeholder '[Body Type]' if not provided."),
-    gvwr: z.string().describe("Gross Vehicle Weight Rating (e.g., '14000 LBS'). Use placeholder '[GVWR Value]' if not provided."),
-    gawr: z.string().describe("Gross Axle Weight Rating (specify for each axle if multiple, e.g., '7000 LBS per axle'). Use placeholder '[GAWR Value]' if not provided."),
-    numberOfAxles: z.string().describe("Total number of axles. Use placeholder '[Number of Axles]' if not provided."),
-    tireSize: z.string().describe("Tire size specification (e.g., 'ST235/80R16E'). Use placeholder '[Tire Size]' if not provided."),
-    rimSize: z.string().describe("Rim size specification (e.g., '16X6JJ'). Use placeholder '[Rim Size]' if not provided."),
-    dimensions: z.string().describe("Overall vehicle dimensions (Length, Width, Height). Use placeholder '[Overall Dimensions LWH]' if not provided."),
-    dateOfManufacture: z.string().describe("Date of manufacture in MM/YYYY format. Use placeholder '[MM/YYYY]' if not provided."),
+    manufacturerName: z.string().describe("Manufacturer's full legal name. Extract from details, or use placeholder '[Manufacturer Name]' if not provided."),
+    manufacturerAddress: z.string().describe("Manufacturer's full mailing address. Extract from details, or use placeholder '[Manufacturer Address]' if not provided."),
+    make: z.string().describe("Vehicle Make, typically the same as the manufacturer. Extract from details, or use placeholder '[Make]' if not provided."),
+    model: z.string().describe("Vehicle Model designation. Extract from details, or use placeholder '[Model]' if not provided."),
+    year: z.string().describe("Vehicle Model Year (YYYY). Extract from details, or use placeholder '[YYYY]' if not provided."),
+    bodyType: z.string().describe("Vehicle Body Type/Style (e.g., Flatbed, Gooseneck, Utility). Extract from details, or use placeholder '[Body Type]' if not provided."),
+    gvwr: z.string().describe("Gross Vehicle Weight Rating (e.g., '14000 LBS'). Extract from details, or use placeholder '[GVWR Value]' if not provided."),
+    gawr: z.string().describe("Gross Axle Weight Rating (specify for each axle if multiple, e.g., '7000 LBS per axle'). Extract from details, or use placeholder '[GAWR Value]' if not provided."),
+    numberOfAxles: z.string().describe("Total number of axles. Extract from details, or use placeholder '[Number of Axles]' if not provided."),
+    tireSize: z.string().describe("Tire size specification (e.g., 'ST235/80R16E'). Extract from details, or use placeholder '[Tire Size]' if not provided."),
+    rimSize: z.string().describe("Rim size specification (e.g., '16X6JJ'). Extract from details, or use placeholder '[Rim Size]' if not provided."),
+    dimensions: z.string().describe("Overall vehicle dimensions (Length, Width, Height). Extract from details, or use placeholder '[Overall Dimensions LWH]' if not provided."),
+    dateOfManufacture: z.string().describe("Date of manufacture in MM/YYYY format. Extract from details, or use placeholder '[MM/YYYY]' if not provided."),
 });
 
-// Structured schema for Bill of Sale data
+// Structured schema for Bill of Sale data with detailed descriptions.
 const BillOfSaleDataSchema = z.object({
-    sellerName: z.string().describe("Seller's full legal name. Use placeholder '[Seller Name]' if not provided."),
-    sellerAddress: z.string().describe("Seller's full mailing address. Use placeholder '[Seller Address]' if not provided."),
-    buyerName: z.string().describe("Buyer's full legal name. Use placeholder '[Buyer Name]' if not provided."),
-    buyerAddress: z.string().describe("Buyer's full mailing address. Use placeholder '[Buyer Address]' if not provided."),
-    saleDate: z.string().describe("Date of the transaction. Use placeholder '[Date of Sale]' if not provided."),
-    salePrice: z.string().describe("Full sale price including currency (e.g., '$10,000.00 USD'). Use placeholder '[Sale Price]' if not provided."),
-    make: z.string().describe("Vehicle Make. Use placeholder '[Make]' if not provided."),
-    model: z.string().describe("Vehicle Model. Use placeholder '[Model]' if not provided."),
-    year: z.string().describe("Vehicle Model Year (YYYY). Use placeholder '[YYYY]' if not provided."),
-    bodyType: z.string().describe("Vehicle Body Type/Style. Use placeholder '[Body Type]' if not provided."),
-    color: z.string().optional().describe("Primary vehicle color."),
+    sellerName: z.string().describe("Seller's full legal name. Extract from details, or use placeholder '[Seller Name]' if not provided."),
+    sellerAddress: z.string().describe("Seller's full mailing address. Extract from details, or use placeholder '[Seller Address]' if not provided."),
+    buyerName: z.string().describe("Buyer's full legal name. Extract from details, or use placeholder '[Buyer Name]' if not provided."),
+    buyerAddress: z.string().describe("Buyer's full mailing address. Extract from details, or use placeholder '[Buyer Address]' if not provided."),
+    saleDate: z.string().describe("Date of the transaction. Extract from details, or use placeholder '[Date of Sale]' if not provided."),
+    salePrice: z.string().describe("Full sale price including currency (e.g., '$10,000.00 USD'). Extract from details, or use placeholder '[Sale Price]' if not provided."),
+    make: z.string().describe("Vehicle Make. Extract from details, or use placeholder '[Make]' if not provided."),
+    model: z.string().describe("Vehicle Model. Extract from details, or use placeholder '[Model]' if not provided."),
+    year: z.string().describe("Vehicle Model Year (YYYY). Extract from details, or use placeholder '[YYYY]' if not provided."),
+    bodyType: z.string().describe("Vehicle Body Type/Style. Extract from details, or use placeholder '[Body Type]' if not provided."),
+    color: z.string().optional().describe("Primary vehicle color. Extract from details if available."),
 });
 
-// Union schema for the output of the data extraction prompt
+// Union schema for the extracted data part of the output
 const ExtractedDataSchema = z.union([NvisDataSchema, BillOfSaleDataSchema]);
 
+// The final output schema for the entire generation process
 const GenerateDocumentationOutputSchema = z.object({
-  structuredData: ExtractedDataSchema.describe('The structured data extracted from the user input.'),
-  documentText: z.string().describe('The final, formatted vehicle documentation text.'),
+  structuredData: ExtractedDataSchema.describe('The structured data extracted from the user input, with placeholders for missing information.'),
+  documentText: z.string().describe('The final, formatted vehicle documentation text, suitable for display or download.'),
 });
 export type GenerateDocumentationOutput = z.infer<typeof GenerateDocumentationOutputSchema>;
 
@@ -75,138 +76,61 @@ export async function generateDocumentation(input: SmartDocsInput, authToken: st
   }
 }
 
-// A single, more powerful prompt for extracting structured data.
-const extractDocumentDataPrompt = ai.definePrompt({
-    name: 'extractDocumentDataPrompt',
+// A single, powerful prompt that handles both data extraction and document formatting.
+const generateDocumentPrompt = ai.definePrompt({
+    name: 'generateDocumentPrompt',
     input: { schema: SmartDocsSchema },
-    // The output schema is dynamically chosen in the flow, so we don't specify it here.
-    prompt: `You are an AI assistant specializing in vehicle documentation. Your task is to extract structured information from the provided text based on the requested document type.
-Adopt the following tone: {{#if tone}}{{{tone}}}{{else}}professional and formal{{/if}}.
+    output: { schema: GenerateDocumentationOutputSchema },
+    prompt: `You are an AI assistant specializing in vehicle documentation. Your task is to act as a single, powerful agent that both extracts structured information from provided details AND formats it into a complete, professional document.
 
-Document Type Requested: {{{documentType}}}
-VIN: {{{vin}}}
-Provided Details:
+**User Inputs:**
+- Document Type Requested: {{{documentType}}}
+- VIN: {{{vin}}}
+- Document Tone: {{#if tone}}{{{tone}}}{{else}}professional and formal{{/if}}
+- Provided Details:
 """
 {{{trailerSpecs}}}
 """
 
-Carefully parse the 'Provided Details' to populate ALL fields of the required schema for the requested document type.
-It is crucial that you do not hallucinate or invent values.
-If a required piece of information is not available in the 'Provided Details', you MUST use a clear placeholder in square brackets for that field (e.g., "[Manufacturer Name]", "[Sale Price]", "[YYYY]").
-Do not omit any fields from the target schema.
-For optional fields in the schema (like 'color' in a Bill of Sale), you may omit them if not provided.
-`,
+**Your Task (Two parts, one response):**
+
+**Part 1: Extract Structured Data**
+- Based on the 'Document Type Requested', populate all fields of the corresponding 'structuredData' schema (NVIS or Bill of Sale).
+- It is crucial that you do not hallucinate or invent values.
+- If a required piece of information is not available in the 'Provided Details', you MUST use a clear placeholder in square brackets for that field (e.g., "[Manufacturer Name]", "[Sale Price]", "[YYYY]").
+- Do not omit any required fields from the target schema. For the VIN, use the one provided above.
+
+**Part 2: Generate Formatted Document Text**
+- Using the data you just extracted (including placeholders), generate the full text for the document in the 'documentText' field.
+- The text must be professionally formatted with clear headings, sections, and spacing, suitable for a legal or official document.
+- The tone of the document should match the requested 'Document Tone'.
+
+**Formatting Rules based on Document Type:**
+
+{{#if (eq documentType "NVIS")}}
+**NVIS Certificate Formatting:**
+- Title: NEW VEHICLE INFORMATION STATEMENT (NVIS)
+- Sections: MANUFACTURER, VEHICLE DETAILS, SPECIFICATIONS, CERTIFICATION, SIGNATURES.
+- Key fields to include: Manufacturer Name/Address, VIN, Make, Model, Year, Body Type, GVWR, GAWR, Axles, Tire/Rim Size, Date of Manufacture, Dimensions.
+- Include a standard certification statement about conforming to applicable U.S. and Canadian safety standards.
+- Include signature lines for Seller/Dealer and Purchaser.
+{{/if}}
+
+{{#if (eq documentType "BillOfSale")}}
+**Bill of Sale Formatting:**
+- Title: BILL OF SALE
+- Sections: SELLER INFORMATION, BUYER INFORMATION, VEHICLE/TRAILER INFORMATION, SALE INFORMATION, TERMS & CONDITIONS, SIGNATURES.
+- Key fields to include: Seller/Buyer Name/Address, VIN, Make, Model, Year, Body Type, Color (if available), Sale Date, Sale Price.
+- Include a standard 'as-is' condition clause.
+- Include an optional Odometer Reading field with a placeholder.
+- Include signature lines for Seller, Buyer, and a Witness.
+{{/if}}
+
+Respond ONLY with a single JSON object that perfectly matches the required output schema, containing both the 'structuredData' and the 'documentText'.`,
     config: {
       safetySettings: defaultSafetySettings,
     },
 });
-
-/**
- * Formats the structured NVIS data into a human-readable text document.
- * @param vin - The Vehicle Identification Number.
- * @param data - The structured NVIS data.
- * @returns A formatted string representing the NVIS document.
- */
-function formatNvisText(vin: string, data: z.infer<typeof NvisDataSchema>): string {
-    return `
-NEW VEHICLE INFORMATION STATEMENT (NVIS)
-=========================================
-
-MANUFACTURER
------------------------------------------
-Name: ${data.manufacturerName}
-Address: ${data.manufacturerAddress}
-
-VEHICLE DETAILS
------------------------------------------
-Vehicle Identification Number (VIN): ${vin}
-Make: ${data.make}
-Model: ${data.model}
-Year: ${data.year}
-Body Type/Style: ${data.bodyType}
-Date of Manufacture: ${data.dateOfManufacture}
-Overall Dimensions (L/W/H): ${data.dimensions}
-
-SPECIFICATIONS
------------------------------------------
-Gross Vehicle Weight Rating (GVWR): ${data.gvwr}
-Gross Axle Weight Rating (GAWR): ${data.gawr}
-Number of Axles: ${data.numberOfAxles}
-Tire Size: ${data.tireSize}
-Rim Size: ${data.rimSize}
-
-CERTIFICATION
------------------------------------------
-This vehicle conforms to all applicable U.S. Federal Motor Vehicle Safety Standards (FMVSS) and Canadian Motor Vehicle Safety Standards (CMVSS) in effect on the date of manufacture shown above.
-
-SIGNATURES
------------------------------------------
-
-Seller/Dealer Signature: _________________________
-Date: _________________________
-
-
-Purchaser Signature: _________________________
-Date: _________________________
-    `.trim();
-}
-
-/**
- * Formats the structured Bill of Sale data into a human-readable text document.
- * @param vin - The Vehicle Identification Number.
- * @param data - The structured Bill of Sale data.
- * @returns A formatted string representing the Bill of Sale document.
- */
-function formatBillOfSaleText(vin: string, data: z.infer<typeof BillOfSaleDataSchema>): string {
-    return `
-BILL OF SALE
-============
-
-SELLER INFORMATION
------------------------------------------
-Full Name: ${data.sellerName}
-Address: ${data.sellerAddress}
-
-BUYER INFORMATION
------------------------------------------
-Full Name: ${data.buyerName}
-Address: ${data.buyerAddress}
-
-VEHICLE/TRAILER INFORMATION
------------------------------------------
-Vehicle Identification Number (VIN): ${vin}
-Make: ${data.make}
-Model: ${data.model}
-Year: ${data.year}
-Body Type/Style: ${data.bodyType}
-${data.color ? `Color: ${data.color}` : ''}
-
-SALE INFORMATION
------------------------------------------
-Date of Sale: ${data.saleDate}
-Sale Price: ${data.salePrice}
-
-TERMS & CONDITIONS
------------------------------------------
-The vehicle is sold in 'as-is' condition, with no warranties expressed or implied.
-Odometer Reading (if applicable): [Odometer Reading]
-
-SIGNATURES
------------------------------------------
-
-Seller's Signature: _________________________
-Date: _________________________
-
-
-Buyer's Signature: _________________________
-Date: _________________________
-
-
-Witness Signature: _________________________
-Date: _________________________
-    `.trim();
-}
-
 
 const generateDocumentationFlow = ai.defineFlow(
   {
@@ -215,38 +139,17 @@ const generateDocumentationFlow = ai.defineFlow(
     outputSchema: GenerateDocumentationOutputSchema,
   },
   async (input) => {
-    // Step 1: Determine which schema to use for data extraction
-    const targetSchema = input.documentType === 'NVIS' ? NvisDataSchema : BillOfSaleDataSchema;
+    // Step 1: Call the single, powerful prompt to do both extraction and formatting.
+    const { output } = await generateDocumentPrompt(input);
 
-    // Step 2: Call the AI to extract structured data
-    const { output: structuredData } = await extractDocumentDataPrompt(input, {
-        output: { schema: targetSchema },
-    });
-
-    if (!structuredData) {
-        const errorMessage = `AI failed to extract structured data for ${input.documentType}. The output was empty. Please check your input and try again.`;
-        console.error(errorMessage, { input, receivedOutput: structuredData });
+    // Step 2: Validate the output
+    if (!output || !output.documentText?.trim() || !output.structuredData) {
+        const errorMessage = `AI failed to generate valid documentation for ${input.documentType}. The output was empty or incomplete. Please check your input and try again.`;
+        console.error(errorMessage, { input, receivedOutput: output });
         throw new Error(errorMessage);
     }
     
-    // Step 3: Format the structured data into a text document
-    let documentText: string;
-    if (input.documentType === 'NVIS') {
-        documentText = formatNvisText(input.vin, structuredData as z.infer<typeof NvisDataSchema>);
-    } else {
-        documentText = formatBillOfSaleText(input.vin, structuredData as z.infer<typeof BillOfSaleDataSchema>);
-    }
-
-    if (!documentText.trim()) {
-        const errorMessage = `Failed to format document from structured data for ${input.documentType}.`;
-        console.error(errorMessage, { input, structuredData });
-        throw new Error(errorMessage);
-    }
-
-    // Step 4: Return both the structured data and the formatted text
-    return {
-        structuredData,
-        documentText,
-    };
+    // Step 3: Return the combined result
+    return output;
   }
 );
