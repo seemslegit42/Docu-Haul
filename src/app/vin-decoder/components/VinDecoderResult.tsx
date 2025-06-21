@@ -1,4 +1,3 @@
-
 "use client";
 
 import type { DecodeVinOutput } from '@/ai/flows/decode-vin-flow';
@@ -98,7 +97,7 @@ export default function VinDecoderResult({ result, isLoading }: VinDecoderResult
       {result && !isLoading && (
         <CardFooter className="flex flex-col md:flex-row gap-2 pt-4">
             <Button asChild className="w-full">
-              <Link href={`/smart-docs?vin=${result.fullVin}&modelYear=${result.modelYear.value}&axles=${result.vehicleDescriptors.numberOfAxles}`}>
+              <Link href={`/smart-docs?vin=${result.fullVin}&modelYear=${result.modelYear.year}&axles=${result.vehicleDescriptors.numberOfAxles}`}>
                 <FilePlus2 className="mr-2 h-4 w-4" />
                 Generate NVIS / BoS
               </Link>
