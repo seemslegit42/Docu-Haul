@@ -96,7 +96,7 @@ export default function VinDecoderResult({ result, isLoading }: VinDecoderResult
         )}
       </CardContent>
       {result && !isLoading && (
-        <CardFooter className="flex flex-col sm:flex-row gap-2 pt-4">
+        <CardFooter className="flex flex-col md:flex-row gap-2 pt-4">
             <Button asChild className="w-full">
               <Link href={`/smart-docs?vin=${result.fullVin}&modelYear=${result.modelYear.value}&axles=${result.vehicleDescriptors.numberOfAxles}`}>
                 <FilePlus2 className="mr-2 h-4 w-4" />

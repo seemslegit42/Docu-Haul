@@ -49,15 +49,15 @@ export default function GeneratedDocument({
           value={editableDocText}
           onChange={onTextChange}
           rows={15}
-          className="font-mono text-sm w-full flex-grow p-3 border rounded-md bg-muted/50 shadow-inner"
+          className="font-mono w-full flex-grow p-3 border rounded-md bg-muted/50 shadow-inner"
           placeholder="Your AI-generated document will appear here."
           disabled={!generatedDoc || isLoading}
         />
       </CardContent>
       {canPerformActions && (
-        <CardFooter className="flex flex-col sm:flex-row gap-2 pt-4">
+        <CardFooter className="flex flex-col md:flex-row gap-2 pt-4">
             <Button 
-                className="w-full sm:flex-grow" 
+                className="w-full md:flex-grow" 
                 onClick={onCheckCompliance} 
                 disabled={!canPerformActions || isSaving}
             >
@@ -66,14 +66,14 @@ export default function GeneratedDocument({
             </Button>
             <Button 
                 variant="secondary" 
-                className="w-full sm:w-auto" 
+                className="w-full md:w-auto" 
                 onClick={onSave} 
                 disabled={!canPerformActions || isSaving}
             >
                 {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                 Save
             </Button>
-            <div className="flex w-full sm:w-auto gap-2">
+            <div className="flex w-full md:w-auto gap-2">
                 <Button 
                     variant="outline" 
                     className="w-full" 

@@ -36,7 +36,7 @@ export default function GeneratedLabel({ generatedData, template, labelRef, isLo
         )}
         {!isLoading && generatedData && (
           <>
-            <div className="border rounded-md p-4 bg-muted/30 flex justify-center items-center min-h-[250px]">
+            <div className="border rounded-md p-4 bg-muted/30 flex justify-center items-center min-h-[250px] overflow-x-auto">
               <VinLabel ref={labelRef} data={generatedData.labelData} template={template} />
             </div>
             <div>
@@ -54,9 +54,9 @@ export default function GeneratedLabel({ generatedData, template, labelRef, isLo
         )}
       </CardContent>
       {canPerformActions && (
-        <CardFooter className="flex flex-col sm:flex-row gap-2 pt-4">
+        <CardFooter className="flex flex-col md:flex-row gap-2 pt-4">
             <Button 
-                className="w-full sm:flex-grow" 
+                className="w-full md:flex-grow" 
                 onClick={onCheckCompliance} 
                 disabled={!canPerformActions || isSaving}
             >
@@ -65,7 +65,7 @@ export default function GeneratedLabel({ generatedData, template, labelRef, isLo
             </Button>
              <Button 
                 variant="secondary" 
-                className="w-full sm:w-auto" 
+                className="w-full md:w-auto" 
                 onClick={onSave} 
                 disabled={!canPerformActions || isSaving}
             >
@@ -74,7 +74,7 @@ export default function GeneratedLabel({ generatedData, template, labelRef, isLo
             </Button>
             <Button 
                 variant="outline" 
-                className="w-full sm:w-auto" 
+                className="w-full md:w-auto" 
                 onClick={onDownload} 
                 disabled={!canPerformActions || isSaving}
             >
