@@ -4,7 +4,7 @@
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { VariantProps, cva } from "class-variance-authority"
-import { PanelLeft } from "lucide-react"
+import { Menu } from "lucide-react"
 
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
@@ -71,21 +71,24 @@ const SidebarProvider = React.forwardRef<
     const isMobile = useIsMobile()
     const [openMobile, setOpenMobile] = React.useState(false)
 
-    const getInitialOpenState = () => {
-      if (typeof document === 'undefined') {
-        return defaultOpen; // For SSR or if document is not available
-      }
-      const cookieValue = document.cookie
-        .split('; ')
-        .find(row => row.startsWith(`${SIDEBAR_COOKIE_NAME}=`))
-        ?.split('=')[1];
-      if (cookieValue !== undefined) {
-        return cookieValue === 'true';
-      }
-      return defaultOpen;
-    };
+    // Initialize state with defaultOpen for both server and initial client render
+    // to prevent a hydration mismatch.
+    const [_open, _setOpen] = React.useState(defaultOpen)
 
-    const [_open, _setOpen] = React.useState(getInitialOpenState);
+    // After mounting on the client, check the cookie and update the state.
+    React.useEffect(() => {
+      if (typeof document !== 'undefined') {
+        const cookieValue = document.cookie
+          .split('; ')
+          .find(row => row.startsWith(`${SIDEBAR_COOKIE_NAME}=`))
+          ?.split('=')[1];
+        if (cookieValue !== undefined) {
+          _setOpen(cookieValue === 'true');
+        }
+      }
+    }, []);
+
+
     const open = openProp ?? _open;
 
     const setOpen = React.useCallback(
@@ -299,7 +302,7 @@ const SidebarTrigger = React.forwardRef<
       }}
       {...props}
     >
-      <PanelLeft />
+      <Menu />
       <span className="sr-only">Toggle Sidebar</span>
     </Button>
   )

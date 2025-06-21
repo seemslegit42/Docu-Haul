@@ -29,8 +29,12 @@ const navItems = [
 export function SidebarNav() {
   const pathname = usePathname();
   const router = useRouter();
-  const { open } = useSidebar();
+  const { open, isMobile } = useSidebar();
   const { user } = useAuth();
+
+  // On mobile, the sidebar is inside a sheet, so it's conceptually "open" when visible.
+  // On desktop, its state is determined by the `open` prop.
+  const isExpanded = isMobile || open;
 
   const handleSignOut = async () => {
     try {
@@ -48,7 +52,7 @@ export function SidebarNav() {
       <SidebarHeader className="flex items-center p-3 border-b border-sidebar-border">
         <Link href="/" className="flex items-center gap-2">
           <FileCheck2 className="w-7 h-7 text-primary" />
-          {open && <span className="font-headline text-xl font-bold text-primary tracking-tight">DocuHaul</span>}
+          {isExpanded && <span className="font-headline text-xl font-bold text-primary tracking-tight">DocuHaul</span>}
         </Link>
       </SidebarHeader>
       <SidebarMenu className="flex-1 p-2">
@@ -71,7 +75,7 @@ export function SidebarNav() {
                     >
                         <a>
                         <item.icon className="h-5 w-5" />
-                        <span className={cn(open ? "opacity-100" : "opacity-0 md:opacity-100", "transition-opacity duration-200 delay-100")}>{item.label}</span>
+                        <span className={cn(isExpanded ? "opacity-100" : "opacity-0 md:opacity-100", "transition-opacity duration-200 delay-100")}>{item.label}</span>
                         </a>
                     </SidebarMenuButton>
                     </Link>
@@ -88,7 +92,7 @@ export function SidebarNav() {
                className="w-full"
              >
                <LogOut className="h-5 w-5" />
-               <span className={cn(open ? "opacity-100" : "opacity-0 md:opacity-100", "transition-opacity duration-200 delay-100")}>Sign Out</span>
+               <span className={cn(isExpanded ? "opacity-100" : "opacity-0 md:opacity-100", "transition-opacity duration-200 delay-100")}>Sign Out</span>
              </SidebarMenuButton>
            </SidebarMenuItem>
         )}
