@@ -44,15 +44,30 @@ export function createAuthenticatedFlow<TInput, TOutput>(
       return await flow(input);
 
     } catch (error) {
-      // Log the full error for better debugging, not just the message.
       console.error('Authorization check failed:', error);
 
-      // Re-throw specific, intentional errors
-      if (error instanceof Error && error.message.includes('premium')) {
-          throw error;
+      // A list of strings that indicate a developer configuration error, not a user auth error.
+      const configErrorIndicators = [
+        'credential',
+        'GOOGLE_APPLICATION_CREDENTIALS',
+        'initialize',
+        'Could not load the default credentials'
+      ];
+
+      if (error instanceof Error) {
+        // If it's a known server configuration error, re-throw the original error.
+        // This provides a clear message to the developer in the server logs instead of a generic auth error.
+        if (configErrorIndicators.some(indicator => error.message.includes(indicator))) {
+            throw error;
+        }
+
+        // Re-throw specific, intentional user-facing errors (like premium checks).
+        if (error.message.includes('premium')) {
+            throw error;
+        }
       }
       
-      // For other errors, throw a generic one to avoid leaking implementation details.
+      // For all other runtime errors (e.g., invalid/expired token), throw a generic one to avoid leaking implementation details.
       throw new Error('You are not authorized to perform this action. Please sign in and try again.');
     }
   };
