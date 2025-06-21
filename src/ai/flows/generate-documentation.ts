@@ -1,7 +1,7 @@
 'use server';
 /**
- * @fileOverview A flow for generating vehicle documentation (NVIS or Bill of Sale).
- * This flow uses a single, powerful AI prompt to both extract structured data from user input and format the final document text.
+ * @fileOverview An agentic flow for generating vehicle documentation (NVIS or Bill of Sale).
+ * This flow uses an AI prompt with a tool to look up vehicle information by VIN, then generates the document.
  *
  * - generateDocumentation - The primary function to generate documentation.
  * - GenerateDocumentationOutput - The return type for the generateDocumentation function.
@@ -12,6 +12,40 @@ import {z}from 'genkit';
 import { type SmartDocsInput, SmartDocsSchema } from '@/lib/schemas';
 import { defaultSafetySettings } from '@/ai/safety-settings';
 import { createAuthenticatedFlow } from './utils/authWrapper';
+
+// Tool Definition: A mock tool to demonstrate agentic capabilities.
+// In a real application, this would call a database or an external API.
+const getVehicleInfoByVin = ai.defineTool(
+  {
+    name: 'getVehicleInfoByVin',
+    description: 'Returns detailed vehicle specifications for a given VIN. Use this tool to get the primary information for the vehicle.',
+    inputSchema: z.object({ vin: z.string().describe('The 17-character Vehicle Identification Number.') }),
+    outputSchema: z.object({
+      make: z.string().describe("The manufacturer's brand name."),
+      model: z.string().describe('The specific model of the vehicle.'),
+      year: z.string().describe('The model year of the vehicle.'),
+      bodyType: z.string().describe('The style of the vehicle body (e.g., "Flatbed Trailer").'),
+      gvwr: z.string().describe("The Gross Vehicle Weight Rating in pounds (e.g., '14000 LBS')."),
+      numberOfAxles: z.string().describe("The number of axles on the vehicle."),
+      tireSize: z.string().describe("The tire specification (e.g., 'ST235/80R16E')."),
+    }),
+  },
+  async ({ vin }) => {
+    console.log(`[Tool] Mocking VIN lookup for: ${vin}`);
+    // This is mock data. A real implementation would query a database.
+    // The data is intentionally generic to allow user overrides.
+    return {
+      make: 'NorthStar Trailers',
+      model: 'Gooseneck Pro',
+      year: '2024',
+      bodyType: 'Gooseneck Trailer',
+      gvwr: '15000 LBS',
+      numberOfAxles: '2',
+      tireSize: 'ST235/85R16G',
+    };
+  }
+);
+
 
 // Structured schema for NVIS data with detailed descriptions to guide AI extraction.
 const NvisDataSchema = z.object({
@@ -50,10 +84,17 @@ const ExtractedDataSchema = z.union([NvisDataSchema, BillOfSaleDataSchema]);
 
 // The final output schema for the entire generation process
 const GenerateDocumentationOutputSchema = z.object({
-  structuredData: ExtractedDataSchema.describe('The structured data extracted from the user input, with placeholders for missing information.'),
+  structuredData: ExtractedDataSchema.describe('The structured data extracted from the user input and tool output, with placeholders for missing information.'),
   documentText: z.string().describe('The final, formatted vehicle documentation text, suitable for display or download.'),
 });
 export type GenerateDocumentationOutput = z.infer<typeof GenerateDocumentationOutputSchema>;
+
+// Create a schema for the prompt's input, extending the base schema with boolean flags.
+// This makes the prompt logic simpler and more robust.
+const GenerateDocumentPromptSchema = SmartDocsSchema.extend({
+    isNVIS: z.boolean(),
+    isBillOfSale: z.boolean(),
+});
 
 const generateDocumentationFlow = ai.defineFlow(
   {
@@ -62,8 +103,16 @@ const generateDocumentationFlow = ai.defineFlow(
     outputSchema: GenerateDocumentationOutputSchema,
   },
   async (input) => {
+    // Prepare the input for the prompt, adding boolean flags for the document type
+    // to avoid using non-standard Handlebars helpers.
+    const promptInput = {
+        ...input,
+        isNVIS: input.documentType === 'NVIS',
+        isBillOfSale: input.documentType === 'BillOfSale',
+    };
+
     // Step 1: Call the single, powerful prompt to do both extraction and formatting.
-    const { output } = await generateDocumentPrompt(input);
+    const { output } = await generateDocumentPrompt(promptInput);
 
     // Step 2: Validate the output
     if (!output || !output.documentText?.trim() || !output.structuredData) {
@@ -83,9 +132,17 @@ export const generateDocumentation = createAuthenticatedFlow(generateDocumentati
 // A single, powerful prompt that handles both data extraction and document formatting.
 const generateDocumentPrompt = ai.definePrompt({
     name: 'generateDocumentPrompt',
-    input: { schema: SmartDocsSchema },
+    input: { schema: GenerateDocumentPromptSchema },
     output: { schema: GenerateDocumentationOutputSchema },
-    prompt: `You are an AI assistant specializing in vehicle documentation. Your task is to act as a single, powerful agent that both extracts structured information from provided details AND formats it into a complete, professional document.
+    tools: [getVehicleInfoByVin],
+    prompt: `You are an AI agent specializing in vehicle documentation. Your primary goal is to generate a complete and accurate document (either NVIS or Bill of Sale) for the user.
+
+**Your Agentic Process:**
+
+1.  **Use Your Tools**: First, use the 'getVehicleInfoByVin' tool to retrieve the base specifications for the provided VIN: '{{{vin}}}'. This is your primary source of vehicle data.
+2.  **Incorporate User Details**: Analyze the user's 'Provided Details' below. This text contains supplemental information that might not be in the tool's output (e.g., buyer/seller names, addresses, sale price, specific dimensions, etc.). It can also contain overrides for the data you retrieved from the tool. User-provided details take precedence.
+3.  **Synthesize and Extract**: Combine the information from the tool and the user's details. Populate ALL fields of the required structuredData schema (NVIS or Bill of Sale). If information is missing from both the tool and the user's input, you MUST use a clear placeholder in square brackets (e.g., "[Manufacturer Address]", "[Sale Price]"). Do not omit any required fields.
+4.  **Generate Final Document**: Using the complete, synthesized data from step 3, generate the final, professionally formatted text for the document in the 'documentText' field. The tone must match the requested 'Document Tone'.
 
 **User Inputs:**
 - Document Type Requested: {{{documentType}}}
@@ -96,22 +153,9 @@ const generateDocumentPrompt = ai.definePrompt({
 {{{trailerSpecs}}}
 """
 
-**Your Task (Two parts, one response):**
-
-**Part 1: Extract Structured Data**
-- Based on the 'Document Type Requested', populate all fields of the corresponding 'structuredData' schema (NVIS or Bill of Sale).
-- It is crucial that you do not hallucinate or invent values.
-- If a required piece of information is not available in the 'Provided Details', you MUST use a clear placeholder in square brackets for that field (e.g., "[Manufacturer Name]", "[Sale Price]", "[YYYY]").
-- Do not omit any required fields from the target schema. For the VIN, use the one provided above.
-
-**Part 2: Generate Formatted Document Text**
-- Using the data you just extracted (including placeholders), generate the full text for the document in the 'documentText' field.
-- The text must be professionally formatted with clear headings, sections, and spacing, suitable for a legal or official document.
-- The tone of the document should match the requested 'Document Tone'.
-
 **Formatting Rules based on Document Type:**
 
-{{#if (eq documentType "NVIS")}}
+{{#if isNVIS}}
 **NVIS Certificate Formatting:**
 - Title: NEW VEHICLE INFORMATION STATEMENT (NVIS)
 - Sections: MANUFACTURER, VEHICLE DETAILS, SPECIFICATIONS, CERTIFICATION, SIGNATURES.
@@ -120,7 +164,7 @@ const generateDocumentPrompt = ai.definePrompt({
 - Include signature lines for Seller/Dealer and Purchaser.
 {{/if}}
 
-{{#if (eq documentType "BillOfSale")}}
+{{#if isBillOfSale}}
 **Bill of Sale Formatting:**
 - Title: BILL OF SALE
 - Sections: SELLER INFORMATION, BUYER INFORMATION, VEHICLE/TRAILER INFORMATION, SALE INFORMATION, TERMS & CONDITIONS, SIGNATURES.

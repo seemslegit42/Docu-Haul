@@ -59,7 +59,7 @@ export default function SmartDocsForm({ form, onSubmit, isLoading }: SmartDocsFo
                 <FormItem>
                   <FormLabel className="font-headline">Vehicle Identification Number (VIN)</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter 17-character VIN" {...field} className="font-body"/>
+                    <Input placeholder="Enter 17-character VIN" {...field} className="font-body text-sm"/>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -71,20 +71,18 @@ export default function SmartDocsForm({ form, onSubmit, isLoading }: SmartDocsFo
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="font-headline">
-                    {watchedDocumentType === DOCUMENT_TYPES.BILL_OF_SALE ? 'Transaction & Vehicle Details' : 'Trailer Specifications'}
+                    {watchedDocumentType === DOCUMENT_TYPES.BILL_OF_SALE ? 'Supplemental Details' : 'Supplemental Specifications'}
                   </FormLabel>
                   <FormControl>
                     <Textarea 
-                      placeholder="Enter all required specifications for the selected document."
+                      placeholder="Enter any details to supplement or override the standard vehicle info."
                       {...field} 
                       rows={5} 
-                      className="font-body"
+                      className="font-body text-sm"
                     />
                   </FormControl>
                     <FormDescription className="font-body text-xs">
-                    {watchedDocumentType === DOCUMENT_TYPES.BILL_OF_SALE
-                          ? "Include seller/buyer names & addresses, sale price, date, and key vehicle info." 
-                          : "Include manufacturer, model, GVWR, GAWRs, tire/rim specs, manufacture date, etc."}
+                      The AI agent will look up base vehicle data using the VIN. Use this field for specifics like buyer/seller info, sale price, or to override auto-populated data.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
