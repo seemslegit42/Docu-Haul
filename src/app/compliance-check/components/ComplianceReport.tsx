@@ -3,8 +3,8 @@
 
 import type { CheckComplianceOutput } from '@/ai/flows/check-compliance-flow';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Loader2, ShieldCheck, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Loader2, ShieldCheck, AlertTriangle, CheckCircle2, ShieldAlert } from 'lucide-react';
 
 interface ComplianceReportProps {
   result: CheckComplianceOutput | null;
@@ -42,22 +42,47 @@ export default function ComplianceReport({ result, isLoading }: ComplianceReport
           </div>
         )}
         {!isLoading && result && (
-          <>
+          <div className="space-y-4">
             <div>
-              <h4 className="font-headline text-lg text-primary">Overall Status:</h4>
+              <h4 className="font-headline text-lg text-primary">Overall Status</h4>
               <p className="font-body text-md font-semibold p-2 bg-muted/30 rounded-md border">
                 {result.complianceStatus}
               </p>
             </div>
             <div>
-              <h4 className="font-headline text-lg text-primary mt-4">Detailed Findings:</h4>
-              <ScrollArea className="h-96 w-full rounded-md border p-3 bg-muted/30">
-                <pre className="font-mono text-sm text-muted-foreground whitespace-pre-wrap">
-                  {result.complianceReport}
-                </pre>
-              </ScrollArea>
+              <h4 className="font-headline text-lg text-primary">Summary</h4>
+              <p className="font-body text-sm bg-muted/30 p-3 rounded-md border whitespace-pre-wrap">
+                {result.summary}
+              </p>
             </div>
-          </>
+            <div>
+              <h4 className="font-headline text-lg text-primary">Detailed Findings</h4>
+              {result.findings && result.findings.length > 0 ? (
+                <Accordion type="single" collapsible className="w-full">
+                  {result.findings.map((finding, index) => (
+                    <AccordionItem value={`item-${index}`} key={index}>
+                      <AccordionTrigger className="text-left hover:no-underline">
+                        <div className="flex items-start gap-3">
+                          {finding.isCritical && <ShieldAlert className="w-6 h-6 text-destructive shrink-0 mt-1" />}
+                          <span className="font-semibold">{finding.issue}</span>
+                        </div>
+                      </AccordionTrigger>
+                      <AccordionContent className="text-muted-foreground pl-9">
+                          <p className="font-bold text-foreground mb-2">Recommendation:</p>
+                          <p>{finding.recommendation}</p>
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              ) : (
+                <div className="text-center text-success font-body p-4 border border-dashed border-success/50 rounded-md h-40 flex flex-col items-center justify-center bg-success/10 mt-2">
+                    <CheckCircle2 className="w-12 h-12 text-success mb-4" />
+                    <p className="font-semibold">No compliance issues found!</p>
+                    <p className="text-sm text-muted-foreground">The document appears to be compliant based on the provided regulations.</p>
+                </div>
+              )}
+            </div>
+          </div>
         )}
         {!isLoading && !result && (
           <div className="text-center text-muted-foreground font-body p-4 border border-dashed rounded-md h-60 flex flex-col items-center justify-center">

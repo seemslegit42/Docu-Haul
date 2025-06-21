@@ -12,9 +12,16 @@ import {z} from 'genkit';
 import { type ComplianceCheckInput, ComplianceCheckSchema } from '@/lib/schemas';
 import { defaultSafetySettings } from '@/ai/safety-settings';
 
+const ComplianceFindingSchema = z.object({
+  issue: z.string().describe("A concise description of a single compliance issue or potential concern found in the document."),
+  recommendation: z.string().describe("A clear, actionable recommendation to fix the identified issue and achieve compliance."),
+  isCritical: z.boolean().describe("A boolean flag indicating if the issue is a critical compliance failure."),
+});
+
 const CheckComplianceOutputSchema = z.object({
   complianceStatus: z.string().describe('The compliance status, which must be one of the following exact strings: "Compliant", "Potential Issues", or "Non-Compliant".'),
-  complianceReport: z.string().describe('A detailed report outlining the compliance findings, issues, and recommendations.'),
+  summary: z.string().describe('A high-level summary of the overall compliance assessment.'),
+  findings: z.array(ComplianceFindingSchema).describe('A list of specific compliance findings. If the document is fully compliant, this array should be empty.'),
 });
 export type CheckComplianceOutput = z.infer<typeof CheckComplianceOutputSchema>;
 
@@ -27,7 +34,7 @@ const prompt = ai.definePrompt({
   input: {schema: ComplianceCheckSchema},
   output: {schema: CheckComplianceOutputSchema},
   prompt: `You are an AI compliance expert specializing in transportation and vehicle regulations.
-Your task is to analyze the provided document content against the specified regulations for the given country of operation.
+Your task is to analyze the provided document content against the specified regulations for the given country of operation and return a structured compliance report in JSON format.
 
 Document Type: {{{documentType}}}
 Country of Operation: {{{countryOfOperation}}}
@@ -38,16 +45,14 @@ Document Content to Analyze:
 {{{documentContent}}}
 \`\`\`
 
-Please perform a thorough compliance check and provide:
-1.  A 'complianceStatus' that is strictly one of: "Compliant", "Potential Issues", or "Non-Compliant".
-2.  A detailed 'complianceReport' that includes:
-    - An overall assessment summary.
-    - A list of any identified compliance issues or areas of concern. For each issue, briefly explain why it's a concern in relation to the target regulations.
-    - Specific recommendations for addressing any identified issues to achieve compliance.
-    - If compliant, confirm and highlight key compliant aspects.
-
-Structure your report clearly. Be precise and refer to general regulatory principles if specific clauses are not known, but emphasize the {{{targetRegulations}}}.
-If the document content is insufficient for a full check, state that in the report.
+Please perform a thorough compliance check and respond ONLY with a JSON object matching the output schema.
+1.  Set the 'complianceStatus' to "Compliant", "Potential Issues", or "Non-Compliant".
+2.  Write a high-level 'summary' of your findings.
+3.  Populate the 'findings' array with specific issues. For each finding:
+    - Clearly state the 'issue'.
+    - Provide an actionable 'recommendation' to fix it.
+    - Set 'isCritical' to true if it represents a major compliance failure, or false for minor issues or suggestions.
+4.  If the document is fully compliant, the 'findings' array MUST be empty. Do not add "No issues found" as a finding.
 `,
   config: {
     safetySettings: defaultSafetySettings,
@@ -63,8 +68,8 @@ const checkComplianceFlow = ai.defineFlow(
   async input => {
     const {output} = await prompt(input);
     
-    // Check for null/undefined output or empty/whitespace-only report fields
-    if (!output || !output.complianceStatus?.trim() || !output.complianceReport?.trim()) {
+    // Check for null/undefined output or empty summary. The `findings` array can be empty.
+    if (!output || !output.complianceStatus?.trim() || !output.summary?.trim()) {
       const errorMessage = 'AI failed to generate a valid compliance report. The output was empty or incomplete. Please check your input and try again.';
       console.error(errorMessage, { input, receivedOutput: output });
       throw new Error(errorMessage);
