@@ -49,7 +49,7 @@ export function SidebarNav() {
       <SidebarHeader className="flex items-center justify-between p-3 border-b border-sidebar-border">
         <Link href="/" className="flex items-center gap-2">
           <FileCheck2 className="w-7 h-7 text-primary" />
-          {open && <span className="font-headline text-xl font-bold text-primary tracking-tight">VINscribe</span>}
+          {open && <span className="font-headline text-xl font-bold text-primary tracking-tight">DocuHaul</span>}
         </Link>
         <SidebarTrigger className="md:hidden" />
       </SidebarHeader>
@@ -107,7 +107,7 @@ export function SidebarNav() {
           </TooltipProvider>
         {open && (
           <p className="text-xs text-sidebar-foreground/70 font-body text-center">
-            © {new Date().getFullYear()} VINscribe
+            © {new Date().getFullYear()} DocuHaul
           </p>
         )}
       </SidebarFooter>

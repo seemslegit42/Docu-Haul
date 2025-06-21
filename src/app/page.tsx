@@ -35,7 +35,7 @@ export default function LandingPage() {
               Reimagine Vehicle Documentation
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
-              VINscribe leverages Generative AI to automate the creation, validation, and management of essential vehicle documents. Save time, ensure compliance, and streamline your workflow.
+              DocuHaul leverages Generative AI to automate the creation, validation, and management of essential vehicle documents. Save time, ensure compliance, and streamline your workflow.
             </p>
             <div className="mt-8 flex justify-center gap-4">
               <AuthAwareButton text="Get Started Now" buttonProps={{ size: "lg" }} />
@@ -82,9 +82,9 @@ export default function LandingPage() {
       <footer className="border-t border-border/40">
         <div className="container flex flex-col items-center justify-between gap-4 py-8 md:flex-row">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} VINscribe. All rights reserved.
+            © {new Date().getFullYear()} DocuHaul. All rights reserved.
           </p>
-          <div className="font-headline text-lg font-bold text-primary">VINscribe</div>
+          <div className="font-headline text-lg font-bold text-primary">DocuHaul</div>
         </div>
       </footer>
     </div>

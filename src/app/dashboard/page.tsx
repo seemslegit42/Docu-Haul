@@ -9,7 +9,7 @@ export default function DashboardPage() {
   return (
     <AppLayout>
       <PageHeader 
-        title="Welcome to VINscribe" 
+        title="Welcome to DocuHaul" 
         description="AI-powered creation of VIN labels, NVIS certificates, and Bills of Sale for trailer and vehicle manufacturers."
       />
       <div className="space-y-8">
@@ -17,7 +17,7 @@ export default function DashboardPage() {
           <CardHeader>
             <CardTitle className="font-headline text-2xl">Focus on Essential Documents</CardTitle>
             <CardDescription className="font-body">
-              VINscribe simplifies your document workflow by automating the generation and validation of critical vehicle documents.
+              DocuHaul simplifies your document workflow by automating the generation and validation of critical vehicle documents.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -55,7 +55,7 @@ export default function DashboardPage() {
         
         <Card>
           <CardHeader>
-            <CardTitle className="font-headline text-2xl">How VINscribe Works</CardTitle>
+            <CardTitle className="font-headline text-2xl">How DocuHaul Works</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 font-body">
             <p><strong>1. Input Data:</strong> Provide essential vehicle and transaction specifications.</p>
