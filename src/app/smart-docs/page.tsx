@@ -33,31 +33,35 @@ export default function SmartDocsPage() {
 
   useEffect(() => {
     const vin = searchParams.get('vin');
+    if (!vin) return;
+
     const modelYear = searchParams.get('modelYear');
     const axles = searchParams.get('axles');
 
-    if (vin) {
-      form.setValue('vin', vin, { shouldValidate: true });
-      
-      const prefillHeader = '--- Pre-filled from VIN Decoder ---';
-      const existingSpecs = form.getValues('trailerSpecs');
+    form.setValue('vin', vin, { shouldValidate: true });
+    
+    const prefillHeader = '--- Pre-filled from VIN Decoder ---';
+    const existingSpecs = form.getValues('trailerSpecs');
 
+    const specsArray = [];
+    if (modelYear) specsArray.push(`Year: ${modelYear}`);
+    if (axles) specsArray.push(`Number of Axles: ${axles}`);
+    
+    if (specsArray.length > 0) {
+      const newSpecsContent = specsArray.join('\n');
+      const newPrefillBlock = `${prefillHeader}\n${newSpecsContent}`;
+
+      let finalSpecs;
       if (existingSpecs.includes(prefillHeader)) {
-          return; // Already pre-filled
+        // Replace existing pre-filled block
+        finalSpecs = existingSpecs.replace(/--- Pre-filled from VIN Decoder ---\n(.*\n)*/, `${newPrefillBlock}\n\n`);
+      } else {
+        // Add new pre-filled block
+        finalSpecs = existingSpecs 
+            ? `${newPrefillBlock}\n\n${existingSpecs}`
+            : newPrefillBlock;
       }
-      
-      const specsArray = [];
-      if (modelYear) specsArray.push(`Year: ${modelYear}`);
-      if (axles) specsArray.push(`Number of Axles: ${axles}`);
-      
-      if (specsArray.length > 0) {
-          const newSpecs = specsArray.join('\n');
-          const finalSpecs = existingSpecs 
-              ? `${prefillHeader}\n${newSpecs}\n\n${existingSpecs}`
-              : `${prefillHeader}\n${newSpecs}`;
-          
-          form.setValue('trailerSpecs', finalSpecs, { shouldValidate: true });
-      }
+      form.setValue('trailerSpecs', finalSpecs.trim(), { shouldValidate: true });
     }
   }, [searchParams, form]);
 

@@ -51,6 +51,74 @@ const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
     </svg>
 );
 
+function AuthForm({ form, onSubmit, isLoading, isOtherLoading, buttonText, onPasswordReset }: { 
+    form: ReturnType<typeof useForm<LoginFormValues>>;
+    onSubmit: (data: LoginFormValues) => void;
+    isLoading: boolean;
+    isOtherLoading: boolean;
+    buttonText: string;
+    onPasswordReset: () => void;
+}) {
+    const anyLoading = isLoading || isOtherLoading;
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle>{buttonText}</CardTitle>
+                <CardDescription>Enter your credentials to continue to DocuHaul.</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                        <FormField
+                            control={form.control}
+                            name="email"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Email</FormLabel>
+                                    <FormControl>
+                                        <Input type="email" placeholder="you@example.com" {...field} disabled={anyLoading} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={form.control}
+                            name="password"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <div className="flex items-center justify-between">
+                                      <FormLabel>Password</FormLabel>
+                                      {buttonText === 'Login' && (
+                                        <Button
+                                          type="button"
+                                          variant="link"
+                                          className="p-0 h-auto text-sm font-normal"
+                                          onClick={onPasswordReset}
+                                          disabled={anyLoading || !form.getValues('email')}
+                                        >
+                                          Forgot Password?
+                                        </Button>
+                                      )}
+                                    </div>
+                                    <FormControl>
+                                        <Input type="password" placeholder="••••••••" {...field} disabled={anyLoading} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <Button type="submit" disabled={anyLoading} className="w-full">
+                            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            {buttonText}
+                        </Button>
+                    </form>
+                </Form>
+            </CardContent>
+        </Card>
+    );
+}
 
 export default function LoginPage() {
   const router = useRouter();
@@ -160,10 +228,24 @@ export default function LoginPage() {
                     <TabsTrigger value="signup" disabled={anyLoading}>Sign Up</TabsTrigger>
                 </TabsList>
                 <TabsContent value="login">
-                    <AuthForm form={form} onSubmit={onSubmit} isLoading={isLoading} isOtherLoading={isGoogleLoading} buttonText="Login" />
+                    <AuthForm 
+                      form={form} 
+                      onSubmit={onSubmit} 
+                      isLoading={isLoading} 
+                      isOtherLoading={isGoogleLoading} 
+                      buttonText="Login"
+                      onPasswordReset={handlePasswordReset}
+                    />
                 </TabsContent>
                 <TabsContent value="signup">
-                    <AuthForm form={form} onSubmit={onSubmit} isLoading={isLoading} isOtherLoading={isGoogleLoading} buttonText="Sign Up" />
+                    <AuthForm 
+                      form={form} 
+                      onSubmit={onSubmit} 
+                      isLoading={isLoading} 
+                      isOtherLoading={isGoogleLoading} 
+                      buttonText="Sign Up"
+                      onPasswordReset={handlePasswordReset}
+                    />
                 </TabsContent>
             </Tabs>
 
@@ -189,70 +271,4 @@ export default function LoginPage() {
         </div>
     </div>
   );
-}
-
-function AuthForm({ form, onSubmit, isLoading, isOtherLoading, buttonText }: { form: any, onSubmit: (data: LoginFormValues) => void, isLoading: boolean, isOtherLoading: boolean, buttonText: string }) {
-    const { handlePasswordReset } = useRouter() ? (useRouter() as any) : { handlePasswordReset: () => {} };
-    // This is a bit of a hack because AuthForm is defined inside LoginPage and can access its functions.
-    // In a larger app, you'd pass handlePasswordReset as a prop.
-    const pageScope = (form.control.register as any)._formRef.current.formContext.handlePasswordReset;
-
-    const anyLoading = isLoading || isOtherLoading;
-    return (
-        <Card>
-            <CardHeader>
-                <CardTitle>{buttonText}</CardTitle>
-                <CardDescription>Enter your credentials to continue to DocuHaul.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                        <FormField
-                            control={form.control}
-                            name="email"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Email</FormLabel>
-                                    <FormControl>
-                                        <Input type="email" placeholder="you@example.com" {...field} disabled={anyLoading} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="password"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <div className="flex items-center justify-between">
-                                      <FormLabel>Password</FormLabel>
-                                      {buttonText === 'Login' && (
-                                        <Button
-                                          type="button"
-                                          variant="link"
-                                          className="p-0 h-auto text-sm font-normal"
-                                          onClick={pageScope}
-                                          disabled={anyLoading}
-                                        >
-                                          Forgot Password?
-                                        </Button>
-                                      )}
-                                    </div>
-                                    <FormControl>
-                                        <Input type="password" placeholder="••••••••" {...field} disabled={anyLoading} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <Button type="submit" disabled={anyLoading} className="w-full">
-                            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            {buttonText}
-                        </Button>
-                    </form>
-                </Form>
-            </CardContent>
-        </Card>
-    );
 }
