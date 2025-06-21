@@ -30,11 +30,6 @@ export function createAuthenticatedFlow<TInput, TOutput>(
       throw new Error('Authentication required. Access denied.');
     }
 
-    if (!admin.apps.length) {
-      console.error("Firebase Admin SDK is not initialized. Cannot perform authenticated check.");
-      throw new Error("Server authentication is not configured. Please contact support.");
-    }
-
     try {
       const decodedToken = await admin.auth().verifyIdToken(authToken);
 
