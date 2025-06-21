@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview A higher-order function to wrap Genkit flows with authentication and authorization checks.
@@ -44,31 +45,23 @@ export function createAuthenticatedFlow<TInput, TOutput>(
       return await flow(input);
 
     } catch (error) {
-      console.error('Authorization check failed:', error);
-
-      // A list of strings that indicate a developer configuration error, not a user auth error.
-      const configErrorIndicators = [
-        'credential',
-        'GOOGLE_APPLICATION_CREDENTIALS',
-        'initialize',
-        'Could not load the default credentials'
-      ];
-
-      if (error instanceof Error) {
-        // If it's a known server configuration error, re-throw the original error.
-        // This provides a clear message to the developer in the server logs instead of a generic auth error.
-        if (configErrorIndicators.some(indicator => error.message.includes(indicator))) {
-            throw error;
-        }
-
-        // Re-throw specific, intentional user-facing errors (like premium checks).
-        if (error.message.includes('premium')) {
-            throw error;
-        }
-      }
+      // The error could be from `verifyIdToken`, the premium check, or the `flow` itself.
+      // We only want to mask errors that are genuinely related to authentication tokens.
       
-      // For all other runtime errors (e.g., invalid/expired token), throw a generic one to avoid leaking implementation details.
-      throw new Error('You are not authorized to perform this action. Please sign in and try again.');
+      // Firebase Admin SDK auth errors have a `code` property starting with "auth/".
+      // Any other error should be considered an application-level error and be re-thrown as-is.
+      const isFirebaseAuthError = typeof error === 'object' && error !== null && 'code' in error && typeof (error as any).code === 'string' && (error as any).code.startsWith('auth/');
+      
+      if (isFirebaseAuthError) {
+          console.error('Authentication token verification failed:', error);
+          throw new Error('You are not authorized to perform this action. Please sign in and try again.');
+      }
+
+      // If it's not a Firebase Auth error, it's an application error from the premium check or the flow itself.
+      // We should let it pass through so the client can handle it specifically.
+      // e.g., 'Invalid VIN...', 'Premium feature...', or a config error.
+      console.error('An application or configuration error occurred within an authenticated flow:', error);
+      throw error;
     }
   };
 }
