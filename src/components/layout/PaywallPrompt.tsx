@@ -1,7 +1,11 @@
 
+import Link from 'next/link';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Lock } from "lucide-react";
+import { Lock, ArrowRight } from "lucide-react";
+
+// TODO: Replace this with your actual Lemon Squeezy checkout link
+const LEMON_SQUEEZY_CHECKOUT_URL = "https://your-store.lemonsqueezy.com/checkout/buy/your-variant-id";
 
 export function PaywallPrompt() {
   return (
@@ -17,11 +21,13 @@ export function PaywallPrompt() {
             </CardDescription>
         </CardHeader>
         <CardContent>
-            <Button size="lg" disabled>
-                Upgrade to Pro (Coming Soon)
+            <Button asChild size="lg">
+                <Link href={LEMON_SQUEEZY_CHECKOUT_URL} target="_blank">
+                    Upgrade to Pro <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
             </Button>
-            <p className="text-xs text-muted-foreground mt-3">
-                Payment integration is not yet implemented.
+            <p className="text-xs text-muted-foreground mt-3 max-w-sm mx-auto">
+                After purchasing, you may need to sign out and sign back in for the changes to take effect.
             </p>
         </CardContent>
         </Card>
