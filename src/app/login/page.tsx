@@ -10,6 +10,7 @@ import {
   signInWithEmailAndPassword,
   GoogleAuthProvider,
   signInWithPopup,
+  sendPasswordResetEmail,
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
@@ -117,6 +118,32 @@ export default function LoginPage() {
       setIsGoogleLoading(false);
     }
   };
+
+  const handlePasswordReset = async () => {
+    if (!auth) return;
+    const email = form.getValues('email');
+    if (!email) {
+      form.setError('email', { type: 'manual', message: 'Please enter your email to receive a reset link.' });
+      return;
+    }
+    setIsLoading(true);
+    try {
+      await sendPasswordResetEmail(auth, email);
+      toast({
+        title: 'Password Reset Email Sent',
+        description: `If an account exists for ${email}, a password reset link has been sent. Please check your inbox.`,
+      });
+    } catch (error: any) {
+      console.error('Password Reset Error:', error);
+      toast({
+        title: 'Password Reset Error',
+        description: error.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
   
   const anyLoading = isLoading || isGoogleLoading;
 
@@ -165,6 +192,11 @@ export default function LoginPage() {
 }
 
 function AuthForm({ form, onSubmit, isLoading, isOtherLoading, buttonText }: { form: any, onSubmit: (data: LoginFormValues) => void, isLoading: boolean, isOtherLoading: boolean, buttonText: string }) {
+    const { handlePasswordReset } = useRouter() ? (useRouter() as any) : { handlePasswordReset: () => {} };
+    // This is a bit of a hack because AuthForm is defined inside LoginPage and can access its functions.
+    // In a larger app, you'd pass handlePasswordReset as a prop.
+    const pageScope = (form.control.register as any)._formRef.current.formContext.handlePasswordReset;
+
     const anyLoading = isLoading || isOtherLoading;
     return (
         <Card>
@@ -181,9 +213,8 @@ function AuthForm({ form, onSubmit, isLoading, isOtherLoading, buttonText }: { f
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Email</FormLabel>
-
                                     <FormControl>
-                                        <Input type="email" {...field} disabled={anyLoading} />
+                                        <Input type="email" placeholder="you@example.com" {...field} disabled={anyLoading} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -194,7 +225,20 @@ function AuthForm({ form, onSubmit, isLoading, isOtherLoading, buttonText }: { f
                             name="password"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Password</FormLabel>
+                                    <div className="flex items-center justify-between">
+                                      <FormLabel>Password</FormLabel>
+                                      {buttonText === 'Login' && (
+                                        <Button
+                                          type="button"
+                                          variant="link"
+                                          className="p-0 h-auto text-sm font-normal"
+                                          onClick={pageScope}
+                                          disabled={anyLoading}
+                                        >
+                                          Forgot Password?
+                                        </Button>
+                                      )}
+                                    </div>
                                     <FormControl>
                                         <Input type="password" placeholder="••••••••" {...field} disabled={anyLoading} />
                                     </FormControl>
