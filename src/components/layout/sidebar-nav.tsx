@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Home, FileText, Tags, ShieldCheck, FileCheck2, Hash, LogOut, User as UserIcon } from 'lucide-react';
+import { Home, FileText, Tags, ShieldCheck, FileCheck2, Hash, LogOut, History, User as UserIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   SidebarMenu,
@@ -24,6 +24,7 @@ const navItems = [
   { href: '/label-forge', label: 'Label Forge', icon: Tags },
   { href: '/compliance-check', label: 'Compliance Check', icon: ShieldCheck },
   { href: '/vin-decoder', label: 'VIN Decoder', icon: Hash },
+  { href: '/history', label: 'History', icon: History },
 ];
 
 export function SidebarNav() {
@@ -34,7 +35,9 @@ export function SidebarNav() {
 
   const handleSignOut = async () => {
     try {
-      await signOut(auth);
+      if (auth) {
+        await signOut(auth);
+      }
       router.push('/login');
     } catch (error) {
       console.error("Error signing out:", error);
@@ -74,14 +77,14 @@ export function SidebarNav() {
       </SidebarMenu>
       <SidebarFooter className="p-2 border-t border-sidebar-border">
         {user && (
-           <SidebarMenuItem className="mb-2">
+           <SidebarMenuItem>
              <SidebarMenuButton
                onClick={handleSignOut}
                tooltip={{ children: `Sign out (${user.email})`, side: 'right' }}
                className="w-full"
              >
                <LogOut className="h-5 w-5" />
-               <span>Sign Out</span>
+               <span className={cn(open ? "opacity-100" : "opacity-0 md:opacity-100", "transition-opacity duration-200 delay-100")}>Sign Out</span>
              </SidebarMenuButton>
            </SidebarMenuItem>
         )}

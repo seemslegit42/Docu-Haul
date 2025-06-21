@@ -7,6 +7,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { SmartDocsSchema, type SmartDocsInput } from '@/lib/schemas';
 import { generateDocumentation, type GenerateDocumentationOutput } from '@/ai/flows/generate-documentation';
+import { addGeneratedDocument } from '@/lib/firestore';
 import { AppLayout } from '@/components/layout/app-layout';
 import { PageHeader } from '@/components/layout/page-header';
 import { useToast } from '@/hooks/use-toast';
@@ -19,6 +20,7 @@ export default function SmartDocsPage() {
   const [generatedDoc, setGeneratedDoc] = useState<GenerateDocumentationOutput | null>(null);
   const [editableDocText, setEditableDocText] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -84,6 +86,33 @@ export default function SmartDocsPage() {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleSave = async () => {
+    if (!user || !generatedDoc || !editableDocText.trim()) return;
+    setIsSaving(true);
+    try {
+      await addGeneratedDocument({
+        userId: user.uid,
+        documentType: form.getValues('documentType'),
+        vin: form.getValues('vin'),
+        content: editableDocText.trim(),
+      });
+      toast({
+        title: "Document Saved",
+        description: "Your document has been saved to your history.",
+      });
+    } catch (error) {
+      console.error("Error saving document:", error);
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
+      toast({
+        title: "Error Saving Document",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -163,7 +192,9 @@ export default function SmartDocsPage() {
           isLoading={isLoading}
           generatedDoc={generatedDoc}
           editableDocText={editableDocText}
+          isSaving={isSaving}
           onTextChange={handleTextChange}
+          onSave={handleSave}
           onTxtDownload={handleTxtDownload}
           onPdfDownload={handlePdfDownload}
           onCheckCompliance={handleCheckCompliance}

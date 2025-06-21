@@ -5,16 +5,18 @@ import type { CreateCompliantVinLabelOutput } from '@/ai/flows/create-compliant-
 import Image from 'next/image';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, Download, ShieldCheck } from 'lucide-react';
+import { Loader2, Download, ShieldCheck, Save } from 'lucide-react';
 
 interface GeneratedLabelProps {
   generatedLabel: CreateCompliantVinLabelOutput | null;
   isLoading: boolean;
+  isSaving: boolean;
+  onSave: () => void;
   onDownload: () => void;
   onCheckCompliance: () => void;
 }
 
-export default function GeneratedLabel({ generatedLabel, isLoading, onDownload, onCheckCompliance }: GeneratedLabelProps) {
+export default function GeneratedLabel({ generatedLabel, isLoading, isSaving, onSave, onDownload, onCheckCompliance }: GeneratedLabelProps) {
   const canPerformActions = generatedLabel && !isLoading;
 
   return (
@@ -62,19 +64,28 @@ export default function GeneratedLabel({ generatedLabel, isLoading, onDownload, 
             <Button 
                 className="w-full sm:flex-grow" 
                 onClick={onCheckCompliance} 
-                disabled={!canPerformActions}
+                disabled={!canPerformActions || isSaving}
             >
                 <ShieldCheck className="mr-2 h-4 w-4" />
                 Check Compliance
+            </Button>
+             <Button 
+                variant="secondary" 
+                className="w-full sm:w-auto" 
+                onClick={onSave} 
+                disabled={!canPerformActions || isSaving}
+            >
+                {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                Save Label
             </Button>
             <Button 
                 variant="outline" 
                 className="w-full sm:w-auto" 
                 onClick={onDownload} 
-                disabled={!canPerformActions}
+                disabled={!canPerformActions || isSaving}
             >
                 <Download className="mr-2 h-4 w-4" />
-                Download Label
+                Download
             </Button>
         </CardFooter>
       )}

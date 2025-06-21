@@ -5,13 +5,15 @@ import type { GenerateDocumentationOutput } from '@/ai/flows/generate-documentat
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2, Download, ShieldCheck } from 'lucide-react';
+import { Loader2, Download, ShieldCheck, Save } from 'lucide-react';
 
 interface GeneratedDocumentProps {
   isLoading: boolean;
   generatedDoc: GenerateDocumentationOutput | null;
   editableDocText: string;
+  isSaving: boolean;
   onTextChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  onSave: () => void;
   onTxtDownload: () => void;
   onPdfDownload: () => void;
   onCheckCompliance: () => void;
@@ -21,18 +23,20 @@ export default function GeneratedDocument({
   isLoading,
   generatedDoc,
   editableDocText,
+  isSaving,
   onTextChange,
+  onSave,
   onTxtDownload,
   onPdfDownload,
   onCheckCompliance
 }: GeneratedDocumentProps) {
-  const canDownload = generatedDoc && editableDocText.trim() && !isLoading;
+  const canPerformActions = generatedDoc && editableDocText.trim() && !isLoading;
 
   return (
     <Card className="flex flex-col">
       <CardHeader>
         <CardTitle>Generated Document</CardTitle>
-        <CardDescription>Preview and edit the AI-generated document below. You can download it once generated.</CardDescription>
+        <CardDescription>Preview and edit the AI-generated document below. You can download or save it once generated.</CardDescription>
       </CardHeader>
       <CardContent className="flex-grow flex flex-col relative">
         {isLoading && (
@@ -50,22 +54,31 @@ export default function GeneratedDocument({
           disabled={!generatedDoc || isLoading}
         />
       </CardContent>
-      {canDownload && (
+      {canPerformActions && (
         <CardFooter className="flex flex-col sm:flex-row gap-2 pt-4">
             <Button 
                 className="w-full sm:flex-grow" 
                 onClick={onCheckCompliance} 
-                disabled={!canDownload}
+                disabled={!canPerformActions || isSaving}
             >
                 <ShieldCheck className="mr-2 h-4 w-4" />
                 Check Compliance
+            </Button>
+            <Button 
+                variant="secondary" 
+                className="w-full sm:w-auto" 
+                onClick={onSave} 
+                disabled={!canPerformActions || isSaving}
+            >
+                {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                Save
             </Button>
             <div className="flex w-full sm:w-auto gap-2">
                 <Button 
                     variant="outline" 
                     className="w-full" 
                     onClick={onTxtDownload} 
-                    disabled={!canDownload}
+                    disabled={!canPerformActions || isSaving}
                 >
                     <Download className="mr-2 h-4 w-4" />
                     .txt
@@ -74,7 +87,7 @@ export default function GeneratedDocument({
                     variant="outline" 
                     className="w-full" 
                     onClick={onPdfDownload} 
-                    disabled={!canDownload}
+                    disabled={!canPerformActions || isSaving}
                 >
                     <Download className="mr-2 h-4 w-4" />
                     .pdf

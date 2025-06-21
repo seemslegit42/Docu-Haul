@@ -7,6 +7,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { LabelForgeSchema, type LabelForgeInput } from '@/lib/schemas';
 import { createCompliantVinLabel, type CreateCompliantVinLabelOutput } from '@/ai/flows/create-compliant-vin-label';
+import { addGeneratedDocument } from '@/lib/firestore';
 import { AppLayout } from '@/components/layout/app-layout';
 import { PageHeader } from '@/components/layout/page-header';
 import { useToast } from '@/hooks/use-toast';
@@ -19,6 +20,7 @@ import GeneratedLabel from './components/GeneratedLabel';
 export default function LabelForgePage() {
   const [generatedLabel, setGeneratedLabel] = useState<CreateCompliantVinLabelOutput | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
   const { user, isPremium, isLoading: isAuthLoading } = useAuth();
   const router = useRouter();
@@ -67,6 +69,33 @@ export default function LabelForgePage() {
       });
     } finally {
       setIsGenerating(false);
+    }
+  };
+  
+  const handleSave = async () => {
+    if (!user || !generatedLabel) return;
+    setIsSaving(true);
+    try {
+      await addGeneratedDocument({
+        userId: user.uid,
+        documentType: 'VIN Label',
+        vin: form.getValues('vinData'),
+        content: generatedLabel.labelTextContent,
+      });
+      toast({
+        title: "Label Saved",
+        description: "Your VIN Label has been saved to your history.",
+      });
+    } catch (error) {
+      console.error("Error saving label:", error);
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
+      toast({
+        title: "Error Saving Label",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -119,6 +148,8 @@ export default function LabelForgePage() {
             <GeneratedLabel 
                 generatedLabel={generatedLabel} 
                 isLoading={isGenerating} 
+                isSaving={isSaving}
+                onSave={handleSave}
                 onDownload={handleDownload} 
                 onCheckCompliance={handleCheckCompliance}
             />
