@@ -16,34 +16,34 @@ import { defaultSafetySettings } from '@/ai/safety-settings';
 
 // Structured schema for NVIS data
 const NvisDataSchema = z.object({
-    manufacturerName: z.string().describe("Manufacturer's full name. Use placeholder '[Manufacturer Name]' if not provided."),
-    manufacturerAddress: z.string().describe("Manufacturer's full address. Use placeholder '[Manufacturer Address]' if not provided."),
-    make: z.string().describe("Vehicle Make. Use placeholder '[Make]' if not provided."),
-    model: z.string().describe("Vehicle Model. Use placeholder '[Model]' if not provided."),
-    year: z.string().describe("Vehicle Year (YYYY). Use placeholder '[YYYY]' if not provided."),
-    bodyType: z.string().describe("Vehicle Body Type/Style. Use placeholder '[Body Type]' if not provided."),
-    gvwr: z.string().describe("Gross Vehicle Weight Rating. Use placeholder '[GVWR Value]' if not provided."),
-    gawr: z.string().describe("Gross Axle Weight Rating (specify for each axle if multiple). Use placeholder '[GAWR Value]' if not provided."),
-    numberOfAxles: z.string().describe("Number of axles. Use placeholder '[Number of Axles]' if not provided."),
-    tireSize: z.string().describe("Tire size specification. Use placeholder '[Tire Size]' if not provided."),
-    rimSize: z.string().describe("Rim size specification. Use placeholder '[Rim Size]' if not provided."),
-    dimensions: z.string().describe("Overall dimensions (Length, Width, Height). Use placeholder '[Overall Dimensions LWH]' if not provided."),
-    dateOfManufacture: z.string().describe("Date of manufacture (MM/YYYY). Use placeholder '[MM/YYYY]' if not provided."),
+    manufacturerName: z.string().describe("Manufacturer's full legal name. Use placeholder '[Manufacturer Name]' if not provided in the source details."),
+    manufacturerAddress: z.string().describe("Manufacturer's full mailing address. Use placeholder '[Manufacturer Address]' if not provided."),
+    make: z.string().describe("Vehicle Make, typically the same as the manufacturer. Use placeholder '[Make]' if not provided."),
+    model: z.string().describe("Vehicle Model designation. Use placeholder '[Model]' if not provided."),
+    year: z.string().describe("Vehicle Model Year (YYYY). Use placeholder '[YYYY]' if not provided."),
+    bodyType: z.string().describe("Vehicle Body Type/Style (e.g., Flatbed, Gooseneck, Utility). Use placeholder '[Body Type]' if not provided."),
+    gvwr: z.string().describe("Gross Vehicle Weight Rating (e.g., '14000 LBS'). Use placeholder '[GVWR Value]' if not provided."),
+    gawr: z.string().describe("Gross Axle Weight Rating (specify for each axle if multiple, e.g., '7000 LBS per axle'). Use placeholder '[GAWR Value]' if not provided."),
+    numberOfAxles: z.string().describe("Total number of axles. Use placeholder '[Number of Axles]' if not provided."),
+    tireSize: z.string().describe("Tire size specification (e.g., 'ST235/80R16E'). Use placeholder '[Tire Size]' if not provided."),
+    rimSize: z.string().describe("Rim size specification (e.g., '16X6JJ'). Use placeholder '[Rim Size]' if not provided."),
+    dimensions: z.string().describe("Overall vehicle dimensions (Length, Width, Height). Use placeholder '[Overall Dimensions LWH]' if not provided."),
+    dateOfManufacture: z.string().describe("Date of manufacture in MM/YYYY format. Use placeholder '[MM/YYYY]' if not provided."),
 });
 
 // Structured schema for Bill of Sale data
 const BillOfSaleDataSchema = z.object({
-    sellerName: z.string().describe("Seller's full name. Use placeholder '[Seller Name]' if not provided."),
-    sellerAddress: z.string().describe("Seller's full address. Use placeholder '[Seller Address]' if not provided."),
-    buyerName: z.string().describe("Buyer's full name. Use placeholder '[Buyer Name]' if not provided."),
-    buyerAddress: z.string().describe("Buyer's full address. Use placeholder '[Buyer Address]' if not provided."),
-    saleDate: z.string().describe("Date of the sale. Use placeholder '[Date of Sale]' if not provided."),
-    salePrice: z.string().describe("Full sale price (e.g., '$10,000.00 USD'). Use placeholder '[Sale Price]' if not provided."),
+    sellerName: z.string().describe("Seller's full legal name. Use placeholder '[Seller Name]' if not provided."),
+    sellerAddress: z.string().describe("Seller's full mailing address. Use placeholder '[Seller Address]' if not provided."),
+    buyerName: z.string().describe("Buyer's full legal name. Use placeholder '[Buyer Name]' if not provided."),
+    buyerAddress: z.string().describe("Buyer's full mailing address. Use placeholder '[Buyer Address]' if not provided."),
+    saleDate: z.string().describe("Date of the transaction. Use placeholder '[Date of Sale]' if not provided."),
+    salePrice: z.string().describe("Full sale price including currency (e.g., '$10,000.00 USD'). Use placeholder '[Sale Price]' if not provided."),
     make: z.string().describe("Vehicle Make. Use placeholder '[Make]' if not provided."),
     model: z.string().describe("Vehicle Model. Use placeholder '[Model]' if not provided."),
-    year: z.string().describe("Vehicle Year (YYYY). Use placeholder '[YYYY]' if not provided."),
+    year: z.string().describe("Vehicle Model Year (YYYY). Use placeholder '[YYYY]' if not provided."),
     bodyType: z.string().describe("Vehicle Body Type/Style. Use placeholder '[Body Type]' if not provided."),
-    color: z.string().optional().describe("Vehicle color."),
+    color: z.string().optional().describe("Primary vehicle color."),
 });
 
 // Union schema for the output of the data extraction prompt
