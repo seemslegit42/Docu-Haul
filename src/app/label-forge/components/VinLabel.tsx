@@ -2,6 +2,7 @@
 "use client"
 import React from 'react';
 import { cn } from '@/lib/utils';
+import { formatWeightBilingual } from '@/lib/utils';
 
 interface VinLabelProps {
   data: Record<string, string>;
@@ -19,6 +20,15 @@ const BilingualLabelRow = ({ label, value }: { label: string; value?: string }) 
     <div className="flex border-b border-black text-xs">
         <div className="w-1/2 p-1 font-bold">{label}</div>
         <div className="w-1/2 p-1 font-semibold border-l border-black">{value || ''}</div>
+    </div>
+);
+
+const Checkbox = ({ checked, label }: { checked: boolean; label: string }) => (
+    <div className="flex items-center gap-1">
+        <div className="h-3 w-3 border border-black flex items-center justify-center">
+            {checked && <span className="font-bold text-[10px] leading-none">X</span>}
+        </div>
+        <span>{label}</span>
     </div>
 );
 
@@ -75,19 +85,19 @@ export const VinLabel = React.forwardRef<HTMLDivElement, VinLabelProps>(({ data,
              <div ref={ref} className={mainContainerClass}>
                 <BilingualLabelRow label="MANUFACTURED BY / FABRIQUE PAR:" value={data['MANUFACTURED BY / FABRIQUE PAR']} />
                 <BilingualLabelRow label="DATE:" value={data['DATE']} />
-                <BilingualLabelRow label="GVWR / PNBV:" value={`${data['GVWR / PNBV']} KG ( LB)`} />
-                <BilingualLabelRow label="GAWR (EACH AXLE) / PNBE (CHAQUE ESSIEU):" value={`${data['GAWR (EACH AXLE) / PNBE (CHAQUE ESSIEU)']} KG ( LB)`} />
+                <BilingualLabelRow label="GVWR / PNBV:" value={formatWeightBilingual(data['GVWR / PNBV'])} />
+                <BilingualLabelRow label="GAWR (EACH AXLE) / PNBE (CHAQUE ESSIEU):" value={formatWeightBilingual(data['GAWR (EACH AXLE) / PNBE (CHAQUE ESSIEU)'])} />
                 <BilingualLabelRow label="TIRES / PNEU:" value={data['TIRES / PNEU']} />
                 <BilingualLabelRow label="RIMS / JANTE:" value={data['RIMS / JANTE']} />
                 <BilingualLabelRow label="COLD INFL. PRESS. / PRESS. DE GONFL. A FROID:" value={`${data['COLD INFL. PRESS. / PRESS. DE GONFL. A FROID']} KPA ( PSI / LPC)`} />
                  <div className="flex border-b border-black text-xs">
                     <div className="w-1/2 p-1 font-bold flex items-center gap-2">
-                        <input type="checkbox" checked={isSingle} readOnly className="form-checkbox h-3 w-3" /> SINGLE
-                        <input type="checkbox" checked={isDual} readOnly className="form-checkbox h-3 w-3" /> DUAL
+                        <Checkbox checked={isSingle} label="SINGLE" />
+                        <Checkbox checked={isDual} label="DUAL" />
                     </div>
                     <div className="w-1/2 p-1 font-bold border-l border-black flex items-center gap-2">
-                        <input type="checkbox" checked={isSingle} readOnly className="form-checkbox h-3 w-3" /> SIMPLE
-                        <input type="checkbox" checked={isDual} readOnly className="form-checkbox h-3 w-3" /> JUMELEE
+                        <Checkbox checked={isSingle} label="SIMPLE" />
+                        <Checkbox checked={isDual} label="JUMELEE" />
                     </div>
                 </div>
                 <BilingualLabelRow label="V.I.N. / N.I.V.:" value={data['V.I.N. / N.I.V.']} />

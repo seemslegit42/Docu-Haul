@@ -3,10 +3,6 @@ import { db } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp, getDocs, query, where, orderBy, limit } from 'firebase/firestore';
 import type { DocumentData } from 'firebase/firestore';
 
-if (!db) {
-  throw new Error("Firestore is not initialized. Check your Firebase configuration.");
-}
-
 const GENERATED_DOCS_COLLECTION = 'generatedDocuments';
 
 export interface GeneratedDocument {
@@ -20,11 +16,22 @@ export interface GeneratedDocument {
 }
 
 /**
+ * Throws an error if the Firestore database is not initialized.
+ * This is a safeguard to ensure Firebase client-side configuration is present.
+ */
+function ensureDbInitialized() {
+  if (!db) {
+    throw new Error("Firestore is not initialized. Check your Firebase client-side configuration in your .env file.");
+  }
+}
+
+/**
  * Adds a new generated document to Firestore.
  * @param doc - The document data to add.
  * @returns The ID of the newly created document.
  */
 export async function addGeneratedDocument(doc: Omit<GeneratedDocument, 'id' | 'createdAt'>): Promise<string> {
+  ensureDbInitialized();
   try {
     const docRef = await addDoc(collection(db, GENERATED_DOCS_COLLECTION), {
       ...doc,
@@ -44,6 +51,7 @@ export async function addGeneratedDocument(doc: Omit<GeneratedDocument, 'id' | '
  * @returns A promise that resolves to an array of document data.
  */
 export async function getGeneratedDocumentsForUser(userId: string, docLimit?: number): Promise<GeneratedDocument[]> {
+  ensureDbInitialized();
   try {
     const constraints = [
       where('userId', '==', userId),

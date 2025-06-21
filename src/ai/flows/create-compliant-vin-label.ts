@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview Flow to create compliant VIN labels. This flow uses an AI tool to first validate the VIN, then extracts structured key-value data from the user's input.
@@ -114,7 +115,10 @@ Extract data for the following keys: "MANUFACTURER", "DATE OF MANUF.", "GVWR", "
 
 {{#if (eq template "bilingual_canadian")}}
 **Template Style: Bilingual Canadian (English/French)**
-Extract data for the following keys: "MANUFACTURED BY / FABRIQUE PAR", "DATE", "GVWR / PNBV", "GAWR (EACH AXLE) / PNBE (CHAQUE ESSIEU)", "TIRES / PNEU", "RIMS / JANTE", "COLD INFL. PRESS. / PRESS. DE GONFL. A FROID", "SINGLE_OR_DUAL", "V.I.N. / N.I.V.", "TYPE / TYPE", and "COMPLIANCE_STATEMENT". For the compliance statement, use the provided standard or a default US/Canadian statement. For the "SINGLE_OR_DUAL" key, return only the string "single" or "dual" based on the specs.
+Extract data for the following keys: "MANUFACTURED BY / FABRIQUE PAR", "DATE", "GVWR / PNBV", "GAWR (EACH AXLE) / PNBE (CHAQUE ESSIEU)", "TIRES / PNEU", "RIMS / JANTE", "COLD INFL. PRESS. / PRESS. DE GONFL. A FROID", "SINGLE_OR_DUAL", "V.I.N. / N.I.V.", "TYPE / TYPE", and "COMPLIANCE_STATEMENT".
+- For "GVWR / PNBV" and "GAWR (EACH AXLE) / PNBE (CHAQUE ESSIEU)", extract ONLY the numeric value in kilograms. Do not include units or any other text (e.g., "7000").
+- For the "SINGLE_OR_DUAL" key, analyze the tire specifications and return only the string "single" or "dual". Do not include any other text.
+- For the compliance statement, use the provided standard or a default US/Canadian statement.
 {{/if}}
 
 **RATIONALE:**
