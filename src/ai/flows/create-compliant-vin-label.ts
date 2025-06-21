@@ -107,6 +107,18 @@ Extract data for the following keys: "MANUFACTURED BY / FABRIQUE PAR", "DATE", "
 - For the compliance statement, use the provided standard or a default US/Canadian statement.
 {{/if}}
 
+{{#if (eq template "bilingual_rv_canadian")}}
+**Template Style: Bilingual Canadian RV (Tall)**
+Extract data for the following keys: "BRAND", "DATE", "RESP_MFR", "GVWR_LBS", "GVWR_KG", "VIN", "SIZE", "FRONT_GAWR_LBS", "FRONT_GAWR_KG", "FRONT_TIRE", "FRONT_RIM", "FRONT_PSI", "FRONT_KPA", "REAR_GAWR_LBS", "REAR_GAWR_KG", "REAR_TIRE", "REAR_RIM", "REAR_PSI", "REAR_KPA", "COMPLIANCE_STATEMENT_VEHICLE", "COMPLIANCE_STATEMENT_TRAILER".
+- "BRAND" is the main logo/name at the top (e.g., Jayco).
+- "RESP_MFR" is the responsible manufacturer name.
+- Extract LBS and KG values for GVWR and GAWRs separately.
+- Extract PSI and KPA values separately for front and rear axles.
+- "COMPLIANCE_STATEMENT_VEHICLE" is the block of text under the heading "TYPE OF VEHICLE/TYPE DE VÉHICULE".
+- "COMPLIANCE_STATEMENT_TRAILER" is the block of text under the heading "TRAILER/REMORQUE".
+{{/if}}
+
+
 **RATIONALE:**
 In the 'placementRationale' field, explain your choices for the data extraction. Describe what you found and what placeholders you had to use.
 

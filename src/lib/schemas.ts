@@ -13,7 +13,7 @@ export type SmartDocsInput = z.infer<typeof SmartDocsSchema>;
 
 // Schema for Label Forge (VIN Label Generation)
 export const LabelForgeSchema = z.object({
-  template: z.enum(['standard', 'bilingual_canadian'], {
+  template: z.enum(['standard', 'bilingual_canadian', 'bilingual_rv_canadian'], {
     required_error: 'A label template must be selected.',
   }),
   vinData: z.string().length(17, { message: "VIN must be exactly 17 characters long." }),

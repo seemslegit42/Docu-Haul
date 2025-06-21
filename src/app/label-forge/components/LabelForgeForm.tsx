@@ -55,6 +55,14 @@ export default function LabelForgeForm({ form, onSubmit, isLoading }: LabelForge
                           Bilingual Canadian Label
                         </FormLabel>
                       </FormItem>
+                       <FormItem className="flex items-center space-x-3 space-y-0 p-4 border rounded-md has-[:checked]:border-primary">
+                        <FormControl>
+                          <RadioGroupItem value="bilingual_rv_canadian" />
+                        </FormControl>
+                        <FormLabel className="font-normal">
+                          Bilingual RV (Tall)
+                        </FormLabel>
+                      </FormItem>
                     </RadioGroup>
                   </FormControl>
                   <FormMessage />
@@ -69,7 +77,7 @@ export default function LabelForgeForm({ form, onSubmit, isLoading }: LabelForge
                 <FormItem>
                   <FormLabel className="font-headline">Vehicle Identification Number (VIN)</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter 17-character VIN" {...field} className="font-body"/>
+                    <Input placeholder="Enter 17-character VIN" {...field} className="font-body text-sm"/>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -86,7 +94,7 @@ export default function LabelForgeForm({ form, onSubmit, isLoading }: LabelForge
                       placeholder="Enter all known vehicle and manufacturer specifications" 
                       {...field} 
                       rows={4} 
-                      className="font-body"
+                      className="font-body text-sm"
                     />
                   </FormControl>
                   <FormDescription className="font-body text-xs">
@@ -103,7 +111,7 @@ export default function LabelForgeForm({ form, onSubmit, isLoading }: LabelForge
                 <FormItem>
                   <FormLabel className="font-headline">Regulatory Standards (Optional)</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter applicable standards" {...field} className="font-body"/>
+                    <Input placeholder="Enter applicable standards" {...field} className="font-body text-sm"/>
                   </FormControl>
                     <FormDescription className="font-body text-xs">
                     If blank, a general compliance statement will be used.
@@ -119,7 +127,7 @@ export default function LabelForgeForm({ form, onSubmit, isLoading }: LabelForge
                 <FormItem>
                   <FormLabel className="font-headline">Target Label Dimensions</FormLabel>
                   <FormControl>
-                    <Input placeholder="Approximate physical dimensions" {...field} className="font-body"/>
+                    <Input placeholder="Approximate physical dimensions" {...field} className="font-body text-sm"/>
                   </FormControl>
                     <FormDescription className="font-body text-xs">
                     e.g., "4x2 inches", "100x50mm". Helps the AI with layout.
