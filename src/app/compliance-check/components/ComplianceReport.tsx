@@ -11,15 +11,29 @@ interface ComplianceReportProps {
   isLoading: boolean;
 }
 
-export default function ComplianceReport({ result, isLoading }: ComplianceReportProps) {
-  const getStatusIcon = (status?: string) => {
-    if (!status) return <ShieldCheck className="w-7 h-7 text-muted-foreground mr-2" />;
-    if (status.toLowerCase().includes("compliant")) return <CheckCircle2 className="w-7 h-7 text-success mr-2" />;
-    if (status.toLowerCase().includes("potential issues") || status.toLowerCase().includes("needs review")) return <AlertTriangle className="w-7 h-7 text-warning mr-2" />;
-    if (status.toLowerCase().includes("non-compliant")) return <AlertTriangle className="w-7 h-7 text-destructive mr-2" />;
-    return <ShieldCheck className="w-7 h-7 text-primary mr-2" />;
-  };
+const StatusIconMap: Record<string, React.ReactNode> = {
+    compliant: <CheckCircle2 className="w-7 h-7 text-success mr-2" />,
+    "potential issues": <AlertTriangle className="w-7 h-7 text-warning mr-2" />,
+    "needs review": <AlertTriangle className="w-7 h-7 text-warning mr-2" />,
+    "non-compliant": <AlertTriangle className="w-7 h-7 text-destructive mr-2" />,
+    default: <ShieldCheck className="w-7 h-7 text-primary mr-2" />,
+    initial: <ShieldCheck className="w-7 h-7 text-muted-foreground mr-2" />,
+};
 
+const getStatusIcon = (status?: string) => {
+    if (!status) {
+      return StatusIconMap.initial;
+    }
+    const lowerStatus = status.toLowerCase();
+    for (const key in StatusIconMap) {
+      if (lowerStatus.includes(key)) {
+        return StatusIconMap[key];
+      }
+    }
+    return StatusIconMap.default;
+};
+
+export default function ComplianceReport({ result, isLoading }: ComplianceReportProps) {
   return (
     <Card>
       <CardHeader>

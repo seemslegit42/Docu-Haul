@@ -13,7 +13,7 @@ export default function LandingPage() {
         <div className="container flex h-14 items-center">
           <Link href="/" className="flex items-center gap-2">
             <FileText className="w-7 h-7 text-primary" />
-            <span className="font-headline text-xl font-bold text-primary tracking-tight">DocuHaul</span>
+            <span className="font-headline text-xl font-bold text-primary tracking-tight">VINscribe</span>
           </Link>
           <nav className="flex-1 flex justify-end">
             <AuthAwareButton text="Go to App" />
@@ -33,7 +33,7 @@ export default function LandingPage() {
                   Reimagine Vehicle Documentation
                 </h1>
                 <p className="mx-auto mt-6 max-w-xl text-lg text-muted-foreground md:mx-0 md:text-xl">
-                  DocuHaul leverages Generative AI to automate the creation, validation, and management of essential vehicle documents. Save time, ensure compliance, and streamline your workflow.
+                  VINscribe leverages Generative AI to automate the creation, validation, and management of essential vehicle documents. Save time, ensure compliance, and streamline your workflow.
                 </p>
                 <div className="mt-8 flex justify-center gap-4 md:justify-start">
                   <AuthAwareButton text="Get Started Now" buttonProps={{ size: "lg" }} />
@@ -93,9 +93,9 @@ export default function LandingPage() {
       <footer className="border-t border-border/40">
         <div className="container flex flex-col items-center justify-between gap-4 py-8 md:flex-row">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} DocuHaul. All rights reserved.
+            © {new Date().getFullYear()} VINscribe. All rights reserved.
           </p>
-          <div className="font-headline text-lg font-bold text-primary">DocuHaul</div>
+          <div className="font-headline text-lg font-bold text-primary">VINscribe</div>
         </div>
       </footer>
     </div>

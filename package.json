@@ -1,5 +1,5 @@
 {
-  "name": "nextn",
+  "name": "vinscribe",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -58,7 +58,7 @@
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
-    "eslint": "^8",
+    "eslint": "^8.57.0",
     "eslint-config-next": "15.2.3",
     "genkit-cli": "^1.8.0",
     "patch-package": "^8.0.0",

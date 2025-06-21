@@ -1,6 +1,6 @@
-# DocuHaul - AI-Powered Vehicle Documentation
+# VINscribe - AI-Powered Vehicle Documentation
 
-This is a Next.js application built in Firebase Studio. DocuHaul leverages Generative AI to automate the creation, validation, and management of essential vehicle documents like VIN labels, NVIS certificates, and Bills of Sale.
+This is a Next.js application built in Firebase Studio. VINscribe leverages Generative AI to automate the creation, validation, and management of essential vehicle documents like VIN labels, NVIS certificates, and Bills of Sale.
 
 ## Getting Started
 
@@ -16,7 +16,7 @@ Then, run the development server:
 npm run dev
 ```
 
-Open [http://localhost:9002](http://localhost:9002) with your browser to see the result.
+Open [http://localhost:6000](http://localhost:6000) with your browser to see the result.
 
 ### Environment Variables
 
