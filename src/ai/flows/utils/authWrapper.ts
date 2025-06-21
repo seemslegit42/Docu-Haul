@@ -43,15 +43,16 @@ export function createAuthenticatedFlow<TInput, TOutput>(
       // If all checks pass, execute the original flow.
       return await flow(input);
 
-    } catch (error: any) {
-      // Log the specific error for debugging but return a generic one to the client, unless it's a specific auth error.
-      console.error('Authorization check failed:', error.message);
+    } catch (error) {
+      // Log the full error for better debugging, not just the message.
+      console.error('Authorization check failed:', error);
 
       // Re-throw specific, intentional errors
-      if (error.message.includes('premium')) {
+      if (error instanceof Error && error.message.includes('premium')) {
           throw error;
       }
       
+      // For other errors, throw a generic one to avoid leaking implementation details.
       throw new Error('You are not authorized to perform this action. Please sign in and try again.');
     }
   };
