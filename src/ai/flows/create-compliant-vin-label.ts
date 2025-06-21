@@ -11,6 +11,7 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 import { type LabelForgeInput, LabelForgeSchema } from '@/lib/schemas';
+import { defaultSafetySettings } from '@/ai/safety-settings';
 
 const CreateCompliantVinLabelOutputSchema = z.object({
   labelDataUri: z.string().describe('The data URI of the generated VIN label image.'),
@@ -28,13 +29,6 @@ const VinLabelDesignSchema = z.object({
   ),
   placementRationale: z.string().describe('The AI\'s rationale for the information placement and content selection.'),
 });
-
-const defaultSafetySettings = [
-  { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_ONLY_HIGH' },
-  { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
-  { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_ONLY_HIGH' },
-  { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_ONLY_HIGH' },
-];
 
 // Prompt for designing label content and rationale
 const vinLabelDesignPrompt = ai.definePrompt({

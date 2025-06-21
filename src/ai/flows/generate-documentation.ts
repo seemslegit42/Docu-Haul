@@ -12,6 +12,7 @@ import {ai}from '@/ai/genkit';
 import {z}from 'genkit';
 import { DOCUMENT_TYPES } from '@/lib/constants';
 import { type SmartDocsInput, SmartDocsSchema } from '@/lib/schemas';
+import { defaultSafetySettings } from '@/ai/safety-settings';
 
 const GenerateDocumentationOutputSchema = z.object({
   documentText: z.string().describe('The generated vehicle documentation text.'),
@@ -21,13 +22,6 @@ export type GenerateDocumentationOutput = z.infer<typeof GenerateDocumentationOu
 export async function generateDocumentation(input: SmartDocsInput): Promise<GenerateDocumentationOutput> {
   return generateDocumentationFlow(input);
 }
-
-const defaultSafetySettings = [
-  { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_ONLY_HIGH' },
-  { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
-  { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_ONLY_HIGH' },
-  { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_ONLY_HIGH' },
-];
 
 const nvisPrompt = ai.definePrompt({
   name: 'generateNVISPrompt',

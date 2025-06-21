@@ -10,6 +10,7 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 import { type ComplianceCheckInput, ComplianceCheckSchema } from '@/lib/schemas';
+import { defaultSafetySettings } from '@/ai/safety-settings';
 
 const CheckComplianceOutputSchema = z.object({
   complianceStatus: z.string().describe('A concise status of the compliance check (e.g., "Compliant", "Potential Issues Found", "Non-Compliant").'),
@@ -49,12 +50,7 @@ Structure your report clearly. Be precise and refer to general regulatory princi
 If the document content is insufficient for a full check, state that in the report.
 `,
   config: {
-    safetySettings: [
-      { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_ONLY_HIGH' },
-      { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
-      { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_ONLY_HIGH' },
-      { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_ONLY_HIGH' },
-    ],
+    safetySettings: defaultSafetySettings,
   },
 });
 

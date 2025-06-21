@@ -10,6 +10,7 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 import { type DecodeVinInput, DecodeVinSchema } from '@/lib/schemas';
+import { defaultSafetySettings } from '@/ai/safety-settings';
 
 const VinPartSchema = z.object({
   value: z.string().describe("The substring of the VIN corresponding to this part."),
@@ -67,12 +68,7 @@ Do not invent or hallucinate information. Your analysis should be based solely o
 The fullVin output field should be the original VIN '{{{vin}}}'.
 `,
   config: {
-    safetySettings: [
-      { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_ONLY_HIGH' },
-      { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
-      { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_ONLY_HIGH' },
-      { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_ONLY_HIGH' },
-    ],
+    safetySettings: defaultSafetySettings,
   },
 });
 
