@@ -1,9 +1,9 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { FileText, Tags, ShieldCheck, Hash, ArrowRight } from 'lucide-react';
+import { FileText, Tags, ShieldCheck, Hash } from 'lucide-react';
 import { AuthAwareButton } from '@/components/layout/AuthAwareButton';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { FeatureCard } from '@/components/shared/FeatureCard';
 
 export default function LandingPage() {
   return (
@@ -99,17 +99,5 @@ export default function LandingPage() {
         </div>
       </footer>
     </div>
-  );
-}
-
-function FeatureCard({ icon, title, description }: { icon: React.ReactNode; title: string; description: string; }) {
-  return (
-    <Card className="text-center transition-all duration-300 hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-2 flex flex-col bg-card/80 backdrop-blur-sm">
-      <CardContent className="pt-6 flex flex-col items-center flex-grow">
-        {icon}
-        <h3 className="font-headline text-xl font-bold mt-4 mb-2">{title}</h3>
-        <p className="text-muted-foreground">{description}</p>
-      </CardContent>
-    </Card>
   );
 }

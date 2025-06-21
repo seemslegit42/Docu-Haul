@@ -5,7 +5,6 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -16,34 +15,10 @@ import {
 import { auth } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Loader2, FileCheck2 } from 'lucide-react';
 import Link from 'next/link';
-
-const formSchema = z.object({
-  email: z.string().email({ message: 'Please enter a valid email address.' }),
-  password: z
-    .string()
-    .min(6, { message: 'Password must be at least 6 characters long.' }),
-});
-
-type LoginFormValues = z.infer<typeof formSchema>;
+import { AuthForm, formSchema, type LoginFormValues } from './components/AuthForm';
 
 const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
     <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" {...props}>
@@ -51,75 +26,6 @@ const GoogleIcon = (props: React.SVGProps<SVGSVGElement>) => (
       <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.85 3.18-1.73 4.1-1.02 1.02-2.62 1.98-4.52 1.98-3.53 0-6.43-2.9-6.43-6.43s2.9-6.43 6.43-6.43c1.93 0 3.33.73 4.1 1.45l2.43-2.33C17.65 4.32 15.4 3 12.48 3c-5.26 0-9.52 4.29-9.52 9.52s4.26 9.52 9.52 9.52c2.82 0 4.96-.94 6.62-2.62 1.7-1.7 2.22-4.13 2.22-6.85 0-.5-.06-.92-.15-1.35H12.48z" fill="currentColor"/>
     </svg>
 );
-
-function AuthForm({ form, onSubmit, isLoading, isOtherLoading, buttonText, onPasswordReset }: { 
-    form: ReturnType<typeof useForm<LoginFormValues>>;
-    onSubmit: (data: LoginFormValues) => void;
-    isLoading: boolean;
-    isOtherLoading: boolean;
-    buttonText: string;
-    onPasswordReset: () => void;
-}) {
-    const anyLoading = isLoading || isOtherLoading;
-
-    return (
-        <Card>
-            <CardHeader>
-                <CardTitle>{buttonText}</CardTitle>
-                <CardDescription>Enter your credentials to continue to DocuHaul.</CardDescription>
-            </CardHeader>
-            <CardContent>
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                        <FormField
-                            control={form.control}
-                            name="email"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Email</FormLabel>
-                                    <FormControl>
-                                        <Input type="email" placeholder="Enter your email" {...field} disabled={anyLoading} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="password"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <div className="flex items-center justify-between">
-                                      <FormLabel>Password</FormLabel>
-                                      {buttonText === 'Login' && (
-                                        <Button
-                                          type="button"
-                                          variant="link"
-                                          className="p-0 h-auto text-sm font-normal"
-                                          onClick={onPasswordReset}
-                                          disabled={anyLoading || !form.getValues('email')}
-                                        >
-                                          Forgot Password?
-                                        </Button>
-                                      )}
-                                    </div>
-                                    <FormControl>
-                                        <Input type="password" placeholder="••••••••" {...field} disabled={anyLoading} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <Button type="submit" disabled={anyLoading} className="w-full">
-                            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            {buttonText}
-                        </Button>
-                    </form>
-                </Form>
-            </CardContent>
-        </Card>
-    );
-}
 
 export default function LoginPage() {
   const router = useRouter();
