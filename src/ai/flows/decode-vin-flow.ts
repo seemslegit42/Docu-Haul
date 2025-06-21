@@ -1,6 +1,7 @@
+
 'use server';
 /**
- * @fileOverview A flow for decoding a Vehicle Identification Number (VIN). This flow first parses the VIN in code, then uses AI to provide human-readable descriptions for each component.
+ * @fileOverview A flow for decoding a Vehicle Identification Number (VIN). This flow first validates the VIN's check digit, parses it in code, then uses AI to provide human-readable descriptions for each component.
  *
  * - decodeVin - A function that performs the VIN decoding.
  * - DecodeVinOutput - The return type for the decodeVin function.
@@ -11,6 +12,7 @@ import {z} from 'genkit';
 import { type DecodeVinInput, DecodeVinSchema } from '@/lib/schemas';
 import { defaultSafetySettings } from '@/ai/safety-settings';
 import { createAuthenticatedFlow } from './utils/authWrapper';
+import { validateVin } from '@/lib/vin-utils';
 
 // Schema for the individual parts of a VIN
 const VinPartSchema = z.object({
@@ -64,8 +66,14 @@ const decodeVinFlow = ai.defineFlow(
     outputSchema: DecodeVinOutputSchema,
   },
   async (input) => {
-    // Step 1: Deterministically parse the VIN in code.
     const vin = input.vin.toUpperCase();
+
+    // Step 1: Deterministically validate the VIN check digit.
+    if (!validateVin(vin)) {
+      throw new Error('Invalid VIN. The provided VIN failed the check digit validation. Please verify the number and try again.');
+    }
+
+    // Step 2: Deterministically parse the valid VIN in code.
     const promptInput: DecodeVinPromptInput = {
       wmi: vin.substring(0, 3),
       vds: {
@@ -82,10 +90,10 @@ const decodeVinFlow = ai.defineFlow(
       fullVin: vin,
     };
 
-    // Step 2: Ask the AI to provide descriptions for the parsed components.
+    // Step 3: Ask the AI to provide descriptions for the parsed components.
     const { output } = await prompt(promptInput);
     
-    // Step 3: Validate the AI's output.
+    // Step 4: Validate the AI's output.
     if (!output || !output.wmi?.value || !output.fullVin?.trim() || output.fullVin !== vin) {
       const errorMessage = 'AI failed to generate a valid description for the VIN. The output was empty, incomplete, or mismatched the original VIN. Please ensure the VIN is valid and try again.';
       console.error(errorMessage, { input, promptInput, receivedOutput: output });
@@ -104,7 +112,7 @@ const prompt = ai.definePrompt({
   input: {schema: DecodeVinPromptInputSchema},
   output: {schema: DecodeVinOutputSchema},
   prompt: `You are an expert VIN (Vehicle Identification Number) decoder for trailers.
-Your task is to take pre-parsed VIN components and assemble them into a structured JSON output with descriptions.
+Your task is to take pre-parsed VIN components and assemble them into a structured JSON output with descriptions. The provided VIN has already been validated.
 
 Provided VIN: {{{fullVin}}}
 - WMI: {{{wmi}}}
@@ -120,7 +128,7 @@ Provided VIN: {{{fullVin}}}
 
 Based on this, generate a JSON response that matches the required output schema.
 1.  For each section (wmi, checkDigit, modelYear, plant, sequentialNumber), populate its 'value' field with the corresponding code provided above and write a 'description' explaining what that part of the VIN represents.
-    - For 'checkDigit', state that it's a calculated value for validation.
+    - For 'checkDigit', state that it's a calculated value for validation and that it is **valid** for this VIN.
     - For 'sequentialNumber', mention the different rules for small (<1000 units/year) vs. large manufacturers.
 2.  For the 'vehicleDescriptors' section:
     - Populate its 'value' field with '{{{vds.full}}}'.
