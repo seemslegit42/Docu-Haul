@@ -82,6 +82,7 @@ export default function LabelForgePage() {
         documentType: 'VIN Label',
         vin: form.getValues('vinData'),
         content: generatedLabel.labelTextContent,
+        imageDataUri: generatedLabel.labelDataUri, // Save the image data URI
       });
       toast({
         title: "Label Saved",

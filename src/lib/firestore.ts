@@ -16,6 +16,7 @@ export interface GeneratedDocument {
   vin: string;
   content: string;
   createdAt: any; 
+  imageDataUri?: string; // Add optional field for image data
 }
 
 /**
