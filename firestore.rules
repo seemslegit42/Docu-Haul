@@ -1,0 +1,30 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default to deny all reads and writes to prevent unauthorized access.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Rules for a 'users' collection where user profile data might be stored.
+    match /users/{userId} {
+      // A user can create their own profile document.
+      allow create: if request.auth != null && request.auth.uid == userId;
+
+      // A user can read, update, and delete their own profile.
+      // For more security, you might prevent them from updating roles or premium status from the client.
+      allow read, update, delete: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Rules for a 'generatedDocuments' collection where created documents are stored.
+    match /generatedDocuments/{documentId} {
+      // A user can create a document if they are logged in and the new document's 'userId' matches their own.
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+
+      // A user can read, update, or delete a document if they own it.
+      allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+    }
+  }
+}
