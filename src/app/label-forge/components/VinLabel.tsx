@@ -2,7 +2,7 @@
 "use client"
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { formatWeightBilingual } from '@/lib/utils';
+import { formatWeightBilingual, formatPressureBilingual } from '@/lib/utils';
 
 interface VinLabelProps {
   data: Record<string, string>;
@@ -16,19 +16,12 @@ const LabelRow = ({ label, value, valueClass }: { label: string; value?: string;
     </div>
 );
 
-const BilingualLabelRow = ({ label, value }: { label: string; value?: string }) => (
-    <div className="flex border-b border-black text-xs">
-        <div className="w-1/2 p-1 font-bold">{label}</div>
-        <div className="w-1/2 p-1 font-semibold border-l border-black">{value || ''}</div>
-    </div>
-);
-
 const Checkbox = ({ checked, label }: { checked: boolean; label: string }) => (
     <div className="flex items-center gap-1">
         <div className="h-3 w-3 border border-black flex items-center justify-center">
-            {checked && <span className="font-bold text-[10px] leading-none">X</span>}
+            {checked && <div className="h-[9px] w-[9px] bg-black" />}
         </div>
-        <span>{label}</span>
+        <span className="font-semibold">{label}</span>
     </div>
 );
 
@@ -78,33 +71,51 @@ export const VinLabel = React.forwardRef<HTMLDivElement, VinLabelProps>(({ data,
     }
     
     if (template === 'bilingual_canadian') {
-        const isSingle = data['SINGLE_OR_DUAL']?.toLowerCase() === 'single';
-        const isDual = data['SINGLE_OR_DUAL']?.toLowerCase() === 'dual';
+        const singleOrDualValue = (data['SINGLE_OR_DUAL'] || '').toLowerCase();
+        const isSingle = singleOrDualValue === 'single';
+        const isDual = singleOrDualValue === 'dual';
+        
+        const bilingualContainerClass = "bg-white text-black font-body flex flex-col w-[450px] min-h-[250px] border-2 border-black text-[9px] leading-tight";
 
         return (
-             <div ref={ref} className={mainContainerClass}>
-                <BilingualLabelRow label="MANUFACTURED BY / FABRIQUE PAR:" value={data['MANUFACTURED BY / FABRIQUE PAR']} />
-                <BilingualLabelRow label="DATE:" value={data['DATE']} />
-                <BilingualLabelRow label="GVWR / PNBV:" value={formatWeightBilingual(data['GVWR / PNBV'])} />
-                <BilingualLabelRow label="GAWR (EACH AXLE) / PNBE (CHAQUE ESSIEU):" value={formatWeightBilingual(data['GAWR (EACH AXLE) / PNBE (CHAQUE ESSIEU)'])} />
-                <BilingualLabelRow label="TIRES / PNEU:" value={data['TIRES / PNEU']} />
-                <BilingualLabelRow label="RIMS / JANTE:" value={data['RIMS / JANTE']} />
-                <BilingualLabelRow label="COLD INFL. PRESS. / PRESS. DE GONFL. A FROID:" value={`${data['COLD INFL. PRESS. / PRESS. DE GONFL. A FROID']} KPA ( PSI / LPC)`} />
-                 <div className="flex border-b border-black text-xs">
-                    <div className="w-1/2 p-1 font-bold flex items-center gap-2">
-                        <Checkbox checked={isSingle} label="SINGLE" />
-                        <Checkbox checked={isDual} label="DUAL" />
+             <div ref={ref} className={bilingualContainerClass}>
+                {/* Row 1: Manufacturer & Date */}
+                <div className="flex justify-between border-b border-black p-1">
+                    <span className="font-bold">MANUFACTURED BY / FABRIQUE PAR: <span className="font-semibold">{data['MANUFACTURED BY / FABRIQUE PAR']}</span></span>
+                    <span className="font-bold">DATE: <span className="font-semibold">{data['DATE']}</span></span>
+                </div>
+                {/* Row 2: Weights & Tires */}
+                <div className="flex border-b border-black">
+                    <div className="w-2/3 border-r border-black">
+                        <div className="flex">
+                            <div className="w-2/5 p-1 font-bold">GVWR / PNBV</div>
+                            <div className="w-3/5 p-1 font-semibold">{formatWeightBilingual(data['GVWR / PNBV'])}</div>
+                        </div>
+                        <div className="flex border-t border-black">
+                             <div className="w-2/5 p-1 font-bold">GAWR (EACH AXLE) / PNBE (CHAQUE ESSIEU)</div>
+                            <div className="w-3/5 p-1 font-semibold">{formatWeightBilingual(data['GAWR (EACH AXLE) / PNBE (CHAQUE ESSIEU)'])}</div>
+                        </div>
                     </div>
-                    <div className="w-1/2 p-1 font-bold border-l border-black flex items-center gap-2">
-                        <Checkbox checked={isSingle} label="SIMPLE" />
-                        <Checkbox checked={isDual} label="JUMELEE" />
+                    <div className="w-1/3 p-1 font-bold">TIRES / PNEU: <span className="font-semibold">{data['TIRES / PNEU']}</span></div>
+                </div>
+                 {/* Row 3: Rims, Pressure, Single/Dual */}
+                <div className="flex border-b border-black items-center">
+                    <div className="w-1/3 p-1 border-r border-black font-bold">RIMS / JANTE: <span className="font-semibold">{data['RIMS / JANTE']}</span></div>
+                    <div className="flex-grow p-1 font-bold">COLD INFL. PRESS. / PRESS. DE GONFL. A FROID: <span className="font-semibold">{formatPressureBilingual(data['COLD INFL. PRESS. / PRESS. DE GONFL. A FROID'])}</span></div>
+                    <div className="flex gap-2 p-1">
+                         <Checkbox checked={isSingle} label="SINGLE" />
+                         <Checkbox checked={isDual} label="DUAL" />
                     </div>
                 </div>
-                <BilingualLabelRow label="V.I.N. / N.I.V.:" value={data['V.I.N. / N.I.V.']} />
-                <BilingualLabelRow label="TYPE / TYPE:" value={data['TYPE / TYPE']} />
-                <div className="flex-grow flex items-center justify-center p-1">
-                    <p className="text-center text-[8px] leading-snug">{data['COMPLIANCE_STATEMENT']}</p>
+                {/* Row 4: Compliance Statement */}
+                <div className="flex-grow flex items-center justify-center p-1 border-b border-black">
+                     <p className="text-center text-[7px] leading-snug px-1 whitespace-pre-wrap">{data['COMPLIANCE_STATEMENT']}</p>
                 </div>
+                 {/* Row 5: VIN & Type */}
+                 <div className="flex justify-between p-1">
+                    <span className="font-bold">V.I.N. / N.I.V.: <span className="font-semibold tracking-wide">{data['V.I.N. / N.I.V.']}</span></span>
+                    <span className="font-bold">TYPE / TYPE: <span className="font-semibold">{data['TYPE / TYPE']}</span></span>
+                 </div>
             </div>
         );
     }

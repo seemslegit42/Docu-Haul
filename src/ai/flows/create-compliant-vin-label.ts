@@ -117,6 +117,7 @@ Extract data for the following keys: "MANUFACTURER", "DATE OF MANUF.", "GVWR", "
 **Template Style: Bilingual Canadian (English/French)**
 Extract data for the following keys: "MANUFACTURED BY / FABRIQUE PAR", "DATE", "GVWR / PNBV", "GAWR (EACH AXLE) / PNBE (CHAQUE ESSIEU)", "TIRES / PNEU", "RIMS / JANTE", "COLD INFL. PRESS. / PRESS. DE GONFL. A FROID", "SINGLE_OR_DUAL", "V.I.N. / N.I.V.", "TYPE / TYPE", and "COMPLIANCE_STATEMENT".
 - For "GVWR / PNBV" and "GAWR (EACH AXLE) / PNBE (CHAQUE ESSIEU)", extract ONLY the numeric value in kilograms. Do not include units or any other text (e.g., "7000").
+- For "COLD INFL. PRESS. / PRESS. DE GONFL. A FROID", extract ONLY the numeric value in KPA (e.g., "690").
 - For the "SINGLE_OR_DUAL" key, analyze the tire specifications and return only the string "single" or "dual". Do not include any other text.
 - For the compliance statement, use the provided standard or a default US/Canadian statement.
 {{/if}}

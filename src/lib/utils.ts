@@ -37,3 +37,34 @@ export function formatWeightBilingual(kgString: string | undefined): string {
   const lbs = convertKgToLbs(kg);
   return `${kg} KG (${lbs} LB)`;
 }
+
+
+/**
+ * Converts a numeric value in kilopascals (KPA) to pounds per square inch (PSI).
+ * @param kpa The value in KPA.
+ * @returns The converted value in PSI, rounded to the nearest whole number.
+ */
+export function convertKpaToPsi(kpa: number): number {
+  return Math.round(kpa / 6.89476);
+}
+
+/**
+ * Formats a pressure string (assumed to be in KPA) into a bilingual format.
+ * e.g., "690" -> "690 KPA (100 PSI / LPC)"
+ * @param kpaString The pressure as a string, expected to be a numeric value.
+ * @returns A formatted string with both KPA and PSI values. Returns a placeholder if input is invalid.
+ */
+export function formatPressureBilingual(kpaString: string | undefined): string {
+  if (!kpaString || kpaString.trim() === '' || kpaString.includes('[PLACEHOLDER]')) {
+    return 'KPA ( PSI / LPC)';
+  }
+  
+  const kpa = parseFloat(kpaString);
+
+  if (isNaN(kpa)) {
+    return `${kpaString} KPA ( PSI / LPC)`;
+  }
+  
+  const psi = convertKpaToPsi(kpa);
+  return `${kpa} KPA (${psi} PSI / LPC)`;
+}
