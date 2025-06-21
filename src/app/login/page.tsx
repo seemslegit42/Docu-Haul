@@ -3,6 +3,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
@@ -16,11 +18,9 @@ import { auth } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, FileCheck2, AlertTriangle } from 'lucide-react';
-import Link from 'next/link';
-import { AuthForm, formSchema, type LoginFormValues } from './components/AuthForm';
-import { GoogleIcon } from '@/components/shared/GoogleIcon';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { FileCheck2, AlertTriangle } from 'lucide-react';
+import { AuthForm, formSchema, type LoginFormValues } from './components/AuthForm';
 
 const getAuthErrorMessage = (errorCode: string): string => {
   switch (errorCode) {
@@ -164,59 +164,70 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background p-4">
-        <div className="w-full max-w-md">
-             <Link href="/" className="flex items-center justify-center gap-2 mb-6">
-                <FileCheck2 className="w-8 h-8 text-primary" />
-                <span className="font-headline text-2xl font-bold text-primary tracking-tight">DocuHaul</span>
+    <main className="w-full lg:grid lg:min-h-screen lg:grid-cols-2">
+      <div className="relative hidden h-full lg:block">
+          <Image
+              src="https://placehold.co/1920x1080.png"
+              alt="A stylized image of vehicle blueprints or a manufacturing plant"
+              data-ai-hint="vehicle blueprints manufacturing"
+              width={1920}
+              height={1080}
+              className="h-full w-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-background/60 to-background/20" />
+          <div className="absolute bottom-10 left-10 text-white">
+              <h1 className="font-headline text-4xl font-bold">DocuHaul</h1>
+              <p className="max-w-md mt-2 text-lg">
+                  Streamline Your Vehicle Documentation. Fast, Compliant, and AI-Powered.
+              </p>
+          </div>
+      </div>
+      <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="w-full max-w-md space-y-6">
+           <div className="text-center">
+            <Link href="/" className="inline-flex items-center justify-center gap-2 mb-4">
+              <FileCheck2 className="w-8 h-8 text-primary" />
+              <span className="font-headline text-3xl font-bold text-primary tracking-tight">DocuHaul</span>
             </Link>
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="login" disabled={anyLoading}>Login</TabsTrigger>
-                    <TabsTrigger value="signup" disabled={anyLoading}>Sign Up</TabsTrigger>
-                </TabsList>
-                <TabsContent value="login">
-                    <AuthForm 
-                      form={form} 
-                      onSubmit={onSubmit} 
-                      isLoading={isLoading} 
-                      isOtherLoading={isGoogleLoading} 
-                      buttonText="Login"
-                      onPasswordReset={handlePasswordReset}
-                    />
-                </TabsContent>
-                <TabsContent value="signup">
-                    <AuthForm 
-                      form={form} 
-                      onSubmit={onSubmit} 
-                      isLoading={isLoading} 
-                      isOtherLoading={isGoogleLoading} 
-                      buttonText="Sign Up"
-                      onPasswordReset={handlePasswordReset}
-                    />
-                </TabsContent>
-            </Tabs>
+            <p className="text-muted-foreground">
+                {activeTab === 'login' ? 'Welcome back! Please sign in to your account.' : 'Create an account to get started.'}
+            </p>
+          </div>
 
-            <div className="relative my-4">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
-                  Or continue with
-                </span>
-              </div>
-            </div>
-
-            <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={anyLoading}>
-              {isGoogleLoading ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <GoogleIcon className="mr-2 h-4 w-4" />
-              )}
-              Sign in with Google
-            </Button>
+          <Card>
+            <CardContent className="p-6">
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                    <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="login" disabled={anyLoading}>Login</TabsTrigger>
+                        <TabsTrigger value="signup" disabled={anyLoading}>Sign Up</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="login" className="mt-6">
+                        <AuthForm 
+                        form={form} 
+                        onSubmit={onSubmit} 
+                        isLoading={isLoading} 
+                        isGoogleLoading={isGoogleLoading}
+                        buttonText="Login"
+                        onPasswordReset={handlePasswordReset}
+                        onGoogleSignIn={handleGoogleSignIn}
+                        />
+                    </TabsContent>
+                    <TabsContent value="signup" className="mt-6">
+                        <AuthForm 
+                        form={form} 
+                        onSubmit={onSubmit} 
+                        isLoading={isLoading} 
+                        isGoogleLoading={isGoogleLoading} 
+                        buttonText="Sign Up"
+                        onPasswordReset={handlePasswordReset}
+                        onGoogleSignIn={handleGoogleSignIn}
+                        />
+                    </TabsContent>
+                </Tabs>
+            </CardContent>
+          </Card>
         </div>
     </div>
+    </main>
   );
 }

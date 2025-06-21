@@ -5,7 +5,6 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { toPng } from 'html-to-image';
 import { LabelForgeSchema, type LabelForgeInput } from '@/lib/schemas';
 import { createCompliantVinLabel, type VinLabelData } from '@/ai/flows/create-compliant-vin-label';
 import { addGeneratedDocument } from '@/lib/firestore';
@@ -80,6 +79,7 @@ export default function LabelForgePage() {
         return;
     }
     try {
+      const { toPng } = await import('html-to-image');
       const dataUrl = await toPng(labelRef.current, { cacheBust: true, pixelRatio: 2 });
       return dataUrl;
     } catch (err) {
@@ -99,7 +99,11 @@ export default function LabelForgePage() {
     setIsSaving(true);
     try {
       const imageDataUri = await generateImageDataUri();
-      if (!imageDataUri) return;
+      if (!imageDataUri) {
+        // Stop saving if image generation failed. The toast is handled in generateImageDataUri.
+        setIsSaving(false);
+        return;
+      }
 
       await addGeneratedDocument({
         userId: user.uid,

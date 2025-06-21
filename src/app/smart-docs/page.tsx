@@ -12,7 +12,6 @@ import { AppLayout } from '@/components/layout/app-layout';
 import { PageHeader } from '@/components/layout/page-header';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/use-auth';
-import jsPDF from 'jspdf';
 import SmartDocsForm from './components/SmartDocsForm';
 import GeneratedDocument from './components/GeneratedDocument';
 
@@ -142,8 +141,10 @@ export default function SmartDocsPage() {
     });
   };
 
-  const handlePdfDownload = () => {
+  const handlePdfDownload = async () => {
     if (!editableDocText.trim() || !generatedDoc) return;
+
+    const { default: jsPDF } = await import('jspdf');
 
     const selectedDocType = form.getValues('documentType');
     const vin = form.getValues('vin') || 'document';
