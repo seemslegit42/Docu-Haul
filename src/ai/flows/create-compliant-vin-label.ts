@@ -70,6 +70,12 @@ export async function createCompliantVinLabel(input: LabelForgeInput, authToken:
     throw new Error('Authentication required. Access denied.');
   }
 
+  // Check if the admin SDK was initialized. If not, the server is not configured for premium checks.
+  if (!admin.apps.length) {
+    console.error("Firebase Admin SDK is not initialized. Cannot perform premium user check.");
+    throw new Error("Server authentication is not configured. Please contact support.");
+  }
+
   try {
     const decodedToken = await admin.auth().verifyIdToken(authToken);
     const isPremium = decodedToken.premium === true;
