@@ -1,7 +1,7 @@
 
 'use server';
 /**
- * @fileOverview A flow for decoding a Vehicle Identification Number (VIN) into its constituent parts.
+ * @fileOverview A flow for decoding a Vehicle Identification Number (VIN). This flow first parses the VIN in code, then uses AI to provide human-readable descriptions for each component.
  *
  * - decodeVin - A function that performs the VIN decoding.
  * - DecodeVinOutput - The return type for the decodeVin function.
@@ -13,19 +13,22 @@ import { type DecodeVinInput, DecodeVinSchema } from '@/lib/schemas';
 import { defaultSafetySettings } from '@/ai/safety-settings';
 import admin from '@/lib/firebase-admin';
 
+// Schema for the individual parts of a VIN
 const VinPartSchema = z.object({
   value: z.string().describe("The substring of the VIN corresponding to this part."),
   description: z.string().describe("A brief explanation of what this part of the VIN represents."),
 });
 
+// Schema for the decoded vehicle descriptors
 const VinDescriptorSchema = VinPartSchema.extend({
-  trailerType: z.string().describe("Decoded trailer type from digit 4."),
-  bodyType: z.string().describe("Decoded body type from digit 5."),
-  bodyLength: z.string().describe("Decoded body length from digits 6-7."),
-  numberOfAxles: z.string().describe("Decoded number of axles from digit 8."),
+  trailerType: z.string().describe("Decoded trailer type (e.g., 'Flatbed', 'Gooseneck')."),
+  bodyType: z.string().describe("Decoded body type (e.g., 'Steel Frame', 'Aluminum')."),
+  bodyLength: z.string().describe("Decoded body length (e.g., '20 feet', '40 feet')."),
+  numberOfAxles: z.string().describe("Decoded number of axles (e.g., '2 Axles', '3 Axles')."),
 });
 
-const DecodeVinOutputSchema = z.object({
+// The final, structured output for the entire decoded VIN
+export const DecodeVinOutputSchema = z.object({
   wmi: VinPartSchema.describe("World Manufacturer Identifier (Digits 1-3)."),
   vehicleDescriptors: VinDescriptorSchema.describe("Vehicle Descriptors (Digits 4-8)."),
   checkDigit: VinPartSchema.describe("Check Digit (Digit 9)."),
@@ -35,6 +38,26 @@ const DecodeVinOutputSchema = z.object({
   fullVin: z.string().describe("The full VIN that was decoded."),
 });
 export type DecodeVinOutput = z.infer<typeof DecodeVinOutputSchema>;
+
+
+// The input schema for the AI prompt, containing the pre-parsed VIN parts.
+const DecodeVinPromptInputSchema = z.object({
+  wmi: z.string().describe("World Manufacturer Identifier (Digits 1-3)."),
+  vds: z.object({
+    full: z.string().describe("The full VDS string (Digits 4-8)."),
+    trailerType: z.string().describe("Trailer Type Code (Digit 4)."),
+    bodyType: z.string().describe("Body Type Code (Digit 5)."),
+    bodyLength: z.string().describe("Body Length Code (Digits 6-7)."),
+    numberOfAxles: z.string().describe("Number of Axles Code (Digit 8)."),
+  }),
+  checkDigit: z.string().describe("Check Digit (Digit 9)."),
+  modelYear: z.string().describe("Model Year Code (Digit 10)."),
+  plant: z.string().describe("Plant Code (Digit 11)."),
+  sequentialNumber: z.string().describe("Sequential Production Number (Digits 12-17)."),
+  fullVin: z.string().describe("The full 17-digit VIN."),
+});
+type DecodeVinPromptInput = z.infer<typeof DecodeVinPromptInputSchema>;
+
 
 export async function decodeVin(input: DecodeVinInput, authToken: string | undefined): Promise<DecodeVinOutput> {
   if (!authToken) {
@@ -57,31 +80,33 @@ export async function decodeVin(input: DecodeVinInput, authToken: string | undef
 
 const prompt = ai.definePrompt({
   name: 'decodeVinPrompt',
-  input: {schema: DecodeVinSchema},
+  input: {schema: DecodeVinPromptInputSchema},
   output: {schema: DecodeVinOutputSchema},
   prompt: `You are an expert VIN (Vehicle Identification Number) decoder for trailers.
-Your task is to decode the provided 17-digit VIN based on the structural rules below.
+Your task is to take pre-parsed VIN components and assemble them into a structured JSON output with descriptions.
 
-VIN to decode: {{{vin}}}
+Provided VIN: {{{fullVin}}}
+- WMI: {{{wmi}}}
+- VDS (Full): {{{vds.full}}}
+- Trailer Type Code: {{{vds.trailerType}}}
+- Body Type Code: {{{vds.bodyType}}}
+- Body Length Code: {{{vds.bodyLength}}}
+- Number of Axles Code: {{{vds.numberOfAxles}}}
+- Check Digit: {{{checkDigit}}}
+- Model Year Code: {{{modelYear}}}
+- Plant Code: {{{plant}}}
+- Sequential Number: {{{sequentialNumber}}}
 
-Here is the VIN structure:
-- **Digits 1-3 (WMI - World Manufacturer Identifier)**: Identifies the manufacturer.
-- **Digits 4-8 (Vehicle Descriptors)**:
-  - **Digit 4**: Trailer Type.
-  - **Digit 5**: Body Type.
-  - **Digits 6-7**: Body Length.
-  - **Digit 8**: Number of Axles.
-- **Digit 9 (Check Digit)**: A calculated digit for validation. Your description should state that it's a calculated value.
-- **Digit 10 (Model Year)**: Represents the model year.
-- **Digit 11 (Plant)**: The manufacturing plant code.
-- **Digits 12-17 (Sequential Production Number)**:
-  - For manufacturers producing > 999 units/year, digits 12-17 are a 6-digit sequential number.
-  - For manufacturers producing <= 999 units/year, digits 12-14 are a WMI extension, and digits 15-17 are a 3-digit sequential number (001-999). Briefly mention this rule in the sequentialNumber description.
-
-Based on this structure, break down the VIN '{{{vin}}}' into the specified parts. For each part, provide the corresponding substring from the VIN as 'value' and an explanation as 'description'. For the 'vehicleDescriptors', also provide the decoded values for trailerType, bodyType, etc.
-
-Do not invent or hallucinate information. Your analysis should be based solely on the positional information provided.
-The fullVin output field should be the original VIN '{{{vin}}}'.
+Based on this, generate a JSON response that matches the required output schema.
+1.  For each section (wmi, checkDigit, modelYear, plant, sequentialNumber), populate its 'value' field with the corresponding code provided above and write a 'description' explaining what that part of the VIN represents.
+    - For 'checkDigit', state that it's a calculated value for validation.
+    - For 'sequentialNumber', mention the different rules for small (<1000 units/year) vs. large manufacturers.
+2.  For the 'vehicleDescriptors' section:
+    - Populate its 'value' field with '{{{vds.full}}}'.
+    - Populate the specific fields 'trailerType', 'bodyType', 'bodyLength', and 'numberOfAxles' with human-readable descriptions based on their respective codes.
+    - Provide a general description for the whole Vehicle Descriptor Section.
+3.  The 'fullVin' field in your output MUST be '{{{fullVin}}}'.
+4.  Do not invent or hallucinate information not derivable from the provided codes. Your analysis should be based solely on the positional information.
 `,
   config: {
     safetySettings: defaultSafetySettings,
@@ -94,14 +119,32 @@ const decodeVinFlow = ai.defineFlow(
     inputSchema: DecodeVinSchema,
     outputSchema: DecodeVinOutputSchema,
   },
-  async input => {
-    const {output} = await prompt(input);
+  async (input) => {
+    // Step 1: Deterministically parse the VIN in code.
+    const vin = input.vin.toUpperCase();
+    const promptInput: DecodeVinPromptInput = {
+      wmi: vin.substring(0, 3),
+      vds: {
+        full: vin.substring(3, 8),
+        trailerType: vin.substring(3, 4),
+        bodyType: vin.substring(4, 5),
+        bodyLength: vin.substring(5, 7),
+        numberOfAxles: vin.substring(7, 8),
+      },
+      checkDigit: vin.substring(8, 9),
+      modelYear: vin.substring(9, 10),
+      plant: vin.substring(10, 11),
+      sequentialNumber: vin.substring(11, 17),
+      fullVin: vin,
+    };
+
+    // Step 2: Ask the AI to provide descriptions for the parsed components.
+    const { output } = await prompt(promptInput);
     
-    // It's crucial to validate the output from the AI.
-    // Check for null/undefined output or if key fields are missing.
-    if (!output || !output.wmi?.value || !output.fullVin?.trim()) {
-      const errorMessage = 'AI failed to decode the VIN. The output was empty or incomplete. Please ensure the VIN is valid and try again.';
-      console.error(errorMessage, { input, receivedOutput: output });
+    // Step 3: Validate the AI's output.
+    if (!output || !output.wmi?.value || !output.fullVin?.trim() || output.fullVin !== vin) {
+      const errorMessage = 'AI failed to generate a valid description for the VIN. The output was empty, incomplete, or mismatched the original VIN. Please ensure the VIN is valid and try again.';
+      console.error(errorMessage, { input, promptInput, receivedOutput: output });
       throw new Error(errorMessage);
     }
     
