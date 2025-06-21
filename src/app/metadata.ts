@@ -2,6 +2,7 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://docuhaul.lol'),
   title: {
     default: "DocuHaul",
     template: "%s | DocuHaul",
@@ -18,6 +19,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "DocuHaul: AI-Powered Vehicle Documentation",
     description: "Automate the creation, validation, and management of essential vehicle documents like VIN labels, NVIS certificates, and Bills of Sale.",
+    url: "https://docuhaul.lol",
     siteName: "DocuHaul",
     locale: 'en_US',
     type: 'website',
