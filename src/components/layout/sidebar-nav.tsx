@@ -11,7 +11,6 @@ import {
   SidebarMenuButton,
   SidebarHeader,
   SidebarFooter,
-  SidebarTrigger,
   useSidebar,
 } from '@/components/ui/sidebar';
 import { useAuth } from '@/hooks/use-auth';
@@ -46,12 +45,11 @@ export function SidebarNav() {
 
   return (
     <>
-      <SidebarHeader className="flex items-center justify-between p-3 border-b border-sidebar-border">
+      <SidebarHeader className="flex items-center p-3 border-b border-sidebar-border">
         <Link href="/" className="flex items-center gap-2">
           <FileCheck2 className="w-7 h-7 text-primary" />
           {open && <span className="font-headline text-xl font-bold text-primary tracking-tight">DocuHaul</span>}
         </Link>
-        <SidebarTrigger className="md:hidden" />
       </SidebarHeader>
       <SidebarMenu className="flex-1 p-2">
         {navItems.map((item) => {

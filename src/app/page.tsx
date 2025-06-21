@@ -1,7 +1,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { FileText, Tags, ShieldCheck, Hash } from 'lucide-react';
+import { FileCheck2, Tags, ShieldCheck, Hash } from 'lucide-react';
 import { AuthAwareButton } from '@/components/layout/AuthAwareButton';
 import { FeatureCard } from '@/components/shared/FeatureCard';
 
@@ -12,7 +12,7 @@ export default function LandingPage() {
       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container flex h-14 items-center">
           <Link href="/" className="flex items-center gap-2">
-            <FileText className="w-7 h-7 text-primary" />
+            <FileCheck2 className="w-7 h-7 text-primary" />
             <span className="font-headline text-xl font-bold text-primary tracking-tight">DocuHaul</span>
           </Link>
           <nav className="flex-1 flex justify-end">
@@ -65,7 +65,7 @@ export default function LandingPage() {
             </div>
             <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
               <FeatureCard
-                icon={<FileText className="w-10 h-10 mb-4 text-primary" />}
+                icon={<FileCheck2 className="w-10 h-10 mb-4 text-primary" />}
                 title="Smart Docs"
                 description="Instantly generate NVIS certificates and Bills of Sale from minimal input. Professional, accurate, and fast."
               />
