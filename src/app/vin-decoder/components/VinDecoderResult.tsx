@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Loader2, FilePlus2 } from 'lucide-react';
+import { FilePlus2, Tags } from 'lucide-react';
 
 interface VinDecoderResultProps {
   result: DecodeVinOutput | null;
@@ -96,11 +96,17 @@ export default function VinDecoderResult({ result, isLoading }: VinDecoderResult
         )}
       </CardContent>
       {result && !isLoading && (
-        <CardFooter>
+        <CardFooter className="flex flex-col sm:flex-row gap-2 pt-4">
             <Button asChild className="w-full">
               <Link href={`/smart-docs?vin=${result.fullVin}&modelYear=${result.modelYear.value}&axles=${result.vehicleDescriptors.numberOfAxles}`}>
                 <FilePlus2 className="mr-2 h-4 w-4" />
-                Generate Document for this VIN
+                Generate NVIS / BoS
+              </Link>
+            </Button>
+            <Button asChild variant="outline" className="w-full">
+              <Link href={`/label-forge?vin=${result.fullVin}`}>
+                <Tags className="mr-2 h-4 w-4" />
+                Forge VIN Label
               </Link>
             </Button>
         </CardFooter>

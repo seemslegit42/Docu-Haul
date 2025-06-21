@@ -1,8 +1,8 @@
 
 "use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { LabelForgeSchema, type LabelForgeInput } from '@/lib/schemas';
@@ -22,6 +22,7 @@ export default function LabelForgePage() {
   const { toast } = useToast();
   const { user, isPremium, isLoading: isAuthLoading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const form = useForm<LabelForgeInput>({
     resolver: zodResolver(LabelForgeSchema),
@@ -32,6 +33,14 @@ export default function LabelForgePage() {
       labelDimensions: '',
     },
   });
+
+  useEffect(() => {
+    const vin = searchParams.get('vin');
+    if (vin) {
+      form.setValue('vinData', vin, { shouldValidate: true });
+    }
+  }, [searchParams, form]);
+
 
   const onSubmit = async (data: LabelForgeInput) => {
     setIsGenerating(true);
