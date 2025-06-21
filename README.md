@@ -63,6 +63,37 @@ The application uses the Firebase Admin SDK for secure server-side actions (like
         # Firebase service account keys
         *.json
         ```
+        
+#### Payments and Premium Access (Lemon Squeezy)
+
+This application is set up to handle premium feature access via payments through Lemon Squeezy. A Cloud Function listens for webhook events to grant users a `premium` role.
+
+**Local Setup & Deployment:**
+
+1.  **Get Checkout Link**:
+    *   In your Lemon Squeezy dashboard, create a product and get its Checkout Link.
+    *   Add this URL to your `.env` file:
+        ```env
+        NEXT_PUBLIC_LEMON_SQUEEZY_CHECKOUT_URL=https://your-store.lemonsqueezy.com/checkout/buy/your-variant-id
+        ```
+
+2.  **Configure Webhook Secret**:
+    *   In your Lemon Squeezy dashboard, go to Settings > Webhooks. Create a new webhook.
+    *   The webhook URL will be your deployed Cloud Function URL. You can get this from the Firebase Console after deploying. It will look like: `https://lemonsqueezywebhook-<your-project-hash>-<region>.a.run.app`.
+    *   Copy the **Signing Secret** provided by Lemon Squeezy.
+    *   Set this secret in your local environment for the Firebase CLI to use during deployment. **Do not commit this to your code.**
+        ```bash
+        firebase secrets:set LEMONSQUEEZY_WEBHOOK_SECRET
+        ```
+    *   When prompted, paste your signing secret.
+
+3.  **Deploy the Webhook Function**:
+    *   Deploy your functions. The CLI will automatically detect that the `lemonsqueezyWebhook` function requires the `LEMONSQUEEZY_WEBHOOK_SECRET` and grant it access.
+        ```bash
+        firebase deploy --only functions
+        ```
+
+After deployment, ensure the webhook URL in Lemon Squeezy is correct and that it is configured to send `order_created` events.
 
 ## Core Features
 

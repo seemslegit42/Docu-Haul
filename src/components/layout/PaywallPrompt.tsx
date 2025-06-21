@@ -1,14 +1,26 @@
 
+'use client';
+
 import Link from 'next/link';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Lock, ArrowRight } from "lucide-react";
+import { useAuth } from '@/hooks/use-auth';
 
-// TODO: Replace this with your actual Lemon Squeezy checkout link
-const LEMON_SQUEEZY_CHECKOUT_URL = "#";
+// The base URL for your Lemon Squeezy checkout.
+// This should be set in your .env file.
+const LEMON_SQUEEZY_CHECKOUT_URL = process.env.NEXT_PUBLIC_LEMON_SQUEEZY_CHECKOUT_URL || "#";
 
 export function PaywallPrompt() {
-  const isCheckoutDisabled = LEMON_SQUEEZY_CHECKOUT_URL === "#";
+  const { user } = useAuth();
+  
+  // Append the user's ID to the checkout URL as custom data.
+  // This is crucial for the webhook to identify which user to grant premium access to.
+  const checkoutUrl = user 
+    ? `${LEMON_SQUEEZY_CHECKOUT_URL}?checkout_data[custom][user_id]=${user.uid}`
+    : LEMON_SQUEEZY_CHECKOUT_URL;
+
+  const isCheckoutDisabled = checkoutUrl === "#" || !user;
 
   return (
     <div className="grid grid-cols-1">
@@ -25,13 +37,13 @@ export function PaywallPrompt() {
                 </CardHeader>
                 <CardContent className="p-0">
                     <Button asChild size="lg" disabled={isCheckoutDisabled}>
-                        <Link href={LEMON_SQUEEZY_CHECKOUT_URL} target="_blank">
+                        <Link href={checkoutUrl} target="_blank">
                             Purchase Access <ArrowRight className="ml-2 h-4 w-4" />
                         </Link>
                     </Button>
                      {isCheckoutDisabled && (
                         <p className="text-xs text-muted-foreground mt-3 max-w-sm mx-auto">
-                            Checkout is not yet configured.
+                            Checkout is not yet configured. Please set the `NEXT_PUBLIC_LEMON_SQUEEZY_CHECKOUT_URL` in your environment.
                         </p>
                     )}
                     {!isCheckoutDisabled && (
