@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -65,7 +66,7 @@ function AuthForm({ form, onSubmit, isLoading, isOtherLoading, buttonText, onPas
         <Card>
             <CardHeader>
                 <CardTitle>{buttonText}</CardTitle>
-                <CardDescription>Enter your credentials to continue to DocuHaul.</CardDescription>
+                <CardDescription>Enter your credentials to continue to VINscribe.</CardDescription>
             </CardHeader>
             <CardContent>
                 <Form {...form}>
@@ -77,7 +78,7 @@ function AuthForm({ form, onSubmit, isLoading, isOtherLoading, buttonText, onPas
                                 <FormItem>
                                     <FormLabel>Email</FormLabel>
                                     <FormControl>
-                                        <Input type="email" placeholder="you@example.com" {...field} disabled={anyLoading} />
+                                        <Input type="email" placeholder="Enter your email" {...field} disabled={anyLoading} />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
@@ -220,7 +221,7 @@ export default function LoginPage() {
         <div className="w-full max-w-md">
              <Link href="/" className="flex items-center justify-center gap-2 mb-6">
                 <FileCheck2 className="w-8 h-8 text-primary" />
-                <span className="font-headline text-2xl font-bold text-primary tracking-tight">DocuHaul</span>
+                <span className="font-headline text-2xl font-bold text-primary tracking-tight">VINscribe</span>
             </Link>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <TabsList className="grid w-full grid-cols-2">

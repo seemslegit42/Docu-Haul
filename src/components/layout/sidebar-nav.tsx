@@ -18,7 +18,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 
 
 const navItems = [
@@ -49,7 +49,7 @@ export function SidebarNav() {
       <SidebarHeader className="flex items-center justify-between p-3 border-b border-sidebar-border">
         <Link href="/" className="flex items-center gap-2">
           <FileCheck2 className="w-7 h-7 text-primary" />
-          {open && <span className="font-headline text-xl font-bold text-primary tracking-tight">DocuHaul</span>}
+          {open && <span className="font-headline text-xl font-bold text-primary tracking-tight">VINscribe</span>}
         </Link>
         <SidebarTrigger className="md:hidden" />
       </SidebarHeader>
@@ -76,36 +76,38 @@ export function SidebarNav() {
         ))}
       </SidebarMenu>
       <SidebarFooter className="p-2 border-t border-sidebar-border">
-        {user && (
-          <div className="mb-2">
-            {open ? (
-              <div className="flex items-center gap-2 p-1 rounded-md">
-                <UserIcon className="w-5 h-5 shrink-0 text-muted-foreground" />
-                <span className="text-sm font-medium truncate flex-1">{user.email}</span>
-                 <Tooltip>
+          <TooltipProvider>
+            {user && (
+              <div className="mb-2">
+                {open ? (
+                  <div className="flex items-center gap-2 p-1 rounded-md">
+                    <UserIcon className="w-5 h-5 shrink-0 text-muted-foreground" />
+                    <span className="text-sm font-medium truncate flex-1">{user.email}</span>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleSignOut}>
+                            <LogOut className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent side="right">Sign Out</TooltipContent>
+                    </Tooltip>
+                  </div>
+                ) : (
+                  <Tooltip>
                     <TooltipTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleSignOut}>
-                        <LogOut className="h-4 w-4" />
+                      <Button variant="ghost" size="icon" className="w-full" onClick={handleSignOut}>
+                        <LogOut className="h-5 w-5" />
                       </Button>
                     </TooltipTrigger>
-                    <TooltipContent side="right">Sign Out</TooltipContent>
-                 </Tooltip>
+                    <TooltipContent side="right">Sign out {user.email}</TooltipContent>
+                  </Tooltip>
+                )}
               </div>
-            ) : (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" className="w-full" onClick={handleSignOut}>
-                    <LogOut className="h-5 w-5" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="right">Sign out {user.email}</TooltipContent>
-              </Tooltip>
             )}
-          </div>
-        )}
+          </TooltipProvider>
         {open && (
           <p className="text-xs text-sidebar-foreground/70 font-body text-center">
-            © {new Date().getFullYear()} DocuHaul
+            © {new Date().getFullYear()} VINscribe
           </p>
         )}
       </SidebarFooter>

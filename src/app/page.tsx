@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { FileText, Tags, ShieldCheck, Hash, ArrowRight } from 'lucide-react';
 import { AuthAwareButton } from '@/components/layout/AuthAwareButton';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function LandingPage() {
   return (
@@ -23,19 +23,19 @@ export default function LandingPage() {
       {/* Main Content */}
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative py-20 md:py-32">
+        <section className="relative py-20 md:py-32 overflow-hidden">
            <div 
             aria-hidden="true" 
-            className="absolute inset-0 top-0 z-0 grid grid-cols-2 -space-x-52 opacity-20">
-            <div className="h-64 bg-gradient-to-br from-primary to-slate-800 blur-3xl"></div>
-            <div className="h-80 bg-gradient-to-r from-primary to-slate-900 blur-3xl"></div>
+            className="absolute inset-0 top-0 z-0 grid grid-cols-2 -space-x-52 opacity-25">
+            <div className="h-64 bg-gradient-to-br from-primary/30 via-accent/20 to-background blur-3xl"></div>
+            <div className="h-80 bg-gradient-to-r from-primary/20 via-accent/10 to-background blur-3xl"></div>
           </div>
           <div className="container relative z-10 text-center">
             <h1 className="text-4xl font-headline font-extrabold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl">
               Reimagine Vehicle Documentation
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
-              DocuHaul leverages Generative AI to automate the creation, validation, and management of essential vehicle documents. Save time, ensure compliance, and streamline your workflow.
+              VINscribe leverages Generative AI to automate the creation, validation, and management of essential vehicle documents. Save time, ensure compliance, and streamline your workflow.
             </p>
             <div className="mt-8 flex justify-center gap-4">
               <AuthAwareButton text="Get Started Now" buttonProps={{ size: "lg" }} />
@@ -82,9 +82,9 @@ export default function LandingPage() {
       <footer className="border-t border-border/40">
         <div className="container flex flex-col items-center justify-between gap-4 py-8 md:flex-row">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} DocuHaul. All rights reserved.
+            © {new Date().getFullYear()} VINscribe. All rights reserved.
           </p>
-          <div className="font-headline text-lg font-bold text-primary">DocuHaul</div>
+          <div className="font-headline text-lg font-bold text-primary">VINscribe</div>
         </div>
       </footer>
     </div>
@@ -93,7 +93,7 @@ export default function LandingPage() {
 
 function FeatureCard({ icon, title, description }: { icon: React.ReactNode; title: string; description: string; }) {
   return (
-    <Card className="text-center border-transparent transition-all duration-300 hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-2 flex flex-col">
+    <Card className="text-center transition-all duration-300 hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-2 flex flex-col bg-card/80 backdrop-blur-sm">
       <CardContent className="pt-6 flex flex-col items-center flex-grow">
         {icon}
         <h3 className="font-headline text-xl font-bold mt-4 mb-2">{title}</h3>

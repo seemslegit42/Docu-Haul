@@ -7,46 +7,87 @@
 
 @layer base {
   :root {
+    --background: 210 14% 93%; /* Light Gray */
+    --foreground: 222 47% 11%; /* Dark Blue/Black for text */
+    --card: 0 0% 100%; /* White */
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 120 60% 34%; /* Forest Green */
+    --primary-foreground: 0 0% 100%; /* White text on green */
+    --secondary: 210 14% 89%; /* Slightly darker gray */
+    --secondary-foreground: 222 47% 11%;
+    --muted: 210 14% 89%;
+    --muted-foreground: 215 20% 45%;
+    --accent: 34 44% 75%; /* Soft Tan */
+    --accent-foreground: 34 44% 25%; /* Darker text for tan */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 210 14% 80%;
+    --input: 210 14% 80%;
+    --ring: 120 60% 34%;
+    --radius: 0.75rem; /* Slightly larger radius for a softer look */
+    --success: 142 70% 35%;
+    --success-foreground: 0 0% 100%;
+    --warning: 45 85% 55%;
+    --warning-foreground: 45 93% 10%;
+
+    --chart-1: 120 60% 34%;
+    --chart-2: 34 44% 75%;
+    --chart-3: 210 14% 60%;
+    --chart-4: 120 40% 54%;
+    --chart-5: 34 34% 55%;
+
+    /* Sidebar specific colors aligned with the theme */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 222 47% 11%;
+    --sidebar-primary: 120 60% 34%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 14% 93%;
+    --sidebar-accent-foreground: 222 47% 11%;
+    --sidebar-border: 210 14% 89%;
+    --sidebar-ring: 120 60% 34%;
+  }
+
+  .dark {
     --background: 222 47% 11%; /* Dark blue */
     --foreground: 210 40% 98%; /* Almost white */
     --card: 222 47% 15%; /* Slightly lighter dark blue */
     --card-foreground: 210 40% 98%;
     --popover: 222 47% 11%;
     --popover-foreground: 210 40% 98%;
-    --primary: 217 91% 60%; /* Lighter vibrant blue for dark mode */
+    --primary: 120 55% 65%; /* Lighter Forest Green for dark mode */
     --primary-foreground: 222 47% 11%;
     --secondary: 217 32% 17%;
     --secondary-foreground: 210 40% 98%;
     --muted: 217 32% 17%;
     --muted-foreground: 215 20% 65.1%;
-    --accent: 217 32% 17%;
+    --accent: 34 35% 55%; /* Darker Soft Tan for dark mode */
     --accent-foreground: 210 40% 98%;
     --destructive: 0 63% 31%;
     --destructive-foreground: 210 40% 98%;
     --border: 217 32% 27%;
     --input: 217 32% 27%;
-    --ring: 217 91% 60%;
-    --radius: 0.75rem; /* Slightly larger radius for a softer look */
+    --ring: 120 55% 65%;
     --success: 142 70% 45%;
     --success-foreground: 0 0% 100%;
     --warning: 45 85% 55%;
     --warning-foreground: 45 93% 10%;
 
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-
-    /* Sidebar specific colors aligned with the theme */
+    --chart-1: 120 55% 65%;
+    --chart-2: 34 35% 55%;
+    --chart-3: 210 30% 75%;
+    --chart-4: 120 40% 54%;
+    --chart-5: 34 34% 55%;
+    
     --sidebar-background: 222 47% 11%;
     --sidebar-foreground: 210 40% 98%;
-    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary: 120 55% 65%;
     --sidebar-primary-foreground: 222 47% 11%;
     --sidebar-accent: 217 32% 17%;
     --sidebar-accent-foreground: 210 40% 98%;
     --sidebar-border: 217 32% 27%;
-    --sidebar-ring: 217 91% 60%;
+    --sidebar-ring: 120 55% 65%;
   }
 }
 

@@ -1,0 +1,48 @@
+
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: {
+    default: "VINscribe",
+    template: "%s | VINscribe",
+  },
+  description: 'VINscribe: AI-powered creation of VIN labels, NVIS certificates, and Bills of Sale for vehicle manufacturers.',
+  keywords: ["VIN", "NVIS", "Bill of Sale", "Vehicle Documentation", "Trailer Manufacturing", "AI"],
+  authors: [{ name: "Firebase", url: "https://firebase.google.com" }],
+  creator: "Firebase",
+  publisher: "Firebase",
+  robots: {
+    index: true,
+    follow: true,
+  },
+  openGraph: {
+    title: "VINscribe",
+    description: "AI-powered creation of VIN labels, NVIS certificates, and Bills of Sale.",
+    url: "https://your-production-url.com", // TODO: Update with your production URL
+    siteName: "VINscribe",
+    images: [
+      {
+        url: 'https://your-production-url.com/og-image.png', // TODO: Update with your production URL
+        width: 1200,
+        height: 630,
+        alt: 'VINscribe - AI Vehicle Documentation',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'VINscribe - AI Vehicle Documentation',
+    description: 'Automate vehicle documentation with the power of Generative AI.',
+    // site: '@yourtwitterhandle', // TODO: Add your twitter handle
+    // creator: '@yourtwitterhandle', // TODO: Add your twitter handle
+    images: ['https://your-production-url.com/og-image.png'], // TODO: Update with your production URL
+  },
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon-16x16.png',
+    apple: '/apple-touch-icon.png',
+  },
+  manifest: '/site.webmanifest',
+};
