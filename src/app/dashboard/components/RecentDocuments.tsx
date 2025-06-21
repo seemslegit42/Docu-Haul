@@ -9,11 +9,26 @@ import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
-import { formatRelative } from 'date-fns';
+import { format, formatRelative } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, History, FileText } from 'lucide-react';
+import { capitalize } from '@/lib/string-utils';
 
 const RECENT_DOCS_LIMIT = 5;
+
+// This component safely renders a relative time string on the client
+// while providing a deterministic fallback for SSR to prevent hydration errors.
+const SafeRelativeTime = ({ date }: { date: Date }) => {
+  // Set an initial, non-relative date for the server and initial client render.
+  const [time, setTime] = useState(() => format(date, 'PP'));
+
+  useEffect(() => {
+    // After mounting on the client, update to the relative time.
+    setTime(capitalize(formatRelative(date, new Date())));
+  }, [date]);
+
+  return <>{time}</>;
+};
 
 export function RecentDocuments() {
   const { user, isLoading: isAuthLoading } = useAuth();
@@ -105,7 +120,7 @@ export function RecentDocuments() {
                   <TableCell className="font-medium">{doc.documentType}</TableCell>
                   <TableCell className="font-mono">{doc.vin}</TableCell>
                   <TableCell className="text-right">
-                    {doc.createdAt?.toDate ? formatRelative(doc.createdAt.toDate(), new Date()) : 'Just now'}
+                    {doc.createdAt?.toDate ? <SafeRelativeTime date={doc.createdAt.toDate()} /> : 'Just now'}
                   </TableCell>
                 </TableRow>
               ))}

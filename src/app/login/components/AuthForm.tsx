@@ -23,13 +23,14 @@ interface AuthFormProps {
     onSubmit: (data: LoginFormValues) => void;
     isLoading: boolean;
     isGoogleLoading: boolean;
-    buttonText: string;
+    mode: 'login' | 'signup';
     onPasswordReset: () => void;
     onGoogleSignIn: () => void;
 }
 
-export function AuthForm({ form, onSubmit, isLoading, isGoogleLoading, buttonText, onPasswordReset, onGoogleSignIn }: AuthFormProps) {
+export function AuthForm({ form, onSubmit, isLoading, isGoogleLoading, mode, onPasswordReset, onGoogleSignIn }: AuthFormProps) {
     const anyLoading = isLoading || isGoogleLoading;
+    const buttonText = mode === 'login' ? 'Login' : 'Sign Up';
 
     return (
         <div className="w-full">
@@ -55,7 +56,7 @@ export function AuthForm({ form, onSubmit, isLoading, isGoogleLoading, buttonTex
                             <FormItem>
                                 <div className="flex items-center justify-between">
                                     <FormLabel>Password</FormLabel>
-                                    {buttonText === 'Login' && (
+                                    {mode === 'login' && (
                                     <Button
                                         type="button"
                                         variant="link"

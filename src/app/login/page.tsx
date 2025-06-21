@@ -203,24 +203,24 @@ export default function LoginPage() {
                     </TabsList>
                     <TabsContent value="login" className="mt-6">
                         <AuthForm 
-                        form={form} 
-                        onSubmit={onSubmit} 
-                        isLoading={isLoading} 
-                        isGoogleLoading={isGoogleLoading}
-                        buttonText="Login"
-                        onPasswordReset={handlePasswordReset}
-                        onGoogleSignIn={handleGoogleSignIn}
+                          form={form} 
+                          onSubmit={onSubmit} 
+                          isLoading={isLoading} 
+                          isGoogleLoading={isGoogleLoading}
+                          mode="login"
+                          onPasswordReset={handlePasswordReset}
+                          onGoogleSignIn={handleGoogleSignIn}
                         />
                     </TabsContent>
                     <TabsContent value="signup" className="mt-6">
                         <AuthForm 
-                        form={form} 
-                        onSubmit={onSubmit} 
-                        isLoading={isLoading} 
-                        isGoogleLoading={isGoogleLoading} 
-                        buttonText="Sign Up"
-                        onPasswordReset={handlePasswordReset}
-                        onGoogleSignIn={handleGoogleSignIn}
+                          form={form} 
+                          onSubmit={onSubmit} 
+                          isLoading={isLoading} 
+                          isGoogleLoading={isGoogleLoading} 
+                          mode="signup"
+                          onPasswordReset={handlePasswordReset}
+                          onGoogleSignIn={handleGoogleSignIn}
                         />
                     </TabsContent>
                 </Tabs>
