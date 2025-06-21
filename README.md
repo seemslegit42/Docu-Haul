@@ -18,11 +18,13 @@ npm run dev
 
 Open [http://localhost:6000](http://localhost:6000) with your browser to see the result.
 
-### Environment Variables
+### Environment Setup
 
-This application uses Firebase for authentication. To enable login and other authenticated features, you need to create a `.env` file in the root of the project and add your Firebase project credentials.
+#### Client-Side Firebase Setup (for Auth UI)
 
-Create a `.env` file and add the following variables:
+This application uses the Firebase client SDK for authentication features like login and sign-up.
+
+Create a `.env` file in the root of the project and add the following variables:
 
 ```env
 NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
@@ -34,6 +36,33 @@ NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
 ```
 
 You can find these values in your Firebase project's settings. If these are not provided, authentication features will be disabled.
+
+#### Server-Side Firebase Admin Setup (for AI Flows)
+
+The application uses the Firebase Admin SDK for secure server-side actions (like validating user tokens in AI flows). For this to work in your local environment, you need to provide service account credentials. The deployed application on App Hosting uses Application Default Credentials automatically, so this setup is only for **local development**.
+
+1.  **Generate a Service Account Key:**
+    *   Go to your Firebase Project Settings > Service accounts.
+    *   Select "Node.js" and click "Generate new private key".
+    *   A JSON file will be downloaded. Save it securely in your project, for example, at the root of the project. **Do not commit this file to version control.**
+
+2.  **Set the Environment Variable:**
+    *   Create a new file named `.env.local` in the root of your project. Next.js automatically loads this file for local development.
+    *   Add the following line to `.env.local`, replacing the path with the actual path to your key file:
+        ```env
+        GOOGLE_APPLICATION_CREDENTIALS=./your-service-account-key-file.json
+        ```
+
+3.  **IMPORTANT: Secure Your Credentials:**
+    *   The service account key file is highly sensitive. You must ensure it is not committed to your Git repository.
+    *   We strongly recommend creating a `.gitignore` file in your project root if you don't have one, and adding the following lines to it:
+        ```
+        # Local environment variables
+        .env.local
+
+        # Firebase service account keys
+        *.json
+        ```
 
 ## Core Features
 
