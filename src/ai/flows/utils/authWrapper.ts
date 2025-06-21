@@ -1,0 +1,63 @@
+'use server';
+/**
+ * @fileOverview A higher-order function to wrap Genkit flows with authentication and authorization checks.
+ */
+
+import admin from '@/lib/firebase-admin';
+
+interface AuthWrapperOptions {
+  premiumRequired?: boolean;
+  premiumCheckError?: string;
+}
+
+/**
+ * Creates an authenticated flow wrapper.
+ * This function takes a Genkit flow and returns a new function that performs
+ * authentication and authorization checks before executing the original flow.
+ *
+ * @param flow The Genkit flow function to wrap. It should take an input of type TInput and return a Promise of TOutput.
+ * @param options Configuration options for the authorization check.
+ * @param options.premiumRequired If true, checks if the user has a `premium` custom claim.
+ * @param options.premiumCheckError The error message to throw if the premium check fails.
+ * @returns An async function that takes the flow input and an auth token, and returns the flow's output.
+ */
+export function createAuthenticatedFlow<TInput, TOutput>(
+  flow: (input: TInput) => Promise<TOutput>,
+  options: AuthWrapperOptions = {}
+): (input: TInput, authToken: string | undefined) => Promise<TOutput> {
+  return async (input: TInput, authToken: string | undefined) => {
+    if (!authToken) {
+      throw new Error('Authentication required. Access denied.');
+    }
+
+    if (!admin.apps.length) {
+      console.error("Firebase Admin SDK is not initialized. Cannot perform authenticated check.");
+      throw new Error("Server authentication is not configured. Please contact support.");
+    }
+
+    try {
+      const decodedToken = await admin.auth().verifyIdToken(authToken);
+
+      if (options.premiumRequired) {
+        const isPremium = decodedToken.premium === true;
+        if (!isPremium) {
+          throw new Error(options.premiumCheckError || 'This is a premium feature. Please upgrade your plan.');
+        }
+      }
+
+      // If all checks pass, execute the original flow.
+      return await flow(input);
+
+    } catch (error: any) {
+      // Log the specific error for debugging but return a generic one to the client, unless it's a specific auth error.
+      console.error('Authorization check failed:', error.message);
+
+      // Re-throw specific, intentional errors
+      if (error.message.includes('premium')) {
+          throw error;
+      }
+      
+      throw new Error('You are not authorized to perform this action. Please sign in and try again.');
+    }
+  };
+}

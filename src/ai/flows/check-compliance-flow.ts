@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview A flow for checking document compliance against specified regulations.
@@ -11,7 +10,7 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 import { type ComplianceCheckInput, ComplianceCheckSchema } from '@/lib/schemas';
 import { defaultSafetySettings } from '@/ai/safety-settings';
-import admin from '@/lib/firebase-admin';
+import { createAuthenticatedFlow } from './utils/authWrapper';
 
 const ComplianceFindingSchema = z.object({
   issue: z.string().describe("A concise description of a single compliance issue or potential concern found in the document."),
@@ -26,24 +25,28 @@ const CheckComplianceOutputSchema = z.object({
 });
 export type CheckComplianceOutput = z.infer<typeof CheckComplianceOutputSchema>;
 
-export async function checkCompliance(input: ComplianceCheckInput, authToken: string | undefined): Promise<CheckComplianceOutput> {
-  if (!authToken) {
-    throw new Error('Authentication required. Access denied.');
+const checkComplianceFlow = ai.defineFlow(
+  {
+    name: 'checkComplianceFlow',
+    inputSchema: ComplianceCheckSchema,
+    outputSchema: CheckComplianceOutputSchema,
+  },
+  async input => {
+    const {output} = await prompt(input);
+    
+    // Check for null/undefined output or empty summary. The `findings` array can be empty.
+    if (!output || !output.complianceStatus?.trim() || !output.summary?.trim()) {
+      const errorMessage = 'AI failed to generate a valid compliance report. The output was empty or incomplete. Please check your input and try again.';
+      console.error(errorMessage, { input, receivedOutput: output });
+      throw new Error(errorMessage);
+    }
+    
+    return output;
   }
+);
 
-  if (!admin.apps.length) {
-    console.error("Firebase Admin SDK is not initialized. Cannot perform authenticated check.");
-    throw new Error("Server authentication is not configured. Please contact support.");
-  }
-
-  try {
-    await admin.auth().verifyIdToken(authToken);
-    return await checkComplianceFlow(input);
-  } catch (error: any) {
-    console.error('Authorization check failed in checkCompliance:', error);
-    throw new Error('You are not authorized to perform this action. Please sign in and try again.');
-  }
-}
+// Wrap the core flow logic with the authentication utility
+export const checkCompliance = createAuthenticatedFlow(checkComplianceFlow);
 
 const prompt = ai.definePrompt({
   name: 'checkCompliancePrompt',
@@ -74,23 +77,3 @@ Please perform a thorough compliance check and respond ONLY with a JSON object m
     safetySettings: defaultSafetySettings,
   },
 });
-
-const checkComplianceFlow = ai.defineFlow(
-  {
-    name: 'checkComplianceFlow',
-    inputSchema: ComplianceCheckSchema,
-    outputSchema: CheckComplianceOutputSchema,
-  },
-  async input => {
-    const {output} = await prompt(input);
-    
-    // Check for null/undefined output or empty summary. The `findings` array can be empty.
-    if (!output || !output.complianceStatus?.trim() || !output.summary?.trim()) {
-      const errorMessage = 'AI failed to generate a valid compliance report. The output was empty or incomplete. Please check your input and try again.';
-      console.error(errorMessage, { input, receivedOutput: output });
-      throw new Error(errorMessage);
-    }
-    
-    return output;
-  }
-);

@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview A flow for decoding a Vehicle Identification Number (VIN). This flow first parses the VIN in code, then uses AI to provide human-readable descriptions for each component.
@@ -11,7 +10,7 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 import { type DecodeVinInput, DecodeVinSchema } from '@/lib/schemas';
 import { defaultSafetySettings } from '@/ai/safety-settings';
-import admin from '@/lib/firebase-admin';
+import { createAuthenticatedFlow } from './utils/authWrapper';
 
 // Schema for the individual parts of a VIN
 const VinPartSchema = z.object({
@@ -58,61 +57,6 @@ const DecodeVinPromptInputSchema = z.object({
 });
 type DecodeVinPromptInput = z.infer<typeof DecodeVinPromptInputSchema>;
 
-
-export async function decodeVin(input: DecodeVinInput, authToken: string | undefined): Promise<DecodeVinOutput> {
-  if (!authToken) {
-    throw new Error('Authentication required. Access denied.');
-  }
-
-  if (!admin.apps.length) {
-    console.error("Firebase Admin SDK is not initialized. Cannot perform authenticated check.");
-    throw new Error("Server authentication is not configured. Please contact support.");
-  }
-
-  try {
-    await admin.auth().verifyIdToken(authToken);
-    return await decodeVinFlow(input);
-  } catch (error: any) {
-    console.error('Authorization check failed in decodeVin:', error);
-    throw new Error('You are not authorized to perform this action. Please sign in and try again.');
-  }
-}
-
-const prompt = ai.definePrompt({
-  name: 'decodeVinPrompt',
-  input: {schema: DecodeVinPromptInputSchema},
-  output: {schema: DecodeVinOutputSchema},
-  prompt: `You are an expert VIN (Vehicle Identification Number) decoder for trailers.
-Your task is to take pre-parsed VIN components and assemble them into a structured JSON output with descriptions.
-
-Provided VIN: {{{fullVin}}}
-- WMI: {{{wmi}}}
-- VDS (Full): {{{vds.full}}}
-- Trailer Type Code: {{{vds.trailerType}}}
-- Body Type Code: {{{vds.bodyType}}}
-- Body Length Code: {{{vds.bodyLength}}}
-- Number of Axles Code: {{{vds.numberOfAxles}}}
-- Check Digit: {{{checkDigit}}}
-- Model Year Code: {{{modelYear}}}
-- Plant Code: {{{plant}}}
-- Sequential Number: {{{sequentialNumber}}}
-
-Based on this, generate a JSON response that matches the required output schema.
-1.  For each section (wmi, checkDigit, modelYear, plant, sequentialNumber), populate its 'value' field with the corresponding code provided above and write a 'description' explaining what that part of the VIN represents.
-    - For 'checkDigit', state that it's a calculated value for validation.
-    - For 'sequentialNumber', mention the different rules for small (<1000 units/year) vs. large manufacturers.
-2.  For the 'vehicleDescriptors' section:
-    - Populate its 'value' field with '{{{vds.full}}}'.
-    - Populate the specific fields 'trailerType', 'bodyType', 'bodyLength', and 'numberOfAxles' with human-readable descriptions based on their respective codes.
-    - Provide a general description for the whole Vehicle Descriptor Section.
-3.  The 'fullVin' field in your output MUST be '{{{fullVin}}}'.
-4.  Do not invent or hallucinate information not derivable from the provided codes. Your analysis should be based solely on the positional information.
-`,
-  config: {
-    safetySettings: defaultSafetySettings,
-  },
-});
-
 const decodeVinFlow = ai.defineFlow(
   {
     name: 'decodeVinFlow',
@@ -151,3 +95,41 @@ const decodeVinFlow = ai.defineFlow(
     return output;
   }
 );
+
+// Wrap the core flow logic with the authentication utility
+export const decodeVin = createAuthenticatedFlow(decodeVinFlow);
+
+const prompt = ai.definePrompt({
+  name: 'decodeVinPrompt',
+  input: {schema: DecodeVinPromptInputSchema},
+  output: {schema: DecodeVinOutputSchema},
+  prompt: `You are an expert VIN (Vehicle Identification Number) decoder for trailers.
+Your task is to take pre-parsed VIN components and assemble them into a structured JSON output with descriptions.
+
+Provided VIN: {{{fullVin}}}
+- WMI: {{{wmi}}}
+- VDS (Full): {{{vds.full}}}
+- Trailer Type Code: {{{vds.trailerType}}}
+- Body Type Code: {{{vds.bodyType}}}
+- Body Length Code: {{{vds.bodyLength}}}
+- Number of Axles Code: {{{vds.numberOfAxles}}}
+- Check Digit: {{{checkDigit}}}
+- Model Year Code: {{{modelYear}}}
+- Plant Code: {{{plant}}}
+- Sequential Number: {{{sequentialNumber}}}
+
+Based on this, generate a JSON response that matches the required output schema.
+1.  For each section (wmi, checkDigit, modelYear, plant, sequentialNumber), populate its 'value' field with the corresponding code provided above and write a 'description' explaining what that part of the VIN represents.
+    - For 'checkDigit', state that it's a calculated value for validation.
+    - For 'sequentialNumber', mention the different rules for small (<1000 units/year) vs. large manufacturers.
+2.  For the 'vehicleDescriptors' section:
+    - Populate its 'value' field with '{{{vds.full}}}'.
+    - Populate the specific fields 'trailerType', 'bodyType', 'bodyLength', and 'numberOfAxles' with human-readable descriptions based on their respective codes.
+    - Provide a general description for the whole Vehicle Descriptor Section.
+3.  The 'fullVin' field in your output MUST be '{{{fullVin}}}'.
+4.  Do not invent or hallucinate information not derivable from the provided codes. Your analysis should be based solely on the positional information.
+`,
+  config: {
+    safetySettings: defaultSafetySettings,
+  },
+});

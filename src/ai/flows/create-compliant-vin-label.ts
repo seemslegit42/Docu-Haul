@@ -1,5 +1,3 @@
-
-// src/ai/flows/create-compliant-vin-label.ts
 'use server';
 /**
  * @fileOverview Flow to create compliant VIN labels from provided data, using generative AI to determine content and layout, and then generate an image.
@@ -12,7 +10,7 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 import { type LabelForgeInput, LabelForgeSchema } from '@/lib/schemas';
 import { defaultSafetySettings } from '@/ai/safety-settings';
-import admin from '@/lib/firebase-admin';
+import { createAuthenticatedFlow } from './utils/authWrapper';
 
 const CreateCompliantVinLabelOutputSchema = z.object({
   labelDataUri: z.string().describe('The data URI of the generated VIN label image.'),
@@ -25,6 +23,71 @@ export type CreateCompliantVinLabelOutput = z.infer<typeof CreateCompliantVinLab
 const VinLabelDesignSchema = z.object({
     labelTextContent: z.string().describe("The complete, formatted text content for the label, ready for image generation. All placeholders for missing data should be included. The formatting should match the selected template style."),
     placementRationale: z.string().describe("The AI's rationale for the data extraction, content selection, and layout decisions based on the user input and selected template."),
+});
+
+const createCompliantVinLabelFlow = ai.defineFlow(
+  {
+    name: 'createCompliantVinLabelFlow',
+    inputSchema: LabelForgeSchema,
+    outputSchema: CreateCompliantVinLabelOutputSchema,
+  },
+  async (input) => {
+    // Step 1: Generate structured label data and rationale
+    const { output: designOutput } = await vinLabelDesignPrompt(input);
+    if (!designOutput || !designOutput.labelTextContent?.trim() || !designOutput.placementRationale?.trim()) {
+      const errorMessage = 'AI failed to design the label data. The output was empty or incomplete. Please check your input or try again.';
+      console.error(errorMessage, { input, receivedOutput: designOutput });
+      throw new Error(errorMessage);
+    }
+    const { labelTextContent, placementRationale } = designOutput;
+
+    // Step 2: Generate the label image using the AI-composed text
+    const imagePrompt = `Generate a clear, professional, and compliant VIN label image based on the selected template style.
+The label background should be white, and the text should be black for maximum contrast and legibility.
+The label dimensions are approximately ${input.labelDimensions}.
+The label MUST display EXACTLY the following text content, arranged logically according to the specified template style ('${input.template}').
+
+**Label Content:**
+\`\`\`
+${labelTextContent}
+\`\`\`
+
+The style must be utilitarian, official, and highly legible. Avoid artistic fonts. The label must be a simple rectangle.
+For the 'bilingual_canadian' template, ensure the layout mimics the official side-by-side format with checkboxes for SINGLE/DUAL.
+For the 'standard' template, use a clean, stacked layout.`;
+
+    const { media } = await ai.generate({
+      model: 'googleai/gemini-2.0-flash-preview-image-generation',
+      prompt: imagePrompt,
+      config: {
+        responseModalities: ['TEXT', 'IMAGE'],
+        safetySettings: defaultSafetySettings,
+      },
+    });
+
+    if (!media || !media.url) {
+      const errorMessage = 'AI failed to generate the label image. This can be an intermittent issue. Please try again.';
+      console.error(errorMessage, {
+        input,
+        designOutput, // Log the intermediate step's output
+        imagePrompt,
+      });
+      throw new Error(errorMessage);
+    }
+    const labelDataUri = media.url;
+
+    return {
+      labelDataUri,
+      placementRationale,
+      labelTextContent,
+    };
+  }
+);
+
+// Wrap the core flow logic with the authentication utility, requiring a premium claim.
+export const createCompliantVinLabel = createAuthenticatedFlow(createCompliantVinLabelFlow, { 
+    premiumRequired: true,
+    premiumCheckError: 'This is a premium feature. Please upgrade your plan to generate VIN labels.'
 });
 
 // Prompt for designing label content and rationale
@@ -86,92 +149,3 @@ Respond ONLY with a JSON object matching the output schema.
     safetySettings: defaultSafetySettings,
   },
 });
-
-export async function createCompliantVinLabel(input: LabelForgeInput, authToken: string | undefined): Promise<CreateCompliantVinLabelOutput> {
-  // SERVER-SIDE AUTH CHECK: This is a critical security step.
-  if (!authToken) {
-    throw new Error('Authentication required. Access denied.');
-  }
-
-  // Check if the admin SDK was initialized. If not, the server is not configured for premium checks.
-  if (!admin.apps.length) {
-    console.error("Firebase Admin SDK is not initialized. Cannot perform premium user check.");
-    throw new Error("Server authentication is not configured. Please contact support.");
-  }
-
-  try {
-    const decodedToken = await admin.auth().verifyIdToken(authToken);
-    const isPremium = decodedToken.premium === true;
-
-    if (!isPremium) {
-      throw new Error('This is a premium feature. Please upgrade your plan to generate VIN labels.');
-    }
-
-    // If authorized, proceed with the AI flow.
-    return await createCompliantVinLabelFlow(input);
-
-  } catch (error: any) {
-    console.error('Authorization check failed in createCompliantVinLabel:', error);
-    // Re-throw a generic error to avoid leaking implementation details to the client.
-    throw new Error('You are not authorized to perform this action. Please check your subscription status and try again.');
-  }
-}
-
-const createCompliantVinLabelFlow = ai.defineFlow(
-  {
-    name: 'createCompliantVinLabelFlow',
-    inputSchema: LabelForgeSchema,
-    outputSchema: CreateCompliantVinLabelOutputSchema,
-  },
-  async (input) => {
-    // Step 1: Generate structured label data and rationale
-    const { output: designOutput } = await vinLabelDesignPrompt(input);
-    if (!designOutput || !designOutput.labelTextContent?.trim() || !designOutput.placementRationale?.trim()) {
-      const errorMessage = 'AI failed to design the label data. The output was empty or incomplete. Please check your input or try again.';
-      console.error(errorMessage, { input, receivedOutput: designOutput });
-      throw new Error(errorMessage);
-    }
-    const { labelTextContent, placementRationale } = designOutput;
-
-    // Step 2: Generate the label image using the AI-composed text
-    const imagePrompt = `Generate a clear, professional, and compliant VIN label image based on the selected template style.
-The label background should be white, and the text should be black for maximum contrast and legibility.
-The label dimensions are approximately ${input.labelDimensions}.
-The label MUST display EXACTLY the following text content, arranged logically according to the specified template style ('${input.template}').
-
-**Label Content:**
-\`\`\`
-${labelTextContent}
-\`\`\`
-
-The style must be utilitarian, official, and highly legible. Avoid artistic fonts. The label must be a simple rectangle.
-For the 'bilingual_canadian' template, ensure the layout mimics the official side-by-side format with checkboxes for SINGLE/DUAL.
-For the 'standard' template, use a clean, stacked layout.`;
-
-    const { media } = await ai.generate({
-      model: 'googleai/gemini-2.0-flash-preview-image-generation',
-      prompt: imagePrompt,
-      config: {
-        responseModalities: ['TEXT', 'IMAGE'],
-        safetySettings: defaultSafetySettings,
-      },
-    });
-
-    if (!media || !media.url) {
-      const errorMessage = 'AI failed to generate the label image. This can be an intermittent issue. Please try again.';
-      console.error(errorMessage, {
-        input,
-        designOutput, // Log the intermediate step's output
-        imagePrompt,
-      });
-      throw new Error(errorMessage);
-    }
-    const labelDataUri = media.url;
-
-    return {
-      labelDataUri,
-      placementRationale,
-      labelTextContent,
-    };
-  }
-);

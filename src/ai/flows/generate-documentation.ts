@@ -1,5 +1,3 @@
-
-// src/ai/flows/generate-documentation.ts
 'use server';
 /**
  * @fileOverview A flow for generating vehicle documentation (NVIS or Bill of Sale).
@@ -13,7 +11,7 @@ import {ai} from '@/ai/genkit';
 import {z}from 'genkit';
 import { type SmartDocsInput, SmartDocsSchema } from '@/lib/schemas';
 import { defaultSafetySettings } from '@/ai/safety-settings';
-import admin from '@/lib/firebase-admin';
+import { createAuthenticatedFlow } from './utils/authWrapper';
 
 // Structured schema for NVIS data with detailed descriptions to guide AI extraction.
 const NvisDataSchema = z.object({
@@ -57,24 +55,30 @@ const GenerateDocumentationOutputSchema = z.object({
 });
 export type GenerateDocumentationOutput = z.infer<typeof GenerateDocumentationOutputSchema>;
 
-export async function generateDocumentation(input: SmartDocsInput, authToken: string | undefined): Promise<GenerateDocumentationOutput> {
-  if (!authToken) {
-    throw new Error('Authentication required. Access denied.');
-  }
+const generateDocumentationFlow = ai.defineFlow(
+  {
+    name: 'generateDocumentationFlow',
+    inputSchema: SmartDocsSchema,
+    outputSchema: GenerateDocumentationOutputSchema,
+  },
+  async (input) => {
+    // Step 1: Call the single, powerful prompt to do both extraction and formatting.
+    const { output } = await generateDocumentPrompt(input);
 
-  if (!admin.apps.length) {
-    console.error("Firebase Admin SDK is not initialized. Cannot perform authenticated check.");
-    throw new Error("Server authentication is not configured. Please contact support.");
+    // Step 2: Validate the output
+    if (!output || !output.documentText?.trim() || !output.structuredData) {
+        const errorMessage = `AI failed to generate valid documentation for ${input.documentType}. The output was empty or incomplete. Please check your input and try again.`;
+        console.error(errorMessage, { input, receivedOutput: output });
+        throw new Error(errorMessage);
+    }
+    
+    // Step 3: Return the combined result
+    return output;
   }
+);
 
-  try {
-    await admin.auth().verifyIdToken(authToken);
-    return await generateDocumentationFlow(input);
-  } catch (error: any) {
-    console.error('Authorization check failed in generateDocumentation:', error);
-    throw new Error('You are not authorized to perform this action. Please sign in and try again.');
-  }
-}
+// Wrap the core flow logic with the authentication utility
+export const generateDocumentation = createAuthenticatedFlow(generateDocumentationFlow);
 
 // A single, powerful prompt that handles both data extraction and document formatting.
 const generateDocumentPrompt = ai.definePrompt({
@@ -131,25 +135,3 @@ Respond ONLY with a single JSON object that perfectly matches the required outpu
       safetySettings: defaultSafetySettings,
     },
 });
-
-const generateDocumentationFlow = ai.defineFlow(
-  {
-    name: 'generateDocumentationFlow',
-    inputSchema: SmartDocsSchema,
-    outputSchema: GenerateDocumentationOutputSchema,
-  },
-  async (input) => {
-    // Step 1: Call the single, powerful prompt to do both extraction and formatting.
-    const { output } = await generateDocumentPrompt(input);
-
-    // Step 2: Validate the output
-    if (!output || !output.documentText?.trim() || !output.structuredData) {
-        const errorMessage = `AI failed to generate valid documentation for ${input.documentType}. The output was empty or incomplete. Please check your input and try again.`;
-        console.error(errorMessage, { input, receivedOutput: output });
-        throw new Error(errorMessage);
-    }
-    
-    // Step 3: Return the combined result
-    return output;
-  }
-);
