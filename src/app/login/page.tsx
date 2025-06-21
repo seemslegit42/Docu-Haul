@@ -127,7 +127,7 @@ export default function LoginPage() {
         <div className="w-full max-w-md">
              <Link href="/" className="flex items-center justify-center gap-2 mb-6">
                 <FileCheck2 className="w-8 h-8 text-primary" />
-                <span className="font-headline text-2xl font-bold text-primary tracking-tight">VINscribe</span>
+                <span className="font-headline text-2xl font-bold text-primary tracking-tight">DocuHaul</span>
             </Link>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <TabsList className="grid w-full grid-cols-2">

@@ -17,9 +17,6 @@ import {
 import { useAuth } from '@/hooks/use-auth';
 import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
-import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
-
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: Home },
@@ -76,39 +73,28 @@ export function SidebarNav() {
         ))}
       </SidebarMenu>
       <SidebarFooter className="p-2 border-t border-sidebar-border">
-          <TooltipProvider>
-            {user && (
-              <div className="mb-2">
-                {open ? (
-                  <div className="flex items-center gap-2 p-1 rounded-md">
-                    <UserIcon className="w-5 h-5 shrink-0 text-muted-foreground" />
-                    <span className="text-sm font-medium truncate flex-1">{user.email}</span>
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={handleSignOut}>
-                            <LogOut className="h-4 w-4" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent side="right">Sign Out</TooltipContent>
-                    </Tooltip>
-                  </div>
-                ) : (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button variant="ghost" size="icon" className="w-full" onClick={handleSignOut}>
-                        <LogOut className="h-5 w-5" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent side="right">Sign out {user.email}</TooltipContent>
-                  </Tooltip>
-                )}
-              </div>
-            )}
-          </TooltipProvider>
+        {user && (
+           <SidebarMenuItem className="mb-2">
+             <SidebarMenuButton
+               onClick={handleSignOut}
+               tooltip={{ children: `Sign out (${user.email})`, side: 'right' }}
+               className="w-full"
+             >
+               <LogOut className="h-5 w-5" />
+               <span>Sign Out</span>
+             </SidebarMenuButton>
+           </SidebarMenuItem>
+        )}
         {open && (
-          <p className="text-xs text-sidebar-foreground/70 font-body text-center">
-            © {new Date().getFullYear()} DocuHaul
-          </p>
+           <div className="text-center text-xs text-muted-foreground font-body space-y-1">
+             <p>© {new Date().getFullYear()} DocuHaul</p>
+             {user && (
+               <div className="flex items-center justify-center gap-2 p-1 rounded-md">
+                 <UserIcon className="w-4 h-4 shrink-0" />
+                 <p className="truncate">{user.email}</p>
+               </div>
+             )}
+           </div>
         )}
       </SidebarFooter>
     </>
