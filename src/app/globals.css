@@ -5,33 +5,33 @@
 
 @layer base {
   :root {
-    --background: 220 15% 12%; /* Dark Slate Blue */
-    --foreground: 210 40% 98%; /* Almost white */
+    --background: 224 71% 4%;
+    --foreground: 210 40% 98%;
     
-    --card: 220 15% 16%; /* Slightly lighter dark slate blue */
+    --card: 224 71% 8%;
     --card-foreground: 210 40% 98%;
     
-    --popover: 220 15% 12%;
+    --popover: 224 71% 4%;
     --popover-foreground: 210 40% 98%;
     
-    --primary: 120 60% 45%; /* Forest Green */
-    --primary-foreground: 210 40% 98%;
+    --primary: 142.1 76.2% 36.3%;
+    --primary-foreground: 142.1 76.2% 96.3%;
     
-    --secondary: 217 32% 17%;
+    --secondary: 215 28% 17%;
     --secondary-foreground: 210 40% 98%;
     
-    --muted: 217 32% 24%;
+    --muted: 215 28% 17%;
     --muted-foreground: 215 20% 65%;
     
-    --accent: 34 40% 60%; /* Soft Tan */
-    --accent-foreground: 34 60% 15%;
+    --accent: 215 28% 25%;
+    --accent-foreground: 210 40% 98%;
     
-    --destructive: 0 72% 51%;
+    --destructive: 0 63% 31%;
     --destructive-foreground: 210 40% 98%;
     
-    --border: 217 32% 27%;
-    --input: 217 32% 27%;
-    --ring: 120 60% 45%;
+    --border: 215 28% 17%;
+    --input: 215 28% 17%;
+    --ring: 142.1 76.2% 36.3%;
     
     --radius: 0.75rem;
 
@@ -46,13 +46,13 @@
     --chart-4: 120 40% 54%;
     --chart-5: 34 34% 55%;
     
-    --sidebar-background: 220 15% 12%;
+    --sidebar-background: 224 71% 4%;
     --sidebar-foreground: 210 40% 98%;
     --sidebar-primary: hsl(var(--primary));
     --sidebar-primary-foreground: hsl(var(--primary-foreground));
-    --sidebar-accent: 217 32% 24%;
+    --sidebar-accent: 215 28% 25%;
     --sidebar-accent-foreground: 210 40% 98%;
-    --sidebar-border: 217 32% 27%;
+    --sidebar-border: 215 28% 17%;
     --sidebar-ring: hsl(var(--ring));
   }
 }
