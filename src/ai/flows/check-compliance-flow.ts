@@ -34,9 +34,11 @@ const checkComplianceFlow = ai.defineFlow(
   async input => {
     const {output} = await prompt(input);
     
-    // Check for null/undefined output or empty summary. The `findings` array can be empty.
-    if (!output || !output.complianceStatus?.trim() || !output.summary?.trim()) {
-      const errorMessage = 'AI failed to generate a valid compliance report. The output was empty or incomplete. Please check your input and try again.';
+    const validStatuses = ["Compliant", "Potential Issues", "Non-Compliant"];
+    
+    // Check for null/undefined output, empty summary, or an invalid status from the AI.
+    if (!output || !output.summary?.trim() || !output.complianceStatus || !validStatuses.includes(output.complianceStatus)) {
+      const errorMessage = 'AI failed to generate a valid compliance report. The output was empty, incomplete, or contained an invalid status. Please check your input and try again.';
       console.error(errorMessage, { input, receivedOutput: output });
       throw new Error(errorMessage);
     }
