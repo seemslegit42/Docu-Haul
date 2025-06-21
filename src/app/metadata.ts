@@ -18,16 +18,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "DocuHaul: AI-Powered Vehicle Documentation",
     description: "Automate the creation, validation, and management of essential vehicle documents like VIN labels, NVIS certificates, and Bills of Sale.",
-    url: "https://your-production-url.com", // TODO: Update with your production URL
     siteName: "DocuHaul",
-    images: [
-      {
-        url: 'https://your-production-url.com/og-image.png', // TODO: Update with your production URL
-        width: 1200,
-        height: 630,
-        alt: 'DocuHaul - AI Vehicle Documentation',
-      },
-    ],
     locale: 'en_US',
     type: 'website',
   },
@@ -35,9 +26,6 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'DocuHaul - AI Vehicle Documentation',
     description: 'Automate vehicle documentation with the power of Generative AI.',
-    // site: '@yourtwitterhandle', // TODO: Add your twitter handle
-    // creator: '@yourtwitterhandle', // TODO: Add your twitter handle
-    images: ['https://your-production-url.com/og-image.png'], // TODO: Update with your production URL
   },
   icons: {
     icon: '/favicon.ico',

@@ -27,29 +27,17 @@ export default function LandingPage() {
         <section className="relative py-20 md:py-32">
           <div aria-hidden="true" className="absolute inset-0 -z-10 h-full w-full bg-background bg-[radial-gradient(#2d4168_1px,transparent_1px)] [background-size:32px_32px] opacity-20"></div>
 
-          <div className="container grid grid-cols-1 items-center gap-12 text-center md:grid-cols-2 md:text-left">
+          <div className="container text-center">
               <div>
                 <h1 className="text-4xl font-headline font-extrabold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl">
                   Reimagine Vehicle Documentation
                 </h1>
-                <p className="mx-auto mt-6 max-w-xl text-lg text-muted-foreground md:mx-0 md:text-xl">
+                <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
                   DocuHaul leverages Generative AI to automate the creation, validation, and management of essential vehicle documents. Save time, ensure compliance, and streamline your workflow.
                 </p>
-                <div className="mt-8 flex justify-center gap-4 md:justify-start">
+                <div className="mt-8 flex justify-center gap-4">
                   <AuthAwareButton text="Get Started Now" buttonProps={{ size: "lg" }} />
                 </div>
-              </div>
-              <div className="relative mx-auto w-full max-w-lg md:max-w-none">
-                 <div className="absolute -inset-2 rounded-lg bg-gradient-to-r from-primary via-accent to-secondary opacity-25 blur-xl"></div>
-                 <Image
-                    src="https://placehold.co/600x400.png"
-                    alt="AI generating vehicle documents"
-                    width={600}
-                    height={400}
-                    className="relative rounded-lg shadow-2xl shadow-primary/10"
-                    data-ai-hint="vehicle blueprint document"
-                    priority
-                />
               </div>
           </div>
         </section>
