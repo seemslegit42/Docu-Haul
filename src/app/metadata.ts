@@ -3,10 +3,10 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: {
-    default: "VINscribe",
-    template: "%s | VINscribe",
+    default: "DocuHaul",
+    template: "%s | DocuHaul",
   },
-  description: 'VINscribe: AI-powered creation of VIN labels, NVIS certificates, and Bills of Sale for trailer and vehicle manufacturers. Ensure compliance and streamline your workflow.',
+  description: 'DocuHaul: AI-powered creation of VIN labels, NVIS certificates, and Bills of Sale for trailer and vehicle manufacturers. Ensure compliance and streamline your workflow.',
   keywords: ["VIN", "NVIS", "Bill of Sale", "Vehicle Documentation", "Trailer Manufacturing", "AI Documentation", "Vehicle Compliance", "FMVSS", "CMVSS", "GenAI"],
   authors: [{ name: "Firebase", url: "https://firebase.google.com" }],
   creator: "Firebase",
@@ -16,16 +16,16 @@ export const metadata: Metadata = {
     follow: true,
   },
   openGraph: {
-    title: "VINscribe: AI-Powered Vehicle Documentation",
+    title: "DocuHaul: AI-Powered Vehicle Documentation",
     description: "Automate the creation, validation, and management of essential vehicle documents like VIN labels, NVIS certificates, and Bills of Sale.",
     url: "https://your-production-url.com", // TODO: Update with your production URL
-    siteName: "VINscribe",
+    siteName: "DocuHaul",
     images: [
       {
         url: 'https://your-production-url.com/og-image.png', // TODO: Update with your production URL
         width: 1200,
         height: 630,
-        alt: 'VINscribe - AI Vehicle Documentation',
+        alt: 'DocuHaul - AI Vehicle Documentation',
       },
     ],
     locale: 'en_US',
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'VINscribe - AI Vehicle Documentation',
+    title: 'DocuHaul - AI Vehicle Documentation',
     description: 'Automate vehicle documentation with the power of Generative AI.',
     // site: '@yourtwitterhandle', // TODO: Add your twitter handle
     // creator: '@yourtwitterhandle', // TODO: Add your twitter handle
