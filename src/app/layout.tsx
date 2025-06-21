@@ -1,13 +1,11 @@
 
-import type {Metadata} from 'next';
+import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from '@/hooks/use-auth';
+import { metadata as siteMetadata } from './metadata';
 
-export const metadata: Metadata = {
-  title: 'DocuHaul',
-  description: 'DocuHaul: AI-powered creation of VIN labels, NVIS certificates, and Bills of Sale for vehicle manufacturers.',
-};
+export const metadata: Metadata = siteMetadata;
 
 export default function RootLayout({
   children,

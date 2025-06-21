@@ -36,34 +36,23 @@ export default function SmartDocsPage() {
     const vin = searchParams.get('vin');
     if (!vin) return;
 
-    const modelYear = searchParams.get('modelYear');
-    const axles = searchParams.get('axles');
-
+    // Set the VIN from the query parameters
     form.setValue('vin', vin, { shouldValidate: true });
     
-    const prefillHeader = '--- Pre-filled from VIN Decoder ---';
-    const existingSpecs = form.getValues('trailerSpecs');
-
-    const specsArray = [];
-    if (modelYear) specsArray.push(`Year: ${modelYear}`);
-    if (axles) specsArray.push(`Number of Axles: ${axles}`);
+    // Construct a helpful pre-fill string for the user
+    const modelYear = searchParams.get('modelYear');
+    const axles = searchParams.get('axles');
     
-    if (specsArray.length > 0) {
-      const newSpecsContent = specsArray.join('\n');
-      const newPrefillBlock = `${prefillHeader}\n${newSpecsContent}`;
+    const prefillDetails = [];
+    if (modelYear) prefillDetails.push(`Year: ${modelYear}`);
+    if (axles) prefillDetails.push(`Number of Axles: ${axles}`);
 
-      let finalSpecs;
-      if (existingSpecs.includes(prefillHeader)) {
-        // Replace existing pre-filled block
-        finalSpecs = existingSpecs.replace(/--- Pre-filled from VIN Decoder ---\n(.*\n)*/, `${newPrefillBlock}\n\n`);
-      } else {
-        // Add new pre-filled block
-        finalSpecs = existingSpecs 
-            ? `${newPrefillBlock}\n\n${existingSpecs}`
-            : newPrefillBlock;
-      }
-      form.setValue('trailerSpecs', finalSpecs.trim(), { shouldValidate: true });
+    if (prefillDetails.length > 0) {
+        // Pre-fill the trailer specs with decoded VIN info for user convenience
+        const newSpecsContent = `--- Pre-filled from VIN Decoder ---\n${prefillDetails.join('\n')}\n--- Please add more details below ---\n`;
+        form.setValue('trailerSpecs', newSpecsContent, { shouldValidate: true });
     }
+
   }, [searchParams, form]);
 
   const onSubmit = async (data: SmartDocsInput) => {
