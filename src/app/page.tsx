@@ -1,5 +1,6 @@
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { FileText, Tags, ShieldCheck, Hash, ArrowRight } from 'lucide-react';
 import { AuthAwareButton } from '@/components/layout/AuthAwareButton';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -23,28 +24,38 @@ export default function LandingPage() {
       {/* Main Content */}
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative py-20 md:py-32 overflow-hidden">
-           <div 
-            aria-hidden="true" 
-            className="absolute inset-0 top-0 z-0 grid grid-cols-2 -space-x-52 opacity-25">
-            <div className="h-64 bg-gradient-to-br from-primary/30 via-accent/20 to-background blur-3xl"></div>
-            <div className="h-80 bg-gradient-to-r from-primary/20 via-accent/10 to-background blur-3xl"></div>
-          </div>
-          <div className="container relative z-10 text-center">
-            <h1 className="text-4xl font-headline font-extrabold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl">
-              Reimagine Vehicle Documentation
-            </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
-              DocuHaul leverages Generative AI to automate the creation, validation, and management of essential vehicle documents. Save time, ensure compliance, and streamline your workflow.
-            </p>
-            <div className="mt-8 flex justify-center gap-4">
-              <AuthAwareButton text="Get Started Now" buttonProps={{ size: "lg" }} />
-            </div>
+        <section className="relative py-20 md:py-32">
+          <div aria-hidden="true" className="absolute inset-0 -z-10 h-full w-full bg-background bg-[radial-gradient(#2d4168_1px,transparent_1px)] [background-size:32px_32px] opacity-20"></div>
+
+          <div className="container grid grid-cols-1 items-center gap-12 text-center md:grid-cols-2 md:text-left">
+              <div>
+                <h1 className="text-4xl font-headline font-extrabold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl">
+                  Reimagine Vehicle Documentation
+                </h1>
+                <p className="mx-auto mt-6 max-w-xl text-lg text-muted-foreground md:mx-0 md:text-xl">
+                  DocuHaul leverages Generative AI to automate the creation, validation, and management of essential vehicle documents. Save time, ensure compliance, and streamline your workflow.
+                </p>
+                <div className="mt-8 flex justify-center gap-4 md:justify-start">
+                  <AuthAwareButton text="Get Started Now" buttonProps={{ size: "lg" }} />
+                </div>
+              </div>
+              <div className="relative mx-auto w-full max-w-lg md:max-w-none">
+                 <div className="absolute -inset-2 rounded-lg bg-gradient-to-r from-primary via-accent to-secondary opacity-25 blur-xl"></div>
+                 <Image
+                    src="https://placehold.co/600x400.png"
+                    alt="AI generating vehicle documents"
+                    width={600}
+                    height={400}
+                    className="relative rounded-lg shadow-2xl shadow-primary/10"
+                    data-ai-hint="vehicle blueprint document"
+                    priority
+                />
+              </div>
           </div>
         </section>
 
         {/* Features Section */}
-        <section id="features" className="py-16 sm:py-24">
+        <section id="features" className="py-16 sm:py-24 bg-card/40">
           <div className="container">
             <div className="mx-auto mb-12 max-w-2xl text-center">
               <h2 className="text-3xl font-headline font-bold sm:text-4xl">Everything You Need for Vehicle Documentation</h2>

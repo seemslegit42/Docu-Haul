@@ -79,7 +79,7 @@ interface FeatureCardProps {
 function FeatureCard({ icon, title, description, href }: FeatureCardProps) {
   return (
     <Link href={href} className="group block">
-      <Card className="h-full group-hover:border-primary transition-colors duration-300">
+      <Card className="h-full group-hover:border-primary group-hover:bg-muted/30 transition-all duration-300">
         <CardHeader className="flex flex-row items-center gap-4">
           {icon}
           <CardTitle className="font-headline text-xl">{title}</CardTitle>
