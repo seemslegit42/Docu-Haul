@@ -3,53 +3,8 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Redundant font-family removed, handled by tailwind.config.ts and layout.tsx */
-
 @layer base {
   :root {
-    --background: 210 14% 93%; /* Light Gray */
-    --foreground: 222 47% 11%; /* Dark Blue/Black for text */
-    --card: 0 0% 100%; /* White */
-    --card-foreground: 222 47% 11%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-    --primary: 120 60% 34%; /* Forest Green */
-    --primary-foreground: 0 0% 100%; /* White text on green */
-    --secondary: 210 14% 89%; /* Slightly darker gray */
-    --secondary-foreground: 222 47% 11%;
-    --muted: 210 14% 89%;
-    --muted-foreground: 215 20% 45%;
-    --accent: 34 44% 75%; /* Soft Tan */
-    --accent-foreground: 34 44% 25%; /* Darker text for tan */
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 210 14% 80%;
-    --input: 210 14% 80%;
-    --ring: 120 60% 34%;
-    --radius: 0.75rem; /* Slightly larger radius for a softer look */
-    --success: 142 70% 35%;
-    --success-foreground: 0 0% 100%;
-    --warning: 45 85% 55%;
-    --warning-foreground: 45 93% 10%;
-
-    --chart-1: 120 60% 34%;
-    --chart-2: 34 44% 75%;
-    --chart-3: 210 14% 60%;
-    --chart-4: 120 40% 54%;
-    --chart-5: 34 34% 55%;
-
-    /* Sidebar specific colors aligned with the theme */
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 222 47% 11%;
-    --sidebar-primary: 120 60% 34%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 14% 93%;
-    --sidebar-accent-foreground: 222 47% 11%;
-    --sidebar-border: 210 14% 89%;
-    --sidebar-ring: 120 60% 34%;
-  }
-
-  .dark {
     --background: 222 47% 11%; /* Dark blue */
     --foreground: 210 40% 98%; /* Almost white */
     --card: 222 47% 15%; /* Slightly lighter dark blue */
@@ -69,6 +24,7 @@
     --border: 217 32% 27%;
     --input: 217 32% 27%;
     --ring: 120 55% 65%;
+    --radius: 0.75rem;
     --success: 142 70% 45%;
     --success-foreground: 0 0% 100%;
     --warning: 45 85% 55%;
