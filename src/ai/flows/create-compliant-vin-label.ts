@@ -19,15 +19,22 @@ const CreateCompliantVinLabelOutputSchema = z.object({
 });
 export type CreateCompliantVinLabelOutput = z.infer<typeof CreateCompliantVinLabelOutputSchema>;
 
-// Intermediate schema for text content design
+// A structured representation of the data to be placed on the VIN label.
+const StructuredVinLabelDataSchema = z.object({
+    manufacturer: z.string().describe("Manufacturer name. Use placeholder '[MANUFACTURER NAME]' if not provided."),
+    dateOfManufacture: z.string().describe("Date of manufacture (e.g., 'MM/YYYY'). Use placeholder '[MM/YYYY]' if not provided."),
+    gvwr: z.string().describe("Gross Vehicle Weight Rating (e.g., '14000 LBS'). Use placeholder '[GVWR VALUE]' if not provided."),
+    gawr: z.array(z.string()).describe("An array of Gross Axle Weight Ratings, one string per axle (e.g., ['GAWR FRONT: 7000 LBS WITH ...', 'GAWR REAR: 7000 LBS WITH ...']). Use placeholders if not provided."),
+    tireSpec: z.string().optional().describe("Tire specifications if not included in GAWR strings (e.g., 'ST235/80R16E')."),
+    rimSpec: z.string().optional().describe("Rim specifications if not included in GAWR strings (e.g., '16X6JJ')."),
+    psi: z.string().optional().describe("Cold tire pressure if not included in GAWR strings (e.g., '80 PSI COLD')."),
+    complianceStatement: z.string().describe("A regulatory compliance statement. Generate an appropriate default if standards are not provided."),
+  });
+
+// Intermediate schema for the AI to extract structured data and provide a rationale.
 const VinLabelDesignSchema = z.object({
-  formattedLabelText: z.string().describe(
-    "The complete text content for the VIN label, formatted with newlines for basic structure. " +
-    "This text will be used to generate the label image. " +
-    "Include all necessary information like VIN, GVWR, Axle Count, Tire Size, Manufacturer, etc., based on input. " +
-    "Example: 'VIN: {VIN}\\nGVWR: {GVWR} kg\\nAXLE 1: {AXLE1_RATING} kg ...'"
-  ),
-  placementRationale: z.string().describe('The AI\'s rationale for the information placement and content selection.'),
+  extractedData: StructuredVinLabelDataSchema.describe("The structured data extracted from user input, with placeholders for missing values."),
+  placementRationale: z.string().describe("The AI's rationale for the data extraction and content selection."),
 });
 
 // Prompt for designing label content and rationale
@@ -36,44 +43,21 @@ const vinLabelDesignPrompt = ai.definePrompt({
   input: {schema: LabelForgeSchema},
   output: {schema: VinLabelDesignSchema},
   prompt: `You are an expert in designing compliant VIN (Vehicle Identification Number) labels.
-Your task is to determine the optimal text content and its formatting for a VIN label, and provide a rationale.
+Your task is to extract structured data from the user's input and provide a rationale for your choices.
 
 Consider the following inputs:
-- VIN Data: {{{vinData}}}
+- VIN: {{{vinData}}}
 - Trailer Specifications: {{{trailerSpecs}}}
 - Regulatory Standards (if any): {{{regulatoryStandards}}}
 - Label Dimensions: {{{labelDimensions}}}
 
-Based on these inputs, generate:
-1.  'formattedLabelText': The complete, well-structured text content for the VIN label, intended for direct rendering onto an image. Format with newlines (\\n) for clarity.
-    -   Always include the full 'VIN: {{{vinData}}}'.
-    -   From '{{{trailerSpecs}}}', extract and clearly label information such as:
-        -   Manufacturer (e.g., "MANUFACTURER: Trailer Builders Inc.")
-        -   Date of Manufacture (e.g., "DATE OF MANUF.: MM/YYYY")
-        -   GVWR (Gross Vehicle Weight Rating, e.g., "GVWR: 10000 KG / 22046 LBS")
-        -   GAWR (Gross Axle Weight Rating) for each axle (e.g., "GAWR FRONT: 5000 KG / 11023 LBS", "GAWR REAR: 5000 KG / 11023 LBS")
-        -   Tire Size (e.g., "TIRE: ST235/80R16G")
-        -   Rim Size (e.g., "RIM: 16X6J")
-        -   Cold Tire Pressure (e.g., "PSI: 80 COLD")
-    -   If any of the above standard pieces of information (Manufacturer, Date of Manuf., GVWR, GAWRs, Tire, Rim, PSI) are not found or inferable from '{{{trailerSpecs}}}', YOU MUST include them with a clear placeholder value, e.g., "MANUFACTURER: [MANUFACTURER NAME]", "DATE OF MANUF.: [MM/YYYY]", "GVWR: [VALUE]", "GAWR FRONT: [VALUE]", "TIRE: [SIZE]", etc. Do not omit these standard fields.
-    -   If '{{{regulatoryStandards}}}' is provided, include a compliance statement like "COMPLIES WITH: {{{regulatoryStandards}}}". Otherwise, use "THIS VEHICLE CONFORMS TO ALL APPLICABLE U.S. FEDERAL MOTOR VEHICLE SAFETY STANDARDS (FMVSS) AND CANADIAN MOTOR VEHICLE SAFETY STANDARDS (CMVSS) IN EFFECT ON THE DATE OF MANUFACTURE SHOWN ABOVE." if no specific region is clear, or tailor to the region if implied.
-    -   Ensure the text is concise, highly legible, and suitable for a physical label of dimensions {{{labelDimensions}}}.
-    -   The output should be ONLY the formatted text content.
+Based on these inputs, populate the 'extractedData' object with the following information:
+-   From '{{{trailerSpecs}}}', extract the Manufacturer, Date of Manufacture (in MM/YYYY format), GVWR, GAWR for each axle (including tire/rim/psi info in the string), and standalone Tire/Rim/PSI specs if they are not part of the GAWR.
+-   If any of this standard information is NOT FOUND, you MUST use a clear placeholder in the corresponding field: '[MANUFACTURER NAME]', '[MM/YYYY]', '[GVWR VALUE]', '[GAWR VALUE]', etc. DO NOT OMIT any fields in the schema.
+-   For 'complianceStatement': If '{{{regulatoryStandards}}}' is provided, use it. Otherwise, generate a default statement like "THIS VEHICLE CONFORMS TO ALL APPLICABLE U.S. FEDERAL MOTOR VEHICLE SAFETY STANDARDS (FMVSS) AND CANADIAN MOTOR VEHICLE SAFETY STANDARDS (CMVSS) IN EFFECT ON THE DATE OF MANUFACTURE SHOWN ABOVE."
 
-2.  'placementRationale': A brief explanation of your choices for the content selection, information hierarchy, and formatting, highlighting how it ensures clarity, includes necessary information, and considers compliance aspects. Focus on why the chosen text and structure are optimal.
-
-Example of a complete 'formattedLabelText', assuming some data is provided and some is placeholder:
-"VIN: {{{vinData}}}
-MANUFACTURER: [MANUFACTURER NAME]
-DATE OF MANUF.: 07/2024
-GVWR: 14000 LBS
-GAWR FRONT: 7000 LBS WITH ST235/80R16E TIRES AT 80 PSI COLD
-GAWR REAR: 7000 LBS WITH ST235/80R16E TIRES AT 80 PSI COLD
-RIM: 16X6JJ
-THIS VEHICLE CONFORMS TO ALL APPLICABLE U.S. FEDERAL MOTOR VEHICLE SAFETY STANDARDS IN EFFECT ON THE DATE OF MANUFACTURE SHOWN ABOVE."
-
-Ensure the 'formattedLabelText' is ready to be placed onto an image.
-Focus on textual content and its logical structure. The actual visual rendering into an image will be a subsequent step.`,
+Also, provide a 'placementRationale' explaining your choices for the content selection and data extraction.
+`,
   config: {
     safetySettings: defaultSafetySettings,
   },
@@ -90,16 +74,31 @@ const createCompliantVinLabelFlow = ai.defineFlow(
     outputSchema: CreateCompliantVinLabelOutputSchema,
   },
   async (input) => {
-    // Step 1: Generate label text content and rationale
+    // Step 1: Generate structured label data and rationale
     const { output: designOutput } = await vinLabelDesignPrompt(input);
-    if (!designOutput || !designOutput.formattedLabelText || !designOutput.placementRationale) {
-      throw new Error('AI failed to design the label text. Please check your input or try again.');
+    if (!designOutput || !designOutput.extractedData || !designOutput.placementRationale) {
+      throw new Error('AI failed to design the label data. Please check your input or try again.');
     }
-    const { formattedLabelText, placementRationale } = designOutput;
+    const { extractedData, placementRationale } = designOutput;
 
-    // Step 2: Generate the label image using the designed text
+    // Step 2: Programmatically build the label text from structured data for consistency
+    const labelLines = [
+        `VIN: ${input.vinData}`,
+        `MANUFACTURER: ${extractedData.manufacturer}`,
+        `DATE OF MANUF.: ${extractedData.dateOfManufacture}`,
+        `GVWR: ${extractedData.gvwr}`,
+        ...extractedData.gawr,
+    ];
+    if (extractedData.tireSpec) labelLines.push(`TIRE: ${extractedData.tireSpec}`);
+    if (extractedData.rimSpec) labelLines.push(`RIM: ${extractedData.rimSpec}`);
+    if (extractedData.psi) labelLines.push(`PSI: ${extractedData.psi}`);
+    labelLines.push(extractedData.complianceStatement);
+    
+    const formattedLabelText = labelLines.filter(line => line?.trim()).join('\n');
+
+    // Step 3: Generate the label image using the composed text
     const imagePrompt = `Generate a clear, professional, and compliant VIN label image.
-The label background should be white, and the text should be black for maximum contrast and legibility, unless specific instructions in the provided text suggest otherwise (e.g., "metallic label background").
+The label background should be white, and the text should be black for maximum contrast and legibility.
 The label dimensions are approximately ${input.labelDimensions}.
 The label MUST display EXACTLY the following text, arranged logically for a standard VIN label, ensuring all information is clear and readable:
 
