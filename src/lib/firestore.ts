@@ -1,6 +1,6 @@
 
 import { db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp, getDocs, query, where, orderBy } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, getDocs, query, where, orderBy, limit } from 'firebase/firestore';
 import type { DocumentData } from 'firebase/firestore';
 
 if (!db) {
@@ -38,16 +38,25 @@ export async function addGeneratedDocument(doc: Omit<GeneratedDocument, 'id' | '
 }
 
 /**
- * Fetches all generated documents for a specific user.
+ * Fetches generated documents for a specific user.
  * @param userId - The ID of the user whose documents to fetch.
+ * @param docLimit - Optional number of documents to limit the query to.
  * @returns A promise that resolves to an array of document data.
  */
-export async function getGeneratedDocumentsForUser(userId: string): Promise<GeneratedDocument[]> {
+export async function getGeneratedDocumentsForUser(userId: string, docLimit?: number): Promise<GeneratedDocument[]> {
   try {
-    const q = query(
-      collection(db, GENERATED_DOCS_COLLECTION),
+    const constraints = [
       where('userId', '==', userId),
       orderBy('createdAt', 'desc')
+    ];
+
+    if (docLimit) {
+      constraints.push(limit(docLimit));
+    }
+
+    const q = query(
+      collection(db, GENERATED_DOCS_COLLECTION),
+      ...constraints
     );
 
     const querySnapshot = await getDocs(q);
