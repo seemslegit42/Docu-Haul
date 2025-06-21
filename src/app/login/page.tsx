@@ -16,10 +16,33 @@ import { auth } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, FileCheck2 } from 'lucide-react';
+import { Loader2, FileCheck2, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import { AuthForm, formSchema, type LoginFormValues } from './components/AuthForm';
 import { GoogleIcon } from '@/components/shared/GoogleIcon';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+
+const getAuthErrorMessage = (errorCode: string): string => {
+  switch (errorCode) {
+    case 'auth/invalid-credential':
+    case 'auth/wrong-password':
+    case 'auth/user-not-found':
+      return 'Invalid email or password. Please check your credentials and try again.';
+    case 'auth/email-already-in-use':
+      return 'An account with this email address already exists. Please try logging in.';
+    case 'auth/weak-password':
+      return 'The password is too weak. It must be at least 6 characters long.';
+    case 'auth/popup-closed-by-user':
+      return 'The sign-in process was cancelled. Please try again.';
+    case 'auth/account-exists-with-different-credential':
+      return 'An account already exists with this email. Please sign in using the original method you used.';
+    case 'auth/too-many-requests':
+        return 'Access to this account has been temporarily disabled due to many failed login attempts. You can immediately restore it by resetting your password or you can try again later.';
+    default:
+      return 'An unexpected authentication error occurred. Please try again.';
+  }
+};
+
 
 export default function LoginPage() {
   const router = useRouter();
@@ -37,6 +60,10 @@ export default function LoginPage() {
   });
 
   const onSubmit = async (data: LoginFormValues) => {
+    if (!auth) {
+        toast({ title: 'Configuration Error', description: 'Authentication is not configured.', variant: 'destructive' });
+        return;
+    }
     setIsLoading(true);
     try {
       if (activeTab === 'login') {
@@ -48,10 +75,11 @@ export default function LoginPage() {
       }
       router.push('/dashboard');
     } catch (error: any) {
-      console.error(error);
+      console.error("Auth Error:", error.code, error.message);
+      const description = getAuthErrorMessage(error.code);
       toast({
         title: 'Authentication Error',
-        description: error.message,
+        description,
         variant: 'destructive',
       });
     } finally {
@@ -61,7 +89,7 @@ export default function LoginPage() {
 
   const handleGoogleSignIn = async () => {
     if (!auth) {
-        toast({ title: 'Error', description: 'Firebase is not configured.', variant: 'destructive' });
+        toast({ title: 'Configuration Error', description: 'Authentication is not configured.', variant: 'destructive' });
         return;
     }
     setIsGoogleLoading(true);
@@ -71,13 +99,8 @@ export default function LoginPage() {
       toast({ title: 'Success', description: 'Logged in successfully with Google.' });
       router.push('/dashboard');
     } catch (error: any) {
-      console.error("Google Sign-In Error:", error);
-      let description = error.message;
-      if (error.code === 'auth/popup-closed-by-user') {
-        description = 'The sign-in process was cancelled.';
-      } else if (error.code === 'auth/account-exists-with-different-credential') {
-        description = 'An account already exists with this email. Please sign in using the original method.';
-      }
+      console.error("Google Sign-In Error:", error.code, error.message);
+      const description = getAuthErrorMessage(error.code);
       toast({
         title: 'Google Sign-In Error',
         description,
@@ -103,10 +126,11 @@ export default function LoginPage() {
         description: `If an account exists for ${email}, a password reset link has been sent. Please check your inbox.`,
       });
     } catch (error: any) {
-      console.error('Password Reset Error:', error);
+      console.error('Password Reset Error:', error.code, error.message);
+      const description = getAuthErrorMessage(error.code);
       toast({
         title: 'Password Reset Error',
-        description: error.message,
+        description,
         variant: 'destructive',
       });
     } finally {
@@ -115,6 +139,29 @@ export default function LoginPage() {
   };
   
   const anyLoading = isLoading || isGoogleLoading;
+
+  if (!auth) {
+    return (
+        <div className="flex items-center justify-center min-h-screen bg-background p-4">
+            <Card className="w-full max-w-md border-destructive">
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                        <AlertTriangle className="text-destructive" />
+                        Authentication Not Configured
+                    </CardTitle>
+                    <CardDescription>
+                        The application's authentication service is currently unavailable. This is likely due to missing configuration settings.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-sm text-muted-foreground">
+                        If you are the administrator, please ensure that the Firebase client-side configuration variables (e.g., `NEXT_PUBLIC_FIREBASE_API_KEY`) are set correctly in your environment file. Please refer to the `README.md` for setup instructions.
+                    </p>
+                </CardContent>
+            </Card>
+        </div>
+    );
+  }
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-background p-4">
