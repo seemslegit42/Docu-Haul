@@ -10,6 +10,7 @@ import { generateDocumentation, type GenerateDocumentationOutput } from '@/ai/fl
 import { AppLayout } from '@/components/layout/app-layout';
 import { PageHeader } from '@/components/layout/page-header';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/use-auth';
 import jsPDF from 'jspdf';
 import SmartDocsForm from './components/SmartDocsForm';
 import GeneratedDocument from './components/GeneratedDocument';
@@ -21,6 +22,7 @@ export default function SmartDocsPage() {
   const { toast } = useToast();
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { user } = useAuth();
 
   const form = useForm<SmartDocsInput>({
     resolver: zodResolver(SmartDocsSchema),
@@ -61,7 +63,11 @@ export default function SmartDocsPage() {
     setEditableDocText('');
 
     try {
-      const result = await generateDocumentation(data);
+      if (!user) {
+        throw new Error("You must be logged in to perform this action.");
+      }
+      const authToken = await user.getIdToken();
+      const result = await generateDocumentation(data, authToken);
       setGeneratedDoc(result);
       setEditableDocText(result.documentText);
       toast({

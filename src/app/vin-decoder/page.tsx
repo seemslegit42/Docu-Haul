@@ -9,6 +9,7 @@ import { decodeVin, type DecodeVinOutput } from '@/ai/flows/decode-vin-flow';
 import { AppLayout } from '@/components/layout/app-layout';
 import { PageHeader } from '@/components/layout/page-header';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/use-auth';
 import VinDecoderForm from './components/VinDecoderForm';
 import VinDecoderResult from './components/VinDecoderResult';
 
@@ -16,6 +17,7 @@ export default function VinDecoderPage() {
   const [result, setResult] = useState<DecodeVinOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const form = useForm<DecodeVinInput>({
     resolver: zodResolver(DecodeVinSchema),
@@ -28,7 +30,11 @@ export default function VinDecoderPage() {
     setIsLoading(true);
     setResult(null);
     try {
-      const decodedResult = await decodeVin({ vin: data.vin.toUpperCase() });
+      if (!user) {
+        throw new Error("You must be logged in to perform this action.");
+      }
+      const authToken = await user.getIdToken();
+      const decodedResult = await decodeVin({ vin: data.vin.toUpperCase() }, authToken);
       setResult(decodedResult);
       toast({
         title: "VIN Decode Complete",

@@ -13,6 +13,7 @@ import {z}from 'genkit';
 import { DOCUMENT_TYPES } from '@/lib/constants';
 import { type SmartDocsInput, SmartDocsSchema } from '@/lib/schemas';
 import { defaultSafetySettings } from '@/ai/safety-settings';
+import admin from '@/lib/firebase-admin';
 
 // Structured schema for NVIS data
 const NvisDataSchema = z.object({
@@ -55,8 +56,23 @@ const GenerateDocumentationOutputSchema = z.object({
 });
 export type GenerateDocumentationOutput = z.infer<typeof GenerateDocumentationOutputSchema>;
 
-export async function generateDocumentation(input: SmartDocsInput): Promise<GenerateDocumentationOutput> {
-  return generateDocumentationFlow(input);
+export async function generateDocumentation(input: SmartDocsInput, authToken: string | undefined): Promise<GenerateDocumentationOutput> {
+  if (!authToken) {
+    throw new Error('Authentication required. Access denied.');
+  }
+
+  if (!admin.apps.length) {
+    console.error("Firebase Admin SDK is not initialized. Cannot perform authenticated check.");
+    throw new Error("Server authentication is not configured. Please contact support.");
+  }
+
+  try {
+    await admin.auth().verifyIdToken(authToken);
+    return await generateDocumentationFlow(input);
+  } catch (error: any) {
+    console.error('Authorization check failed in generateDocumentation:', error);
+    throw new Error('You are not authorized to perform this action. Please sign in and try again.');
+  }
 }
 
 // A single, more powerful prompt for extracting structured data.

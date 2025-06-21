@@ -10,6 +10,7 @@ import { checkCompliance, type CheckComplianceOutput } from '@/ai/flows/check-co
 import { AppLayout } from '@/components/layout/app-layout';
 import { PageHeader } from '@/components/layout/page-header';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/use-auth';
 import ComplianceCheckForm from './components/ComplianceCheckForm';
 import ComplianceReport from './components/ComplianceReport';
 
@@ -18,6 +19,7 @@ export default function ComplianceCheckPage() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const searchParams = useSearchParams();
+  const { user } = useAuth();
 
   const form = useForm<ComplianceCheckInput>({
     resolver: zodResolver(ComplianceCheckSchema),
@@ -46,7 +48,11 @@ export default function ComplianceCheckPage() {
     setIsLoading(true);
     setResult(null);
     try {
-      const complianceResult = await checkCompliance(data);
+      if (!user) {
+        throw new Error("You must be logged in to perform this action.");
+      }
+      const authToken = await user.getIdToken();
+      const complianceResult = await checkCompliance(data, authToken);
       setResult(complianceResult);
       toast({
         title: "Compliance Check Complete",

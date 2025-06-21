@@ -11,6 +11,7 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 import { type DecodeVinInput, DecodeVinSchema } from '@/lib/schemas';
 import { defaultSafetySettings } from '@/ai/safety-settings';
+import admin from '@/lib/firebase-admin';
 
 const VinPartSchema = z.object({
   value: z.string().describe("The substring of the VIN corresponding to this part."),
@@ -35,8 +36,23 @@ const DecodeVinOutputSchema = z.object({
 });
 export type DecodeVinOutput = z.infer<typeof DecodeVinOutputSchema>;
 
-export async function decodeVin(input: DecodeVinInput): Promise<DecodeVinOutput> {
-  return decodeVinFlow(input);
+export async function decodeVin(input: DecodeVinInput, authToken: string | undefined): Promise<DecodeVinOutput> {
+  if (!authToken) {
+    throw new Error('Authentication required. Access denied.');
+  }
+
+  if (!admin.apps.length) {
+    console.error("Firebase Admin SDK is not initialized. Cannot perform authenticated check.");
+    throw new Error("Server authentication is not configured. Please contact support.");
+  }
+
+  try {
+    await admin.auth().verifyIdToken(authToken);
+    return await decodeVinFlow(input);
+  } catch (error: any) {
+    console.error('Authorization check failed in decodeVin:', error);
+    throw new Error('You are not authorized to perform this action. Please sign in and try again.');
+  }
 }
 
 const prompt = ai.definePrompt({
