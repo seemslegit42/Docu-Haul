@@ -13,11 +13,9 @@ import { formatRelative } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, History, FileText } from 'lucide-react';
 
-interface RecentDocumentsProps {
-  limit?: number;
-}
+const RECENT_DOCS_LIMIT = 5;
 
-export function RecentDocuments({ limit = 5 }: RecentDocumentsProps) {
+export function RecentDocuments() {
   const { user, isLoading: isAuthLoading } = useAuth();
   const [documents, setDocuments] = useState<GeneratedDocument[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -33,7 +31,7 @@ export function RecentDocuments({ limit = 5 }: RecentDocumentsProps) {
 
     async function fetchDocuments() {
       try {
-        const userDocs = await getGeneratedDocumentsForUser(user.uid, limit);
+        const userDocs = await getGeneratedDocumentsForUser(user.uid, RECENT_DOCS_LIMIT);
         setDocuments(userDocs);
       } catch (error) {
         console.error("Error fetching recent documents:", error);
@@ -48,14 +46,17 @@ export function RecentDocuments({ limit = 5 }: RecentDocumentsProps) {
     }
 
     fetchDocuments();
-  }, [user, isAuthLoading, toast, limit]);
+  }, [user, isAuthLoading, toast]);
 
   if (isLoading) {
     return (
       <Card>
         <CardHeader>
-          <Skeleton className="h-6 w-1/2" />
-          <Skeleton className="h-4 w-3/4" />
+          <div className="flex items-center gap-2">
+            <History className="w-6 h-6 text-primary" />
+            <CardTitle>Recent Activity</CardTitle>
+          </div>
+          <CardDescription>Loading your latest documents...</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -77,12 +78,17 @@ export function RecentDocuments({ limit = 5 }: RecentDocumentsProps) {
         </div>
         <CardDescription>A quick look at the documents you've recently generated.</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className={documents.length > 0 ? "p-0" : ""}>
         {documents.length === 0 ? (
           <div className="text-center text-muted-foreground font-body p-6 border border-dashed rounded-md flex flex-col items-center justify-center">
             <FileText className="w-12 h-12 text-muted-foreground/50 mb-4" />
-            <h3 className="text-lg font-headline font-semibold">No Recent Activity</h3>
-            <p className="text-sm">Generate a document using Smart Docs or Label Forge to see it here.</p>
+            <h3 className="text-lg font-headline font-semibold">No Documents Yet</h3>
+            <p className="text-sm mb-4">Generate a document to see your history here.</p>
+            <Button asChild>
+                <Link href="/smart-docs">
+                    Generate Document
+                </Link>
+            </Button>
           </div>
         ) : (
           <Table>
@@ -108,10 +114,10 @@ export function RecentDocuments({ limit = 5 }: RecentDocumentsProps) {
         )}
       </CardContent>
       {documents.length > 0 && (
-        <CardFooter>
+        <CardFooter className="pt-6">
             <Button variant="outline" asChild className="w-full">
                 <Link href="/history">
-                    View All History <ArrowRight className="ml-2 h-4 w-4" />
+                    View Full History <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
             </Button>
         </CardFooter>
