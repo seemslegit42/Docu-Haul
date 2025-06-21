@@ -76,8 +76,10 @@ const createCompliantVinLabelFlow = ai.defineFlow(
   async (input) => {
     // Step 1: Generate structured label data and rationale
     const { output: designOutput } = await vinLabelDesignPrompt(input);
-    if (!designOutput || !designOutput.extractedData || !designOutput.placementRationale) {
-      throw new Error('AI failed to design the label data. Please check your input or try again.');
+    if (!designOutput || !designOutput.extractedData || !designOutput.placementRationale?.trim()) {
+      const errorMessage = 'AI failed to design the label data. The output was empty or incomplete. Please check your input or try again.';
+      console.error(errorMessage, { input, receivedOutput: designOutput });
+      throw new Error(errorMessage);
     }
     const { extractedData, placementRationale } = designOutput;
 
@@ -118,7 +120,13 @@ If the text mentions "barcode" or implies its necessity, include a realistic pla
     });
 
     if (!media || !media.url) {
-      throw new Error('AI failed to generate the label image. Please try again.');
+      const errorMessage = 'AI failed to generate the label image. This can be an intermittent issue. Please try again.';
+      console.error(errorMessage, {
+        input,
+        designOutput, // Log the intermediate step's output
+        imagePrompt,
+      });
+      throw new Error(errorMessage);
     }
     const labelDataUri = media.url;
 

@@ -62,14 +62,14 @@ const checkComplianceFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
-    if (!output) {
-      console.error('Compliance check AI model returned null output.', {input});
-      throw new Error('Compliance check failed: The AI model did not produce an output.');
+    
+    // Check for null/undefined output or empty/whitespace-only report fields
+    if (!output || !output.complianceStatus?.trim() || !output.complianceReport?.trim()) {
+      const errorMessage = 'AI failed to generate a valid compliance report. The output was empty or incomplete. Please check your input and try again.';
+      console.error(errorMessage, { input, receivedOutput: output });
+      throw new Error(errorMessage);
     }
-    if (!output.complianceStatus || !output.complianceReport) {
-      console.error('Compliance check AI model output is missing required fields.', {input, output});
-      throw new Error('Compliance check failed: The AI model output is incomplete.');
-    }
+    
     return output;
   }
 );

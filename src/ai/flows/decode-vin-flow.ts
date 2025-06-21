@@ -80,10 +80,15 @@ const decodeVinFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
-    if (!output) {
-      console.error('VIN decoder AI model returned null output.', {input});
-      throw new Error('VIN decoding failed: The AI model did not produce an output.');
+    
+    // It's crucial to validate the output from the AI.
+    // Check for null/undefined output or if key fields are missing.
+    if (!output || !output.wmi?.value || !output.fullVin?.trim()) {
+      const errorMessage = 'AI failed to decode the VIN. The output was empty or incomplete. Please ensure the VIN is valid and try again.';
+      console.error(errorMessage, { input, receivedOutput: output });
+      throw new Error(errorMessage);
     }
+    
     return output;
   }
 );
