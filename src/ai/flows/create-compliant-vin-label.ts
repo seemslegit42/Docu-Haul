@@ -27,6 +27,13 @@ export const VinLabelDataSchema = z.object({
 });
 export type VinLabelData = z.infer<typeof VinLabelDataSchema>;
 
+// Create a schema for the prompt's input, extending the base schema with boolean flags.
+// This makes the prompt logic simpler and more robust, avoiding non-standard Handlebars helpers.
+const VinLabelDesignPromptSchema = LabelForgeSchema.extend({
+    isStandard: z.boolean(),
+    isBilingualCanadian: z.boolean(),
+    isBilingualRvCanadian: z.boolean(),
+});
 
 const createCompliantVinLabelFlow = ai.defineFlow(
   {
@@ -48,8 +55,16 @@ const createCompliantVinLabelFlow = ai.defineFlow(
         };
     }
 
+    // Prepare the input for the prompt, adding boolean flags for the template type.
+    const promptInput = {
+        ...input,
+        isStandard: input.template === 'standard',
+        isBilingualCanadian: input.template === 'bilingual_canadian',
+        isBilingualRvCanadian: input.template === 'bilingual_rv_canadian',
+    };
+
     // Step 2: Since the VIN is valid, call the AI to perform data extraction.
-    const { output } = await vinLabelDesignPrompt(input);
+    const { output } = await vinLabelDesignPrompt(promptInput);
     
     // This is an unexpected error. If the VIN is valid, the AI should always be able to extract data.
     if (!output || Object.keys(output.labelData).length === 0) {
@@ -77,7 +92,7 @@ export const createCompliantVinLabel = createAuthenticatedFlow(createCompliantVi
 // This prompt is now much simpler because it can assume the VIN is already valid.
 const vinLabelDesignPrompt = ai.definePrompt({
   name: 'vinLabelDesignPrompt',
-  input: {schema: LabelForgeSchema},
+  input: {schema: VinLabelDesignPromptSchema},
   output: {schema: VinLabelDesignOutputSchema},
   prompt: `You are an expert system for designing compliant VIN (Vehicle Identification Number) labels.
 The VIN provided has already been validated and is correct. Your task is to extract structured data for the label based on the user's input.
@@ -96,12 +111,12 @@ User Inputs:
 - Trailer Specifications: {{{trailerSpecs}}}
 - Regulatory Standards (if any): {{{regulatoryStandards}}}
 
-{{#if (eq template "standard")}}
+{{#if isStandard}}
 **Template Style: Standard US**
 Extract data for the following keys: "MANUFACTURER", "DATE OF MANUF.", "GVWR", "GAWR", "TIRE", "RIM", "PSI", "VIN", "TYPE", and "COMPLIANCE_STATEMENT". For the compliance statement, use the provided regulatory standard or a default US/FMVSS statement.
 {{/if}}
 
-{{#if (eq template "bilingual_canadian")}}
+{{#if isBilingualCanadian}}
 **Template Style: Bilingual Canadian (English/French)**
 Extract data for the following keys: "MANUFACTURED BY / FABRIQUE PAR", "DATE", "GVWR / PNBV", "GAWR (EACH AXLE) / PNBE (CHAQUE ESSIEU)", "TIRES / PNEU", "RIMS / JANTE", "COLD INFL. PRESS. / PRESS. DE GONFL. A FROID", "SINGLE_OR_DUAL", "V.I.N. / N.I.V.", "TYPE / TYPE", and "COMPLIANCE_STATEMENT".
 - For "GVWR / PNBV" and "GAWR (EACH AXLE) / PNBE (CHAQUE ESSIEU)", extract ONLY the numeric value in kilograms. Do not include units or any other text (e.g., "7000").
@@ -110,7 +125,7 @@ Extract data for the following keys: "MANUFACTURED BY / FABRIQUE PAR", "DATE", "
 - For the compliance statement, use the provided standard or a default US/Canadian statement.
 {{/if}}
 
-{{#if (eq template "bilingual_rv_canadian")}}
+{{#if isBilingualRvCanadian}}
 **Template Style: Bilingual Canadian RV (Tall)**
 Extract data for the following keys: "BRAND", "DATE", "RESP_MFR", "GVWR_LBS", "GVWR_KG", "VIN", "SIZE", "FRONT_GAWR_LBS", "FRONT_GAWR_KG", "FRONT_TIRE", "FRONT_RIM", "FRONT_PSI", "FRONT_KPA", "REAR_GAWR_LBS", "REAR_GAWR_KG", "REAR_TIRE", "REAR_RIM", "REAR_PSI", "REAR_KPA", "COMPLIANCE_STATEMENT_VEHICLE", "COMPLIANCE_STATEMENT_TRAILER".
 - "BRAND" is the main logo/name at the top (e.g., Jayco).
