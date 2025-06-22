@@ -21,7 +21,7 @@ interface AuthWrapperOptions {
  *
  * @param flow The Genkit flow function to wrap. It should take an input of type TInput and return a Promise of TOutput.
  * @param options Configuration options for the authorization check.
- * @param options.premiumRequired If true, checks if the user has a `premium` custom claim.
+ * @param options.premiumRequired If true, checks if the user has a `premium` custom claim. Admins bypass this check.
  * @param options.premiumCheckError The error message to throw if the premium check fails.
  * @param options.customAuthCheck A custom function to perform additional authorization checks.
  * @returns An async function that takes the flow input and an auth token, and returns the flow's output.
@@ -38,14 +38,19 @@ export function createAuthenticatedFlow<TInput, TOutput>(
     try {
       const decodedToken = await admin.auth().verifyIdToken(authToken);
 
+      // Enforce role-based access for premium features.
       if (options.premiumRequired) {
         const isPremium = decodedToken.premium === true;
-        if (!isPremium) {
+        // Admins are granted access to all features regardless of premium status.
+        const isAdmin = decodedToken.admin === true;
+
+        // If the user is not premium AND not an admin, deny access.
+        if (!isPremium && !isAdmin) {
           throw new Error(options.premiumCheckError || 'This is a premium feature. Please upgrade your plan.');
         }
       }
       
-      // Perform custom authorization check if provided
+      // Perform custom authorization check if provided (e.g., for admin-only routes).
       if (options.customAuthCheck) {
         options.customAuthCheck(decodedToken);
       }
@@ -53,7 +58,7 @@ export function createAuthenticatedFlow<TInput, TOutput>(
       // If all checks pass, execute the original flow.
       return await flow(input);
 
-    } catch (error) {
+    } catch (error) => {
       // Use the centralized error handler
       handleFlowError(error);
     }
