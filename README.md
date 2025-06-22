@@ -70,11 +70,13 @@ This application is set up to handle premium feature access via payments through
 
 **Local Setup & Deployment:**
 
-1.  **Get Checkout Link**:
-    *   In your Lemon Squeezy dashboard, create a product and get its Checkout Link.
-    *   Add this URL to your `.env` file:
+1.  **Get URLs from Lemon Squeezy**:
+    *   In your Lemon Squeezy dashboard, create a product and get its **Checkout Link**.
+    *   In your Lemon Squeezy dashboard, find your **Customer Portal** link.
+    *   Add these URLs to your `.env` file:
         ```env
         NEXT_PUBLIC_LEMON_SQUEEZY_CHECKOUT_URL=https://your-store.lemonsqueezy.com/checkout/buy/your-variant-id
+        NEXT_PUBLIC_LEMON_SQUEEZY_CUSTOMER_PORTAL_URL=https://your-store.lemonsqueezy.com/customer-portal
         ```
 
 2.  **Configure Webhook Secret**:
@@ -101,6 +103,9 @@ After deployment, ensure the webhook URL in Lemon Squeezy is correct and that it
 -   **Label Forge**: Create compliant VIN labels with AI-optimized layouts (Premium Feature).
 -   **Compliance Check**: Validate documents against regulations.
 -   **VIN Decoder**: Break down and understand any 17-digit VIN.
+-   **Account Management**: Users can manage their profile, password, and billing.
+-   **Document History**: Searchable and filterable history of all generated documents.
+-   **Admin Dashboard**: Secure area for administrators to view app statistics and manage users.
 
 ## Tech Stack
 
@@ -109,3 +114,4 @@ After deployment, ensure the webhook URL in Lemon Squeezy is correct and that it
 -   **Styling**: [Tailwind CSS](https://tailwindcss.com/)
 -   **Authentication**: [Firebase Authentication](https://firebase.google.com/docs/auth)
 -   **Generative AI**: [Genkit](https://firebase.google.com/docs/genkit)
+-   **Payments**: [Lemon Squeezy](https://www.lemonsqueezy.com/)

@@ -1,7 +1,6 @@
 
 import { db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp, getDocs, query, where, orderBy, limit } from 'firebase/firestore';
-import type { DocumentData } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, getDocs, query, where, orderBy, limit, writeBatch, type DocumentData } from 'firebase/firestore';
 
 const GENERATED_DOCS_COLLECTION = 'generatedDocuments';
 
@@ -77,4 +76,36 @@ export async function getGeneratedDocumentsForUser(userId: string, docLimit?: nu
     console.error("Error fetching documents from Firestore: ", error);
     throw new Error("Failed to fetch documents. Please try again.");
   }
+}
+
+
+/**
+ * Deletes all generated documents for a specific user.
+ * This is used during account deletion to clean up user data.
+ * @param userId - The ID of the user whose documents to delete.
+ */
+export async function deleteGeneratedDocumentsForUser(userId: string): Promise<void> {
+  if (!db) {
+    console.error("Firestore not initialized. Cannot delete user documents.");
+    return;
+  }
+
+  // A read to find all documents for the user.
+  const q = query(collection(db, GENERATED_DOCS_COLLECTION), where('userId', '==', userId));
+  const querySnapshot = await getDocs(q);
+  
+  if (querySnapshot.empty) {
+    console.log(`No documents to delete for user ${userId}.`);
+    return;
+  }
+
+  // Use a write batch to delete all documents in a single atomic operation.
+  // Batches are more efficient for multiple writes.
+  const batch = writeBatch(db);
+  querySnapshot.forEach((doc) => {
+    batch.delete(doc.ref);
+  });
+  
+  await batch.commit();
+  console.log(`Successfully deleted ${querySnapshot.size} documents for user ${userId}.`);
 }

@@ -25,7 +25,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from '@/hooks/use-auth';
 import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
@@ -58,9 +58,14 @@ export function SidebarNav() {
     }
   };
   
-  const getInitials = (email: string | null | undefined) => {
-    if (!email) return '?';
-    return email.charAt(0).toUpperCase();
+  const getInitials = (name: string | null | undefined, email: string | null | undefined) => {
+    if (name) {
+        return name.split(' ').map(n => n[0]).join('').toUpperCase();
+    }
+    if (email) {
+        return email.charAt(0).toUpperCase();
+    }
+    return '?';
   };
 
   return (
@@ -150,18 +155,19 @@ export function SidebarNav() {
         {user && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-               <SidebarMenuButton className="w-full justify-start h-auto p-2" tooltip={{ children: user.email || 'User Account', side: 'right' }}>
+               <SidebarMenuButton className="w-full justify-start h-auto p-2" tooltip={{ children: user.displayName || user.email || 'User Account', side: 'right' }}>
                     <Avatar className="h-8 w-8">
-                       <AvatarFallback>{getInitials(user.email)}</AvatarFallback>
+                       {user.photoURL && <AvatarImage src={user.photoURL} alt={user.displayName || 'User avatar'} />}
+                       <AvatarFallback>{getInitials(user.displayName, user.email)}</AvatarFallback>
                     </Avatar>
                     {isExpanded && (
                       <div className="flex flex-col items-start ml-2 overflow-hidden flex-grow">
-                          <span className="font-semibold text-sm truncate">{user.email}</span>
+                          <span className="font-semibold text-sm truncate">{user.displayName || user.email}</span>
                           <span className={cn(
                               "text-xs",
                               isPremium ? 'text-yellow-400' : 'text-muted-foreground'
                           )}>
-                              {isPremium ? 'Premium User' : 'Standard User'}
+                              {isAdmin ? 'Administrator' : isPremium ? 'Premium User' : 'Standard User'}
                           </span>
                       </div>
                     )}
@@ -171,7 +177,7 @@ export function SidebarNav() {
             <DropdownMenuContent side="top" align="start" className="w-56 mb-2 ml-2 font-body">
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">My Account</p>
+                    <p className="text-sm font-medium leading-none">{user.displayName || 'My Account'}</p>
                     <p className="text-xs leading-none text-muted-foreground truncate">{user.email}</p>
                   </div>
                 </DropdownMenuLabel>
@@ -179,7 +185,7 @@ export function SidebarNav() {
                  <DropdownMenuItem asChild>
                     <Link href="/account">
                       <User className="mr-2 h-4 w-4" />
-                      <span>Account & Billing</span>
+                      <span>Account Settings</span>
                     </Link>
                  </DropdownMenuItem>
                  <DropdownMenuSeparator />

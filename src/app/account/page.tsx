@@ -2,29 +2,39 @@
 
 import { AppLayout } from '@/components/layout/app-layout';
 import { PageHeader } from '@/components/layout/page-header';
-import AccountDetails from './components/AccountDetails';
-import UpgradeToPremium from './components/UpgradeToPremium';
-import { useAuth } from '@/hooks/use-auth';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import ProfileSettings from './components/ProfileSettings';
+import PasswordSettings from './components/PasswordSettings';
+import BillingSettings from './components/BillingSettings';
+import DangerZone from './components/DangerZone';
 
 export default function AccountPage() {
-    const { isPremium } = useAuth();
-    
     return (
         <AppLayout>
             <PageHeader 
-                title="Account Management"
-                description="Manage your profile, subscription, and settings."
+                title="Account Settings"
+                description="Manage your profile, password, subscription, and other settings."
             />
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-2">
-                    <AccountDetails />
-                </div>
-                {!isPremium && (
-                    <div className="lg:col-span-1">
-                        <UpgradeToPremium />
-                    </div>
-                )}
-            </div>
+            <Tabs defaultValue="profile" className="w-full">
+                <TabsList className="grid w-full max-w-lg grid-cols-4">
+                    <TabsTrigger value="profile">Profile</TabsTrigger>
+                    <TabsTrigger value="password">Password</TabsTrigger>
+                    <TabsTrigger value="billing">Billing</TabsTrigger>
+                    <TabsTrigger value="danger">Danger Zone</TabsTrigger>
+                </TabsList>
+                <TabsContent value="profile" className="mt-6">
+                    <ProfileSettings />
+                </TabsContent>
+                 <TabsContent value="password" className="mt-6">
+                    <PasswordSettings />
+                </TabsContent>
+                <TabsContent value="billing" className="mt-6">
+                    <BillingSettings />
+                </TabsContent>
+                <TabsContent value="danger" className="mt-6">
+                    <DangerZone />
+                </TabsContent>
+            </Tabs>
         </AppLayout>
     );
 }

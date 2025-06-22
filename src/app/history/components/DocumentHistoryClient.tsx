@@ -1,23 +1,29 @@
 
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { getGeneratedDocumentsForUser, type GeneratedDocument } from '@/lib/firestore';
 import { deleteDocument } from '@/ai/flows/delete-document-flow';
 import { useToast } from '@/hooks/use-toast';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 import { DocumentActions } from './DocumentActions';
-import { FileText } from 'lucide-react';
+import { FileText, Search } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Button } from '@/components/ui/button';
 
 export default function DocumentHistoryClient() {
   const { user, isLoading: isAuthLoading } = useAuth();
   const [documents, setDocuments] = useState<GeneratedDocument[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+
+  const [searchTerm, setSearchTerm] = useState('');
+  const [typeFilter, setTypeFilter] = useState('all');
 
   useEffect(() => {
     if (isAuthLoading) return;
@@ -58,6 +64,18 @@ export default function DocumentHistoryClient() {
     setDocuments((prevDocs) => prevDocs.filter((doc) => doc.id !== documentId));
   };
 
+  const filteredDocuments = useMemo(() => {
+    return documents.filter(doc => {
+      const searchTermMatch = doc.vin.toLowerCase().includes(searchTerm.toLowerCase());
+      const typeFilterMatch = typeFilter === 'all' || doc.documentType === typeFilter;
+      return searchTermMatch && typeFilterMatch;
+    });
+  }, [documents, searchTerm, typeFilter]);
+
+  const clearFilters = () => {
+      setSearchTerm('');
+      setTypeFilter('all');
+  }
 
   if (isLoading) {
     return (
@@ -86,6 +104,33 @@ export default function DocumentHistoryClient() {
 
   return (
     <Card>
+        <CardHeader>
+            <div className="flex flex-col sm:flex-row gap-4">
+                <div className="relative flex-grow">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input 
+                        placeholder="Search by VIN..." 
+                        className="pl-10"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
+                <Select value={typeFilter} onValueChange={setTypeFilter}>
+                    <SelectTrigger className="w-full sm:w-[200px]">
+                        <SelectValue placeholder="Filter by type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All Types</SelectItem>
+                        <SelectItem value="NVIS">NVIS</SelectItem>
+                        <SelectItem value="BillOfSale">Bill of Sale</SelectItem>
+                        <SelectItem value="VIN Label">VIN Label</SelectItem>
+                    </SelectContent>
+                </Select>
+                 <Button variant="outline" onClick={clearFilters} disabled={!searchTerm && typeFilter === 'all'}>
+                    Clear
+                </Button>
+            </div>
+        </CardHeader>
       <CardContent className="p-0">
         <Table>
           <TableHeader>
@@ -97,18 +142,26 @@ export default function DocumentHistoryClient() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {documents.map((doc) => (
-              <TableRow key={doc.id}>
-                <TableCell className="font-medium">{doc.documentType}</TableCell>
-                <TableCell className="font-mono">{doc.vin}</TableCell>
-                <TableCell>
-                  {doc.createdAt?.toDate ? format(doc.createdAt.toDate(), 'PPP p') : 'Just now'}
-                </TableCell>
-                <TableCell className="text-right">
-                  <DocumentActions document={doc} onDelete={handleDeleteDocument} />
-                </TableCell>
-              </TableRow>
-            ))}
+            {filteredDocuments.length > 0 ? (
+                filteredDocuments.map((doc) => (
+                <TableRow key={doc.id}>
+                    <TableCell className="font-medium">{doc.documentType}</TableCell>
+                    <TableCell className="font-mono">{doc.vin}</TableCell>
+                    <TableCell>
+                    {doc.createdAt?.toDate ? format(doc.createdAt.toDate(), 'PPP p') : 'Just now'}
+                    </TableCell>
+                    <TableCell className="text-right">
+                    <DocumentActions document={doc} onDelete={handleDeleteDocument} />
+                    </TableCell>
+                </TableRow>
+                ))
+            ) : (
+                <TableRow>
+                    <TableCell colSpan={4} className="h-24 text-center">
+                        No documents match your search criteria.
+                    </TableCell>
+                </TableRow>
+            )}
           </TableBody>
         </Table>
       </CardContent>
