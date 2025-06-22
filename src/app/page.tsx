@@ -15,7 +15,10 @@ export default function LandingPage() {
             <FileCheck2 className="w-7 h-7 text-primary" />
             <span className="font-headline text-xl font-bold text-primary tracking-tight">DocuHaul</span>
           </Link>
-          <nav className="flex-1 flex justify-end">
+          <nav className="ml-auto flex items-center gap-4">
+            <Link href="/pricing" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
+                Pricing
+            </Link>
             <AuthAwareButton text="Go to App" />
           </nav>
         </div>
@@ -83,7 +86,14 @@ export default function LandingPage() {
           <p className="text-sm text-muted-foreground">
             © {new Date().getFullYear()} DocuHaul. All rights reserved.
           </p>
-          <div className="font-headline text-lg font-bold text-primary">DocuHaul</div>
+          <div className="flex gap-4">
+              <Link href="/legal/terms" className="text-sm text-muted-foreground hover:text-primary">
+                  Terms of Service
+              </Link>
+              <Link href="/legal/privacy" className="text-sm text-muted-foreground hover:text-primary">
+                  Privacy Policy
+              </Link>
+          </div>
         </div>
       </footer>
     </div>
