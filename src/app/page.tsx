@@ -1,11 +1,46 @@
+"use client";
 
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/use-auth';
 import Link from 'next/link';
 import Image from 'next/image';
-import { FileCheck2, Tags, ShieldCheck, Hash } from 'lucide-react';
+import { Loader2, FileCheck2, Tags, ShieldCheck, Hash } from 'lucide-react';
 import { AuthAwareButton } from '@/components/layout/AuthAwareButton';
 import { FeatureCard } from '@/components/shared/FeatureCard';
 
-export default function LandingPage() {
+export default function RootPage() {
+  const { user, isLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    // If auth state is resolved and a user exists, redirect to the dashboard.
+    // Using replace so the landing page isn't in the browser history.
+    if (!isLoading && user) {
+      router.replace('/dashboard');
+    }
+  }, [user, isLoading, router]);
+
+  // While checking auth state, show a full-screen loader. This prevents
+  // a flash of the landing page for authenticated users.
+  if (isLoading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-background">
+        <Loader2 className="h-16 w-16 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // If the user is logged in, this will show a loader while redirecting.
+  if (user) {
+     return (
+      <div className="flex h-screen w-full items-center justify-center bg-background">
+        <Loader2 className="h-16 w-16 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // If auth is resolved and there's no user, show the marketing landing page.
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       {/* Header */}
