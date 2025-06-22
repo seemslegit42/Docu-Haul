@@ -23,14 +23,14 @@ export const lemonsqueezyWebhook = functions.https.onRequest(
 
     try {
       const secret = webhookSecret.value();
+
+      // Verify the signature
       const hmac = crypto.createHmac("sha256", secret);
-      const digest = Buffer.from(
-        hmac.update(request.rawBody).digest("hex"),
-        "utf8",
-      );
+      const digestHex = hmac.update(request.rawBody).digest("hex");
+      const digest = Buffer.from(digestHex, "utf8");
       const signature = Buffer.from(
         request.get("X-Signature") || "",
-        "utf8",
+        "utf8"
       );
 
       if (!crypto.timingSafeEqual(digest, signature)) {
@@ -39,6 +39,7 @@ export const lemonsqueezyWebhook = functions.https.onRequest(
         return;
       }
 
+      // Process the webhook payload
       const {meta, data} = request.body;
 
       if (meta.event_name !== "order_created") {
@@ -49,8 +50,9 @@ export const lemonsqueezyWebhook = functions.https.onRequest(
 
       const orderStatus = data.attributes.status;
       if (orderStatus !== "paid") {
-        const logMessage = `Order status is "${orderStatus}", not "paid".`;
-        functions.logger.info(logMessage, "Ignoring.");
+        functions.logger.info(
+          "Order status is '" + orderStatus + "', not 'paid'. Ignoring."
+        );
         response.status(200).send("OK (status not paid)");
         return;
       }
@@ -66,7 +68,7 @@ export const lemonsqueezyWebhook = functions.https.onRequest(
 
       await admin.auth().setCustomUserClaims(userId, {premium: true});
       functions.logger.info(
-        `Successfully granted premium access to user: ${userId}`,
+        "Successfully granted premium access to user: " + userId
       );
 
       response.status(200).send("Webhook processed successfully.");
@@ -79,5 +81,5 @@ export const lemonsqueezyWebhook = functions.https.onRequest(
         response.status(500).send("An unknown error occurred.");
       }
     }
-  },
+  }
 );
