@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { FileCheck2 } from 'lucide-react';
 import { PageHeader } from '@/components/layout/page-header';
 import { Card, CardContent } from '@/components/ui/card';
+import { AuthAwareButton } from '@/components/layout/AuthAwareButton';
 
 export default function TermsOfServicePage() {
     return (
@@ -13,10 +14,11 @@ export default function TermsOfServicePage() {
                     <FileCheck2 className="w-7 h-7 text-primary" />
                     <span className="font-headline text-xl font-bold text-primary tracking-tight">DocuHaul</span>
                 </Link>
-                <nav className="flex-1 flex justify-end">
-                    <Link href="/dashboard" className="text-sm font-medium hover:text-primary transition-colors">
-                        Back to App
+                 <nav className="ml-auto flex items-center gap-4">
+                     <Link href="/pricing" className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary">
+                        Pricing
                     </Link>
+                    <AuthAwareButton text="Go to App" />
                 </nav>
                 </div>
             </header>
@@ -58,6 +60,22 @@ export default function TermsOfServicePage() {
                     </Card>
                 </div>
             </main>
+
+            <footer className="border-t border-border/40">
+                <div className="container flex flex-col items-center justify-between gap-4 py-8 md:flex-row">
+                <p className="text-sm text-muted-foreground">
+                    © {new Date().getFullYear()} DocuHaul. All rights reserved.
+                </p>
+                <div className="flex gap-4">
+                    <Link href="/legal/terms" className="text-sm text-muted-foreground hover:text-primary">
+                        Terms of Service
+                    </Link>
+                    <Link href="/legal/privacy" className="text-sm text-muted-foreground hover:text-primary">
+                        Privacy Policy
+                    </Link>
+                </div>
+                </div>
+            </footer>
         </div>
     );
 }
