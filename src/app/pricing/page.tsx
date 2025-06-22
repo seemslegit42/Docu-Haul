@@ -1,19 +1,11 @@
-
 import Link from 'next/link';
 import { FileCheck2 } from 'lucide-react';
 import { AuthAwareButton } from '@/components/layout/AuthAwareButton';
 import PricingCard from './components/PricingCard';
 
-const premiumFeatures = [
-    "AI-Powered Label Forge",
-    "NVIS & Bill of Sale Generation",
-    "VIN Decoder Access",
-    "Document Compliance Check",
-    "Full Document History & Management",
-    "Advanced Label Templates",
-    "Save & Download All Documents",
-    "Priority Support",
-];
+// Define new env variables for the checkout URLs. The component will read them.
+const LIFETIME_CHECKOUT_URL = process.env.NEXT_PUBLIC_LEMON_SQUEEZY_LIFETIME_URL || "#";
+const SUBSCRIPTION_CHECKOUT_URL = process.env.NEXT_PUBLIC_LEMON_SQUEEZY_SUBSCRIPTION_URL || "#";
 
 export default function PricingPage() {
     return (
@@ -39,25 +31,46 @@ export default function PricingPage() {
                 <section className="py-16 md:py-24">
                 <div className="container text-center">
                     <h1 className="text-4xl font-headline font-extrabold tracking-tighter sm:text-5xl">
-                        Unlock Full Access
+                        Find the Perfect Plan
                     </h1>
                     <p className="mx-auto mt-4 max-w-xl text-lg text-muted-foreground">
-                        A simple one-time payment unlocks all features of DocuHaul, with no hidden fees or recurring subscriptions.
+                        Choose the plan that's right for you. Get lifetime access with a one-time payment or subscribe monthly.
                     </p>
                 </div>
 
-                <div className="container mt-12 flex justify-center">
-                    <div className="w-full max-w-md">
-                         <PricingCard
-                            planName="Premium Access"
-                            price="$49"
-                            priceDescription="one-time payment"
-                            features={premiumFeatures}
-                            ctaText="Get Premium Access"
-                            ctaSubtext="Unlock all features instantly."
-                            isFeatured={true}
-                        />
-                    </div>
+                <div className="container mt-12 grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                    <PricingCard
+                        planName="Pro Lifetime"
+                        price="$299.99"
+                        priceDescription="one-time payment"
+                        features={[
+                            "VIN, Label, and Paperwork Generation",
+                            "All core AI features included",
+                            "Lifetime access to updates",
+                            "Full Document History & Management",
+                            "Standard Support",
+                        ]}
+                        ctaText="Get Lifetime Access"
+                        ctaSubtext="Pay once, own it forever."
+                        checkoutUrl={LIFETIME_CHECKOUT_URL}
+                        isFeatured={false}
+                    />
+                     <PricingCard
+                        planName="Premium Subscription"
+                        price="$199.99"
+                        priceDescription="/ month"
+                        features={[
+                            "All Pro features included",
+                            "Access to all advanced templates",
+                            "Continuous feature updates",
+                            "Enhanced Compliance Checks",
+                            "Priority Support",
+                        ]}
+                        ctaText="Subscribe Now"
+                        ctaSubtext="Get started with our monthly plan."
+                        checkoutUrl={SUBSCRIPTION_CHECKOUT_URL}
+                        isFeatured={true}
+                    />
                 </div>
                 </section>
             </main>

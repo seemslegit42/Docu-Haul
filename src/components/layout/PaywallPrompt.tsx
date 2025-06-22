@@ -9,7 +9,7 @@ import { useAuth } from '@/hooks/use-auth';
 
 // The base URL for your Lemon Squeezy checkout.
 // This should be set in your .env file.
-const LEMON_SQUEEZY_CHECKOUT_URL = process.env.NEXT_PUBLIC_LEMON_SQUEEZY_CHECKOUT_URL || "#";
+const LEMON_SQUEEZY_SUBSCRIPTION_URL = process.env.NEXT_PUBLIC_LEMON_SQUEEZY_SUBSCRIPTION_URL || "#";
 
 interface PaywallPromptProps {
   title?: string;
@@ -22,8 +22,8 @@ export function PaywallPrompt({ title, description }: PaywallPromptProps) {
   // Append the user's ID to the checkout URL as custom data.
   // This is crucial for the webhook to identify which user to grant premium access to.
   const checkoutUrl = user 
-    ? `${LEMON_SQUEEZY_CHECKOUT_URL}?checkout_data[custom][user_id]=${user.uid}`
-    : LEMON_SQUEEZY_CHECKOUT_URL;
+    ? `${LEMON_SQUEEZY_SUBSCRIPTION_URL}?checkout_data[custom][user_id]=${user.uid}`
+    : LEMON_SQUEEZY_SUBSCRIPTION_URL;
 
   const isCheckoutDisabled = checkoutUrl === "#" || !user;
 
@@ -48,7 +48,7 @@ export function PaywallPrompt({ title, description }: PaywallPromptProps) {
                     </Button>
                      {isCheckoutDisabled && (
                         <p className="text-xs text-muted-foreground mt-3 max-w-sm mx-auto">
-                            Checkout is not yet configured. Please set the `NEXT_PUBLIC_LEMON_SQUEEZY_CHECKOUT_URL` in your environment.
+                            Checkout is not yet configured. Please set the `NEXT_PUBLIC_LEMON_SQUEEZY_SUBSCRIPTION_URL` in your environment.
                         </p>
                     )}
                     {!isCheckoutDisabled && (

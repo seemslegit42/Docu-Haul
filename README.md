@@ -71,11 +71,13 @@ This application is set up to handle premium feature access via payments through
 **Local Setup & Deployment:**
 
 1.  **Get URLs from Lemon Squeezy**:
-    *   In your Lemon Squeezy dashboard, create a product and get its **Checkout Link**.
-    *   In your Lemon Squeezy dashboard, find your **Customer Portal** link.
+    *   In your Lemon Squeezy dashboard, create two products: one for the one-time purchase ("Pro Lifetime") and one for the recurring subscription ("Premium Subscription").
+    *   Get the **Checkout Link** for both products.
+    *   In your Lemon Squeezy dashboard, find your **Customer Portal** link (for managing subscriptions).
     *   Add these URLs to your `.env` file:
         ```env
-        NEXT_PUBLIC_LEMON_SQUEEZY_CHECKOUT_URL=https://your-store.lemonsqueezy.com/checkout/buy/your-variant-id
+        NEXT_PUBLIC_LEMON_SQUEEZY_LIFETIME_URL=https://your-store.lemonsqueezy.com/checkout/buy/your-lifetime-variant-id
+        NEXT_PUBLIC_LEMON_SQUEEZY_SUBSCRIPTION_URL=https://your-store.lemonsqueezy.com/checkout/buy/your-subscription-variant-id
         NEXT_PUBLIC_LEMON_SQUEEZY_CUSTOMER_PORTAL_URL=https://your-store.lemonsqueezy.com/customer-portal
         ```
 

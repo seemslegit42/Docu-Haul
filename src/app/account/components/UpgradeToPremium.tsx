@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 // Read from environment variables
-const LEMON_SQUEEZY_CHECKOUT_URL = process.env.NEXT_PUBLIC_LEMON_SQUEEZY_CHECKOUT_URL || "#";
+const LEMON_SQUEEZY_SUBSCRIPTION_URL = process.env.NEXT_PUBLIC_LEMON_SQUEEZY_SUBSCRIPTION_URL || "#";
 const LEMON_SQUEEZY_CUSTOMER_PORTAL_URL = process.env.NEXT_PUBLIC_LEMON_SQUEEZY_CUSTOMER_PORTAL_URL || "#";
 
 export default function BillingSettings({ className, ...props }: CardProps) {
@@ -17,8 +17,8 @@ export default function BillingSettings({ className, ...props }: CardProps) {
     
     // Append user details to checkout URL for webhook mapping
     const checkoutUrl = user 
-        ? `${LEMON_SQUEEZY_CHECKOUT_URL}?checkout_data[custom][user_id]=${user.uid}&checkout_data[email]=${user.email}`
-        : LEMON_SQUEEZY_CHECKOUT_URL;
+        ? `${LEMON_SQUEEZY_SUBSCRIPTION_URL}?checkout_data[custom][user_id]=${user.uid}&checkout_data[email]=${user.email}`
+        : LEMON_SQUEEZY_SUBSCRIPTION_URL;
 
     const isCheckoutDisabled = checkoutUrl === "#" || !user;
 

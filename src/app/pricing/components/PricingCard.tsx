@@ -1,4 +1,3 @@
-
 "use client";
 
 import Link from 'next/link';
@@ -10,8 +9,6 @@ import { Check, ArrowRight } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const LEMON_SQUEEZY_CHECKOUT_URL = process.env.NEXT_PUBLIC_LEMON_SQUEEZY_CHECKOUT_URL || "#";
-
 interface PricingCardProps {
     planName: string;
     price: string;
@@ -20,37 +17,56 @@ interface PricingCardProps {
     ctaText: string;
     ctaSubtext: string;
     isFeatured?: boolean;
+    checkoutUrl?: string; // New prop
 }
 
-export default function PricingCard({ planName, price, priceDescription, features, ctaText, ctaSubtext, isFeatured = false }: PricingCardProps) {
+export default function PricingCard({ planName, price, priceDescription, features, ctaText, ctaSubtext, isFeatured = false, checkoutUrl }: PricingCardProps) {
     const { user, isLoading, isPremium } = useAuth();
     
-    const isPremiumPlan = planName === 'Premium';
-
+    // A plan is considered a "paid" plan if a checkout URL is provided.
+    const isPaidPlan = !!checkoutUrl && checkoutUrl !== "#";
+    
     const getCtaLink = () => {
-        if (!isPremiumPlan) {
-            return user ? '/dashboard' : '/login';
+        // If it's a paid plan and a user exists, append user data to the URL.
+        if (isPaidPlan && user) {
+            try {
+                const url = new URL(checkoutUrl!);
+                url.searchParams.set('checkout_data[custom][user_id]', user.uid);
+                if (user.email) {
+                    url.searchParams.set('checkout_data[email]', user.email);
+                }
+                return url.toString();
+            } catch (error) {
+                // If checkoutUrl is not a valid URL, return the fallback
+                return checkoutUrl || '#';
+            }
         }
-        if (!user) {
-            return '/login?redirect=/pricing';
+        
+        // If it's a paid plan but no user is logged in, redirect to login first.
+        if (isPaidPlan && !user) {
+             return '/login?redirect=/pricing';
         }
-        return user ? `${LEMON_SQUEEZY_CHECKOUT_URL}?checkout_data[custom][user_id]=${user.uid}` : '#';
+        
+        // Default for free plans or other scenarios
+        return user ? '/dashboard' : '/login';
     };
-
-    const isCtaDisabled = isPremiumPlan && (LEMON_SQUEEZY_CHECKOUT_URL === '#' || (user && isPremium));
+    
+    // A CTA should be disabled if it's a paid plan that the user already has.
+    // We assume both paid plans grant the `isPremium` status.
+    const isCtaDisabled = isPaidPlan && (isLoading || isPremium);
 
     const renderCta = () => {
         if (isLoading) {
             return <Skeleton className="h-11 w-full" />;
         }
         
-        if (isPremiumPlan && isPremium) {
+        if (isPaidPlan && isPremium) {
             return <Button className="w-full" disabled>Your Current Plan</Button>;
         }
 
         return (
-            <Button asChild size="lg" className="w-full" disabled={isCtaDisabled}>
-                <Link href={getCtaLink()} target={isPremiumPlan && user ? '_blank' : '_self'}>
+            <Button asChild size="lg" className="w-full" disabled={isCtaDisabled || checkoutUrl === "#"}>
+                <Link href={getCtaLink()} target={isPaidPlan && user ? '_blank' : '_self'}>
                     {ctaText}
                     <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
@@ -83,6 +99,9 @@ export default function PricingCard({ planName, price, priceDescription, feature
             <CardFooter className="flex-col gap-2 pt-6">
                 {renderCta()}
                 <p className="text-xs text-muted-foreground">{ctaSubtext}</p>
+                 {isPaidPlan && checkoutUrl === "#" && !isPremium && (
+                    <p className="text-xs text-destructive text-center">This plan is not yet available for purchase.</p>
+                )}
             </CardFooter>
         </Card>
     );
