@@ -3,4 +3,4 @@
  * This file exports the functions that will be deployed.
  */
 
-export { lemonsqueezyWebhook } from "./lemonsqueezy";
+export {lemonsqueezyWebhook} from "./lemonsqueezy";

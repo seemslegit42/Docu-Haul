@@ -1,7 +1,7 @@
 import * as functions from "firebase-functions/v2/https";
 import * as admin from "firebase-admin";
 import * as crypto from "crypto";
-import { defineString } from "firebase-functions/params";
+import {defineString} from "firebase-functions/params";
 
 // Initialize Firebase Admin SDK if not already initialized
 if (admin.apps.length === 0) {
@@ -17,11 +17,11 @@ const webhookSecret = defineString("LEMONSQUEEZY_WEBHOOK_SECRET");
 
 /**
  * Firebase Function to handle Lemon Squeezy webhooks.
- * This function verifies the request signature and updates user roles (custom claims)
- * upon a successful purchase.
+ * This function verifies the request signature and updates user roles (custom
+ * claims) upon a successful purchase.
  */
 export const lemonsqueezyWebhook = functions.https.onRequest(
-  { secrets: [webhookSecret] },
+  {secrets: [webhookSecret]},
   async (request, response) => {
     if (request.method !== "POST") {
       response.status(405).send("Method Not Allowed");
@@ -48,36 +48,35 @@ export const lemonsqueezyWebhook = functions.https.onRequest(
       }
 
       // 2. Process the webhook payload
-      const { meta, data } = request.body;
+      const {meta, data} = request.body;
 
       // We only care about successful order creations
       if (meta.event_name !== "order_created") {
         functions.logger.info(`Ignoring event: ${meta.event_name}`);
-        response.status(200).send(`OK (event ignored)`);
+        response.status(200).send("OK (event ignored)");
         return;
       }
       
       const orderStatus = data.attributes.status;
       if (orderStatus !== "paid") {
-         functions.logger.info(`Order status is '${orderStatus}', not 'paid'. Ignoring.`);
-         response.status(200).send("OK (status not paid)");
-         return;
+        const logMessage = `Order status is '${orderStatus}', not "paid". Ignoring.`;
+        functions.logger.info(logMessage);
+        response.status(200).send("OK (status not paid)");
+        return;
       }
 
       // 3. Extract the user ID from the custom data passed during checkout
       const userId = meta.custom_data?.user_id;
 
       if (!userId) {
-        functions.logger.error(
-          "Webhook received for paid order but without a user_id in custom_data.",
-          { meta }
-        );
+        const err = "Webhook for paid order missing user_id in custom_data.";
+        functions.logger.error(err, {meta});
         response.status(400).send("Missing user_id in custom_data.");
         return;
       }
 
       // 4. Update the user's custom claims in Firebase Authentication
-      await admin.auth().setCustomUserClaims(userId, { premium: true });
+      await admin.auth().setCustomUserClaims(userId, {premium: true});
       functions.logger.info(
         `Successfully granted premium access to user: ${userId}`
       );
@@ -86,7 +85,8 @@ export const lemonsqueezyWebhook = functions.https.onRequest(
     } catch (error) {
       functions.logger.error("Error processing Lemon Squeezy webhook:", error);
       if (error instanceof Error) {
-        response.status(500).send(`Webhook handler failed: ${error.message}`);
+        const failureMessage = `Webhook handler failed: ${error.message}`;
+        response.status(500).send(failureMessage);
       } else {
         response.status(500).send("An unknown error occurred.");
       }
