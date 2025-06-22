@@ -9,7 +9,7 @@ import { VinLabel } from './VinLabel';
 
 interface GeneratedLabelProps {
   generatedData: VinLabelData | null;
-  template: 'standard' | 'bilingual_canadian';
+  template: 'standard' | 'bilingual_canadian' | 'bilingual_rv_canadian';
   labelRef: React.RefObject<HTMLDivElement>;
   isLoading: boolean;
   isSaving: boolean;
