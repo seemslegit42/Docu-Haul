@@ -4,6 +4,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { getGeneratedDocumentsForUser, type GeneratedDocument } from '@/lib/firestore';
+import { deleteDocument } from '@/ai/flows/delete-document-flow';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -44,6 +45,19 @@ export default function DocumentHistoryClient() {
 
     fetchDocuments();
   }, [user, isAuthLoading, toast]);
+
+  const handleDeleteDocument = async (documentId: string) => {
+    if (!user) {
+      throw new Error("You must be logged in to perform this action.");
+    }
+    
+    const authToken = await user.getIdToken();
+    
+    await deleteDocument({ documentId }, authToken);
+    
+    setDocuments((prevDocs) => prevDocs.filter((doc) => doc.id !== documentId));
+  };
+
 
   if (isLoading) {
     return (
@@ -91,7 +105,7 @@ export default function DocumentHistoryClient() {
                   {doc.createdAt?.toDate ? format(doc.createdAt.toDate(), 'PPP p') : 'Just now'}
                 </TableCell>
                 <TableCell className="text-right">
-                  <DocumentActions document={doc} />
+                  <DocumentActions document={doc} onDelete={handleDeleteDocument} />
                 </TableCell>
               </TableRow>
             ))}

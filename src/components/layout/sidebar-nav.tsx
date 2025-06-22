@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Home, FileText, Tags, ShieldCheck, FileCheck2, Hash, LogOut, History } from 'lucide-react';
+import { Home, FileText, Tags, ShieldCheck, FileCheck2, Hash, LogOut, History, User, ChevronUp, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   SidebarMenu,
@@ -13,6 +13,15 @@ import {
   SidebarFooter,
   useSidebar,
 } from '@/components/ui/sidebar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from '@/hooks/use-auth';
 import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
@@ -30,10 +39,8 @@ export function SidebarNav() {
   const pathname = usePathname();
   const router = useRouter();
   const { open, isMobile } = useSidebar();
-  const { user } = useAuth();
+  const { user, isPremium } = useAuth();
 
-  // On mobile, the sidebar is inside a sheet, so it's conceptually "open" when visible.
-  // On desktop, its state is determined by the `open` prop.
   const isExpanded = isMobile || open;
 
   const handleSignOut = async () => {
@@ -45,6 +52,11 @@ export function SidebarNav() {
     } catch (error) {
       console.error("Error signing out:", error);
     }
+  };
+  
+  const getInitials = (email: string | null | undefined) => {
+    if (!email) return '?';
+    return email.charAt(0).toUpperCase();
   };
 
   return (
@@ -85,21 +97,49 @@ export function SidebarNav() {
       </SidebarMenu>
       <SidebarFooter className="p-2 border-t border-sidebar-border">
         {user && (
-           <SidebarMenuItem>
-             <SidebarMenuButton
-               onClick={handleSignOut}
-               tooltip={{ children: `Sign out (${user.email})`, side: 'right' }}
-               className="w-full"
-             >
-               <LogOut className="h-5 w-5" />
-               <span className={cn(isExpanded ? "opacity-100" : "opacity-0 md:opacity-100", "transition-opacity duration-200 delay-100")}>Sign Out</span>
-             </SidebarMenuButton>
-           </SidebarMenuItem>
-        )}
-        {open && (
-           <div className="text-center text-xs text-muted-foreground font-body py-2">
-             <p>© {new Date().getFullYear()} DocuHaul</p>
-           </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+               <SidebarMenuButton className="w-full justify-start h-auto p-2" tooltip={{ children: user.email || 'User Account', side: 'right' }}>
+                    <Avatar className="h-8 w-8">
+                       <AvatarFallback>{getInitials(user.email)}</AvatarFallback>
+                    </Avatar>
+                    {isExpanded && (
+                      <div className="flex flex-col items-start ml-2 overflow-hidden flex-grow">
+                          <span className="font-semibold text-sm truncate">{user.email}</span>
+                          <span className={cn(
+                              "text-xs",
+                              isPremium ? 'text-yellow-400' : 'text-muted-foreground'
+                          )}>
+                              {isPremium ? 'Premium User' : 'Standard User'}
+                          </span>
+                      </div>
+                    )}
+                    {isExpanded && <ChevronUp className="h-4 w-4 text-muted-foreground ml-auto"/>}
+               </SidebarMenuButton>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent side="top" align="start" className="w-56 mb-2 ml-2 font-body">
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">My Account</p>
+                    <p className="text-xs leading-none text-muted-foreground truncate">{user.email}</p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                 <DropdownMenuItem disabled>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Profile</span>
+                 </DropdownMenuItem>
+                 <DropdownMenuItem disabled>
+                    <Star className="mr-2 h-4 w-4" />
+                    <span>Manage Plan</span>
+                 </DropdownMenuItem>
+                 <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut} className="text-destructive focus:text-destructive focus:bg-destructive/10">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Sign out</span>
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
       </SidebarFooter>
     </>
