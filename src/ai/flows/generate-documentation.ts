@@ -13,14 +13,12 @@ import {z}from 'genkit';
 import { type SmartDocsInput, SmartDocsSchema } from '@/lib/schemas';
 import { defaultSafetySettings } from '@/ai/safety-settings';
 import { createAuthenticatedFlow } from './utils/authWrapper';
-import { decodeModelYear } from '@/lib/vin-utils';
 
-// Tool Definition: Looks up vehicle information by its VIN.
-// In a production system, this could be connected to an external vehicle data API.
+// Tool Definition: Looks up vehicle information by its VIN using the official NHTSA API.
 const getVehicleInfoByVin = ai.defineTool(
   {
     name: 'getVehicleInfoByVin',
-    description: 'Returns detailed vehicle specifications for a given VIN. Use this tool to get the primary information for the vehicle.',
+    description: 'Returns detailed vehicle specifications for a given VIN by calling an external API. Use this tool to get the primary information for the vehicle.',
     inputSchema: z.object({ vin: z.string().describe('The 17-character Vehicle Identification Number.') }),
     outputSchema: z.object({
       make: z.string().describe("The manufacturer's brand name."),
@@ -33,21 +31,56 @@ const getVehicleInfoByVin = ai.defineTool(
     }),
   },
   async ({ vin }) => {
-    console.log(`[Tool] Looking up VIN specifications for: ${vin}`);
+    console.log(`[Tool] Calling NHTSA API for VIN: ${vin}`);
+    const NHTSA_API_URL = `https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValues/${vin}?format=json`;
     
-    // Decode the year from the VIN to provide more accurate data.
-    const decodedYear = decodeModelYear(vin);
+    try {
+        const response = await fetch(NHTSA_API_URL);
+        if (!response.ok) {
+            throw new Error(`NHTSA API returned an error: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        if (!data.Results || data.Results.length === 0 || data.Results[0].ErrorCode !== '0') {
+            const errorMessage = data.Results[0]?.ErrorText || 'No results found for this VIN from the NHTSA API.';
+            throw new Error(errorMessage);
+        }
 
-    // This data serves as a baseline. The AI is instructed to prioritize user-provided details.
-    return {
-      make: 'NorthStar Trailers',
-      model: 'Gooseneck Pro',
-      year: decodedYear,
-      bodyType: 'Gooseneck Trailer',
-      gvwr: '15000 LBS',
-      numberOfAxles: '2',
-      tireSize: 'ST235/85R16G',
-    };
+        const vehicleInfo = data.Results[0];
+
+        // Helper to get a value or return a default placeholder.
+        const getValue = (key: string, defaultValue = '[Not Provided by API]') => {
+            const value = vehicleInfo[key];
+            return (value && value.trim() && value.trim() !== 'Not Applicable') ? value.trim() : defaultValue;
+        }
+
+        // The AI is instructed to prioritize user-provided details over this data.
+        return {
+            make: getValue('Make'),
+            model: getValue('Model'),
+            year: getValue('ModelYear'),
+            bodyType: getValue('BodyClass'),
+            gvwr: getValue('GVWR'),
+            numberOfAxles: getValue('NumberOfAxles'),
+            tireSize: getValue('SuggestedTire'),
+        };
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+        console.error(`[Tool] Error fetching data from NHTSA API for VIN ${vin}:`, errorMessage);
+        
+        // Provide a structured error response that the AI can understand and relay.
+        // Returning default values so the flow doesn't crash, but the AI will know they are placeholders.
+        return {
+            make: '[Data Lookup Failed]',
+            model: '[Data Lookup Failed]',
+            year: '[Data Lookup Failed]',
+            bodyType: '[Data Lookup Failed]',
+            gvwr: '[Data Lookup Failed]',
+            numberOfAxles: '[Data Lookup Failed]',
+            tireSize: '[Data Lookup Failed]',
+        };
+    }
   }
 );
 
