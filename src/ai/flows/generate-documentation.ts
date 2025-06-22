@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview An agentic flow for generating vehicle documentation (NVIS or Bill of Sale).
@@ -119,14 +120,28 @@ const generateDocumentationFlow = ai.defineFlow(
     // Step 1: Call the single, powerful prompt to do both extraction and formatting.
     const { output } = await generateDocumentPrompt(promptInput);
 
-    // Step 2: Validate the output
+    // Step 2: Validate the basic output structure
     if (!output || !output.documentText?.trim() || !output.structuredData) {
         const errorMessage = `AI failed to generate valid documentation for ${input.documentType}. The output was empty or incomplete. Please check your input and try again.`;
         console.error(errorMessage, { input, receivedOutput: output });
         throw new Error(errorMessage);
     }
     
-    // Step 3: Return the combined result
+    // Step 3: Perform strict validation on the structuredData against the expected schema.
+    // This ensures the AI has returned all required fields for the document type.
+    try {
+      if (input.documentType === 'NVIS') {
+        NvisDataSchema.parse(output.structuredData);
+      } else if (input.documentType === 'BillOfSale') {
+        BillOfSaleDataSchema.parse(output.structuredData);
+      }
+    } catch (e) {
+      const errorMessage = `AI failed to generate a valid structured document. The output data did not match the required format. Please try again.`;
+      console.error(errorMessage, { zodError: e, input, receivedOutput: output });
+      throw new Error(errorMessage);
+    }
+
+    // Step 4: Return the validated result
     return output;
   }
 );
