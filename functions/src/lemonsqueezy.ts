@@ -1,4 +1,4 @@
-import * as functions from "firebase-functions/v2/https";
+import * as functions from "firebase-functions/v2";
 import * as admin from "firebase-admin";
 import * as crypto from "crypto";
 import {defineString} from "firebase-functions/params";
@@ -56,10 +56,11 @@ export const lemonsqueezyWebhook = functions.https.onRequest(
         response.status(200).send("OK (event ignored)");
         return;
       }
-      
+
       const orderStatus = data.attributes.status;
       if (orderStatus !== "paid") {
-        const logMessage = `Order status is '${orderStatus}', not "paid". Ignoring.`;
+        const logMessage =
+          `Order status is '${orderStatus}', not "paid". Ignoring.`;
         functions.logger.info(logMessage);
         response.status(200).send("OK (status not paid)");
         return;
