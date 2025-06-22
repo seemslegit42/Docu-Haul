@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -39,7 +40,7 @@ export default function VinDecoderPage() {
       if (decodedResult.isValid) {
         toast({
           title: "VIN Decode Complete",
-          description: `Successfully decoded VIN: ${decodedResult.decodedData?.fullVin}`,
+          description: `Successfully decoded VIN ending in ...${decodedResult.decodedData?.sequentialNumber.value}.`,
         });
       } else {
          toast({

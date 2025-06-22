@@ -55,11 +55,21 @@ export default function LabelForgePage() {
       }
       const authToken = await user.getIdToken();
       const result = await createCompliantVinLabel(data, authToken);
+      
       setGeneratedLabelData(result);
-      toast({
-        title: "Label Data Extracted Successfully",
-        description: "The VIN label data has been structured by AI.",
-      });
+
+      if (result.isVinValid) {
+        toast({
+          title: "Label Data Extracted",
+          description: "The AI has successfully structured the data for your label.",
+        });
+      } else {
+        toast({
+          title: "VIN Validation Failed",
+          description: result.placementRationale, // This contains the specific error message.
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       console.error("Error generating label data:", error);
       const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
