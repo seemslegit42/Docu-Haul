@@ -3,7 +3,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Home, FileText, Tags, ShieldCheck, FileCheck2, Hash, LogOut, History, User, ChevronUp, Star } from 'lucide-react';
+import { Home, FileText, Tags, ShieldCheck, FileCheck2, Hash, LogOut, History, User, ChevronUp, Star, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   SidebarMenu,
@@ -12,6 +12,10 @@ import {
   SidebarHeader,
   SidebarFooter,
   useSidebar,
+  SidebarSeparator,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarGroupContent,
 } from '@/components/ui/sidebar';
 import {
   DropdownMenu,
@@ -39,7 +43,7 @@ export function SidebarNav() {
   const pathname = usePathname();
   const router = useRouter();
   const { open, isMobile } = useSidebar();
-  const { user, isPremium } = useAuth();
+  const { user, isPremium, isAdmin } = useAuth();
 
   const isExpanded = isMobile || open;
 
@@ -95,6 +99,53 @@ export function SidebarNav() {
             )
         })}
       </SidebarMenu>
+      
+      {isAdmin && (
+        <>
+          <SidebarSeparator />
+          <SidebarGroup className="p-2">
+            <SidebarGroupLabel className="flex items-center gap-2 px-2">
+                <Settings />
+                Admin
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+                <SidebarMenu>
+                    <SidebarMenuItem>
+                        <Link href="/admin/dashboard" passHref legacyBehavior>
+                            <SidebarMenuButton
+                                asChild
+                                isActive={pathname.startsWith('/admin/dashboard')}
+                                tooltip={{ children: "Admin Dashboard", className: "font-body" }}
+                                className={cn("font-body")}
+                            >
+                                <a>
+                                <Home className="h-5 w-5" />
+                                <span className={cn(isExpanded ? "opacity-100" : "opacity-0 md:opacity-100", "transition-opacity duration-200 delay-100")}>Dashboard</span>
+                                </a>
+                            </SidebarMenuButton>
+                        </Link>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                        <Link href="/admin/users" passHref legacyBehavior>
+                            <SidebarMenuButton
+                                asChild
+                                isActive={pathname.startsWith('/admin/users')}
+                                tooltip={{ children: "Manage Users", className: "font-body" }}
+                                className={cn("font-body")}
+                            >
+                                <a>
+                                <User className="h-5 w-5" />
+                                <span className={cn(isExpanded ? "opacity-100" : "opacity-0 md:opacity-100", "transition-opacity duration-200 delay-100")}>Users</span>
+                                </a>
+                            </SidebarMenuButton>
+                        </Link>
+                    </SidebarMenuItem>
+                </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </>
+      )}
+
       <SidebarFooter className="p-2 border-t border-sidebar-border">
         {user && (
           <DropdownMenu>
@@ -125,13 +176,11 @@ export function SidebarNav() {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                 <DropdownMenuItem disabled>
-                  <User className="mr-2 h-4 w-4" />
-                  <span>Profile</span>
-                 </DropdownMenuItem>
-                 <DropdownMenuItem disabled>
-                    <Star className="mr-2 h-4 w-4" />
-                    <span>Manage Plan</span>
+                 <DropdownMenuItem asChild>
+                    <Link href="/account">
+                      <User className="mr-2 h-4 w-4" />
+                      <span>Account & Billing</span>
+                    </Link>
                  </DropdownMenuItem>
                  <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut} className="text-destructive focus:text-destructive focus:bg-destructive/10">

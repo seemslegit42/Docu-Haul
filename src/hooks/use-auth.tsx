@@ -10,13 +10,15 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   isPremium: boolean;
+  isAdmin: boolean;
 }
 
-const AuthContext = createContext<AuthContextType>({ user: null, isLoading: true, isPremium: false });
+const AuthContext = createContext<AuthContextType>({ user: null, isLoading: true, isPremium: false, isAdmin: false });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isPremium, setIsPremium] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -36,10 +38,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         // A backend function (e.g., a Cloud Function triggered by Stripe)
         // would be needed to set this custom claim.
         const isUserPremium = idTokenResult.claims.premium === true;
+        const isUserAdmin = idTokenResult.claims.admin === true;
         setIsPremium(isUserPremium);
+        setIsAdmin(isUserAdmin);
       } else {
         setUser(null);
         setIsPremium(false);
+        setIsAdmin(false);
       }
       setIsLoading(false);
     });
@@ -48,7 +53,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, isPremium }}>
+    <AuthContext.Provider value={{ user, isLoading, isPremium, isAdmin }}>
       {children}
     </AuthContext.Provider>
   );
