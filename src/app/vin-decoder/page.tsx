@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from 'react';
@@ -36,11 +35,21 @@ export default function VinDecoderPage() {
       const authToken = await user.getIdToken();
       const decodedResult = await decodeVin({ vin: data.vin.toUpperCase() }, authToken);
       setResult(decodedResult);
-      toast({
-        title: "VIN Decode Complete",
-        description: `Successfully decoded VIN: ${decodedResult.fullVin}`,
-      });
+
+      if (decodedResult.isValid) {
+        toast({
+          title: "VIN Decode Complete",
+          description: `Successfully decoded VIN: ${decodedResult.decodedData?.fullVin}`,
+        });
+      } else {
+         toast({
+          title: "VIN Decode Failed",
+          description: decodedResult.error || "An unknown validation error occurred.",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
+      // This catch block now only handles unexpected errors, like network issues or auth failures.
       console.error("Error decoding VIN:", error);
       const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
       toast({

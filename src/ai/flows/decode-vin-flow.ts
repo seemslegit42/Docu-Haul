@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview A flow for decoding a Vehicle Identification Number (VIN). This flow first validates the VIN's check digit, parses it in code, then uses AI to provide human-readable descriptions for each component.
@@ -33,7 +34,7 @@ const VinModelYearSchema = VinPartSchema.extend({
 });
 
 // The final, structured output for the entire decoded VIN
-export const DecodeVinOutputSchema = z.object({
+const DecodedVinDataSchema = z.object({
   wmi: VinPartSchema.describe("World Manufacturer Identifier (Digits 1-3)."),
   vehicleDescriptors: VinDescriptorSchema.describe("Vehicle Descriptors (Digits 4-8)."),
   checkDigit: VinPartSchema.describe("Check Digit (Digit 9)."),
@@ -41,6 +42,13 @@ export const DecodeVinOutputSchema = z.object({
   plant: VinPartSchema.describe("Plant Code (Digit 11)."),
   sequentialNumber: VinPartSchema.describe("Sequential Production Number (Digits 12-17)."),
   fullVin: z.string().describe("The full VIN that was decoded."),
+});
+
+// The final, robust output schema for the entire flow. It includes validation status.
+export const DecodeVinOutputSchema = z.object({
+  isValid: z.boolean().describe("Whether the VIN was valid and successfully decoded."),
+  decodedData: DecodedVinDataSchema.optional().describe("The structured decoded VIN data. Only present if the VIN is valid."),
+  error: z.string().optional().describe("An error message if the VIN was invalid or decoding failed."),
 });
 export type DecodeVinOutput = z.infer<typeof DecodeVinOutputSchema>;
 
@@ -72,12 +80,15 @@ const decodeVinFlow = ai.defineFlow(
     inputSchema: DecodeVinSchema,
     outputSchema: DecodeVinOutputSchema,
   },
-  async (input) => {
+  async (input): Promise<DecodeVinOutput> => {
     const vin = input.vin.toUpperCase();
 
     // Step 1: Deterministically validate the VIN check digit.
     if (!validateVin(vin)) {
-      throw new Error('Invalid VIN. The provided VIN failed the check digit validation. Please verify the number and try again.');
+      return {
+        isValid: false,
+        error: 'Invalid VIN. The provided VIN failed the check digit validation. Please verify the number and try again.',
+      };
     }
 
     // Step 2: Deterministically parse the valid VIN in code.
@@ -107,10 +118,17 @@ const decodeVinFlow = ai.defineFlow(
     if (!output || !output.wmi?.value || !output.fullVin?.trim() || output.fullVin !== vin) {
       const errorMessage = 'AI failed to generate a valid description for the VIN. The output was empty, incomplete, or mismatched the original VIN. Please ensure the VIN is valid and try again.';
       console.error(errorMessage, { input, promptInput, receivedOutput: output });
-      throw new Error(errorMessage);
+      // Return a structured error instead of throwing.
+      return {
+        isValid: false,
+        error: errorMessage,
+      };
     }
     
-    return output;
+    return {
+        isValid: true,
+        decodedData: output,
+    };
   }
 );
 
@@ -120,7 +138,7 @@ export const decodeVin = createAuthenticatedFlow(decodeVinFlow);
 const prompt = ai.definePrompt({
   name: 'decodeVinPrompt',
   input: {schema: DecodeVinPromptInputSchema},
-  output: {schema: DecodeVinOutputSchema},
+  output: {schema: DecodedVinDataSchema},
   prompt: `You are an expert VIN (Vehicle Identification Number) decoder for trailers.
 Your task is to take pre-parsed VIN components and assemble them into a structured JSON output with descriptions. The provided VIN has already been validated.
 
@@ -146,9 +164,4 @@ Based on this, generate a JSON response that matches the required output schema.
     - Populate the specific fields 'trailerType', 'bodyType', 'bodyLength', and 'numberOfAxles' with human-readable descriptions based on their respective codes.
     - Provide a general description for the whole Vehicle Descriptor Section.
 3.  The 'fullVin' field in your output MUST be '{{{fullVin}}}'.
-4.  Do not invent or hallucinate information not derivable from the provided codes. Your analysis should be based solely on the positional information.
-`,
-  config: {
-    safetySettings: defaultSafetySettings,
-  },
-});
+4.  Do not invent or hallucinate information not derivable from the provided

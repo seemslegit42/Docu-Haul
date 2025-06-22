@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview Flow to create compliant VIN labels. This flow first validates the VIN in code, then uses an AI prompt to extract structured key-value data from the user's input.
@@ -40,14 +39,19 @@ const createCompliantVinLabelFlow = ai.defineFlow(
     const isVinValid = validateVin(input.vinData);
 
     if (!isVinValid) {
-        // If the VIN is invalid, fail fast without calling the AI.
-        // This is more robust and efficient.
-        throw new Error('Invalid VIN. The provided VIN failed validation. Please check the number and try again.');
+        // If the VIN is invalid, return a structured response indicating failure.
+        // This is more graceful than throwing an error for a predictable validation failure.
+        return {
+            isVinValid: false,
+            labelData: {},
+            placementRationale: 'The provided VIN is invalid. The 17-character number failed the check-digit validation. Please verify the VIN and try again.',
+        };
     }
 
     // Step 2: Since the VIN is valid, call the AI to perform data extraction.
     const { output } = await vinLabelDesignPrompt(input);
     
+    // This is an unexpected error. If the VIN is valid, the AI should always be able to extract data.
     if (!output || Object.keys(output.labelData).length === 0) {
         const errorMessage = 'AI failed to extract label data for a valid VIN. Please check your input specifications or try again.';
         console.error(errorMessage, { input, receivedOutput: output });
@@ -66,7 +70,7 @@ const createCompliantVinLabelFlow = ai.defineFlow(
 // Wrap the core flow logic with the authentication utility, requiring a premium claim.
 export const createCompliantVinLabel = createAuthenticatedFlow(createCompliantVinLabelFlow, { 
     premiumRequired: true,
-    premiumCheckError: 'This is a premium feature. Please upgrade your plan to generate VIN labels.'
+    premiumCheckError: 'The Label Forge is a premium feature. Please upgrade your plan to generate VIN labels.'
 });
 
 // Prompt for designing label content and rationale.
@@ -75,7 +79,6 @@ const vinLabelDesignPrompt = ai.definePrompt({
   name: 'vinLabelDesignPrompt',
   input: {schema: LabelForgeSchema},
   output: {schema: VinLabelDesignOutputSchema},
-  // No tools needed anymore.
   prompt: `You are an expert system for designing compliant VIN (Vehicle Identification Number) labels.
 The VIN provided has already been validated and is correct. Your task is to extract structured data for the label based on the user's input.
 
