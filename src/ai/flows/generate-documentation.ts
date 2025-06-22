@@ -145,8 +145,11 @@ const generateDocumentationFlow = ai.defineFlow(
   }
 );
 
-// Wrap the core flow logic with the authentication utility
-export const generateDocumentation = createAuthenticatedFlow(generateDocumentationFlow);
+// Wrap the core flow logic with the authentication utility, requiring a premium claim.
+export const generateDocumentation = createAuthenticatedFlow(generateDocumentationFlow, {
+    premiumRequired: true,
+    premiumCheckError: 'Smart Docs is a premium feature. Please upgrade your plan to generate documents.'
+});
 
 // A single, powerful prompt that handles both data extraction and document formatting.
 const generateDocumentPrompt = ai.definePrompt({

@@ -4,19 +4,14 @@ import { FileCheck2 } from 'lucide-react';
 import { AuthAwareButton } from '@/components/layout/AuthAwareButton';
 import PricingCard from './components/PricingCard';
 
-const standardFeatures = [
+const premiumFeatures = [
+    "AI-Powered Label Forge",
     "NVIS & Bill of Sale Generation",
     "VIN Decoder Access",
     "Document Compliance Check",
-    "Full Document History",
-    "Community Support",
-];
-
-const premiumFeatures = [
-    "All Standard features, plus:",
-    "AI-Powered Label Forge",
+    "Full Document History & Management",
     "Advanced Label Templates",
-    "Save & Download Custom Labels",
+    "Save & Download All Documents",
     "Priority Support",
 ];
 
@@ -44,31 +39,25 @@ export default function PricingPage() {
                 <section className="py-16 md:py-24">
                 <div className="container text-center">
                     <h1 className="text-4xl font-headline font-extrabold tracking-tighter sm:text-5xl">
-                        Find the Perfect Plan
+                        Unlock Full Access
                     </h1>
                     <p className="mx-auto mt-4 max-w-xl text-lg text-muted-foreground">
-                        Choose the plan that best fits your needs. Start for free and upgrade anytime to unlock powerful premium features.
+                        A simple one-time payment unlocks all features of DocuHaul, with no hidden fees or recurring subscriptions.
                     </p>
                 </div>
 
-                <div className="container grid grid-cols-1 lg:grid-cols-2 gap-8 mt-12 max-w-4xl mx-auto items-start">
-                    <PricingCard
-                        planName="Standard"
-                        price="Free"
-                        priceDescription="For individuals and small teams"
-                        features={standardFeatures}
-                        ctaText="Get Started for Free"
-                        ctaSubtext="No credit card required."
-                    />
-                     <PricingCard
-                        planName="Premium"
-                        price="$49"
-                        priceDescription="one-time payment"
-                        features={premiumFeatures}
-                        ctaText="Upgrade to Premium"
-                        ctaSubtext="Unlock the Label Forge and more."
-                        isFeatured={true}
-                    />
+                <div className="container mt-12 flex justify-center">
+                    <div className="w-full max-w-md">
+                         <PricingCard
+                            planName="Premium Access"
+                            price="$49"
+                            priceDescription="one-time payment"
+                            features={premiumFeatures}
+                            ctaText="Get Premium Access"
+                            ctaSubtext="Unlock all features instantly."
+                            isFeatured={true}
+                        />
+                    </div>
                 </div>
                 </section>
             </main>

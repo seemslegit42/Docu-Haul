@@ -132,8 +132,11 @@ const decodeVinFlow = ai.defineFlow(
   }
 );
 
-// Wrap the core flow logic with the authentication utility
-export const decodeVin = createAuthenticatedFlow(decodeVinFlow);
+// Wrap the core flow logic with the authentication utility, requiring a premium claim.
+export const decodeVin = createAuthenticatedFlow(decodeVinFlow, {
+    premiumRequired: true,
+    premiumCheckError: 'The VIN Decoder is a premium feature. Please upgrade your plan to decode VINs.'
+});
 
 const prompt = ai.definePrompt({
   name: 'decodeVinPrompt',
@@ -165,3 +168,8 @@ Based on this, generate a JSON response that matches the required output schema.
     - Provide a general description for the whole Vehicle Descriptor Section.
 3.  The 'fullVin' field in your output MUST be '{{{fullVin}}}'.
 4.  Do not invent or hallucinate information not derivable from the provided
+`,
+  config: {
+    safetySettings: defaultSafetySettings,
+  },
+});

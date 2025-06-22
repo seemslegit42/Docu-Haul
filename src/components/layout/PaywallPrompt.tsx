@@ -11,7 +11,12 @@ import { useAuth } from '@/hooks/use-auth';
 // This should be set in your .env file.
 const LEMON_SQUEEZY_CHECKOUT_URL = process.env.NEXT_PUBLIC_LEMON_SQUEEZY_CHECKOUT_URL || "#";
 
-export function PaywallPrompt() {
+interface PaywallPromptProps {
+  title?: string;
+  description?: string;
+}
+
+export function PaywallPrompt({ title, description }: PaywallPromptProps) {
   const { user } = useAuth();
   
   // Append the user's ID to the checkout URL as custom data.
@@ -30,9 +35,9 @@ export function PaywallPrompt() {
                     <Lock className="w-8 h-8 text-primary" />
                 </div>
                 <CardHeader className="p-0 mb-4">
-                    <CardTitle className="text-2xl text-primary">Premium Feature Locked</CardTitle>
+                    <CardTitle className="text-2xl text-primary">{title || 'Premium Feature Locked'}</CardTitle>
                     <CardDescription className="max-w-md mx-auto">
-                    AI-powered VIN label generation is a premium feature that requires a one-time purchase to unlock.
+                        {description || 'This feature requires a one-time purchase to unlock. Please upgrade your plan.'}
                     </CardDescription>
                 </CardHeader>
                 <CardContent className="p-0">

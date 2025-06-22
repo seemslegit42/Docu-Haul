@@ -14,6 +14,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/use-auth';
 import SmartDocsForm from './components/SmartDocsForm';
 import GeneratedDocument from './components/GeneratedDocument';
+import { PaywallPrompt } from '@/components/layout/PaywallPrompt';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function SmartDocsPage() {
   const [generatedDoc, setGeneratedDoc] = useState<GenerateDocumentationOutput | null>(null);
@@ -23,7 +25,7 @@ export default function SmartDocsPage() {
   const { toast } = useToast();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, isPremium, isLoading: isAuthLoading } = useAuth();
 
   const form = useForm<SmartDocsInput>({
     resolver: zodResolver(SmartDocsSchema),
@@ -180,13 +182,24 @@ export default function SmartDocsPage() {
     router.push(`/compliance-check?${query}`);
   };
 
+  const renderContent = () => {
+    if (isAuthLoading) {
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Skeleton className="h-[500px] w-full" />
+          <Skeleton className="h-[500px] w-full" />
+        </div>
+      );
+    }
 
-  return (
-    <AppLayout>
-      <PageHeader 
-        title="Smart Docs: NVIS & Bills of Sale"
-        description="AI-powered generation of New Vehicle Information Statements (NVIS) and Bills of Sale."
-      />
+    if (!isPremium) {
+      return <PaywallPrompt 
+        title="Smart Docs is a Premium Feature" 
+        description="Instantly generate NVIS certificates and Bills of Sale by upgrading your plan." 
+      />;
+    }
+
+    return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <SmartDocsForm form={form} onSubmit={onSubmit} isLoading={isLoading} />
         <GeneratedDocument
@@ -201,6 +214,16 @@ export default function SmartDocsPage() {
           onCheckCompliance={handleCheckCompliance}
         />
       </div>
+    );
+  };
+
+  return (
+    <AppLayout>
+      <PageHeader 
+        title="Smart Docs: NVIS & Bills of Sale"
+        description="AI-powered generation of New Vehicle Information Statements (NVIS) and Bills of Sale."
+      />
+      {renderContent()}
     </AppLayout>
   );
 }

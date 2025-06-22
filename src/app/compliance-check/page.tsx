@@ -13,13 +13,15 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/use-auth';
 import ComplianceCheckForm from './components/ComplianceCheckForm';
 import ComplianceReport from './components/ComplianceReport';
+import { PaywallPrompt } from '@/components/layout/PaywallPrompt';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function ComplianceCheckPage() {
   const [result, setResult] = useState<CheckComplianceOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const searchParams = useSearchParams();
-  const { user } = useAuth();
+  const { user, isPremium, isLoading: isAuthLoading } = useAuth();
 
   const form = useForm<ComplianceCheckInput>({
     resolver: zodResolver(ComplianceCheckSchema),
@@ -71,16 +73,38 @@ export default function ComplianceCheckPage() {
     }
   };
 
+  const renderContent = () => {
+    if (isAuthLoading) {
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Skeleton className="h-[500px] w-full" />
+          <Skeleton className="h-[500px] w-full" />
+        </div>
+      );
+    }
+
+    if (!isPremium) {
+      return <PaywallPrompt 
+        title="Compliance Checker is a Premium Feature"
+        description="Validate your documents against regulations by upgrading to our premium plan."
+      />;
+    }
+
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <ComplianceCheckForm form={form} onSubmit={onSubmit} isLoading={isLoading} />
+        <ComplianceReport result={result} isLoading={isLoading} />
+      </div>
+    );
+  };
+
   return (
     <AppLayout>
       <PageHeader 
         title="Compliance Checker"
         description="AI-powered validation for your VIN labels, NVIS certificates, and Bills of Sale."
       />
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <ComplianceCheckForm form={form} onSubmit={onSubmit} isLoading={isLoading} />
-        <ComplianceReport result={result} isLoading={isLoading} />
-      </div>
+      {renderContent()}
     </AppLayout>
   );
 }

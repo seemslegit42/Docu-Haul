@@ -12,12 +12,14 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/use-auth';
 import VinDecoderForm from './components/VinDecoderForm';
 import VinDecoderResult from './components/VinDecoderResult';
+import { PaywallPrompt } from '@/components/layout/PaywallPrompt';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function VinDecoderPage() {
   const [result, setResult] = useState<DecodeVinOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, isPremium, isLoading: isAuthLoading } = useAuth();
 
   const form = useForm<DecodeVinInput>({
     resolver: zodResolver(DecodeVinSchema),
@@ -63,12 +65,24 @@ export default function VinDecoderPage() {
     }
   };
 
-  return (
-    <AppLayout>
-      <PageHeader 
-        title="VIN Decoder"
-        description="Break down a Vehicle Identification Number into its component parts using AI."
-      />
+  const renderContent = () => {
+    if (isAuthLoading) {
+      return (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+          <Skeleton className="h-[250px] w-full lg:col-span-1" />
+          <Skeleton className="h-[500px] w-full lg:col-span-2" />
+        </div>
+      );
+    }
+
+    if (!isPremium) {
+      return <PaywallPrompt
+        title="VIN Decoder is a Premium Feature"
+        description="Break down and understand any VIN by upgrading to our premium plan."
+      />;
+    }
+
+    return (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         <div className="lg:col-span-1">
           <VinDecoderForm form={form} onSubmit={onSubmit} isLoading={isLoading} />
@@ -77,6 +91,16 @@ export default function VinDecoderPage() {
           <VinDecoderResult result={result} isLoading={isLoading} />
         </div>
       </div>
+    );
+  };
+
+  return (
+    <AppLayout>
+      <PageHeader 
+        title="VIN Decoder"
+        description="Break down a Vehicle Identification Number into its component parts using AI."
+      />
+      {renderContent()}
     </AppLayout>
   );
 }

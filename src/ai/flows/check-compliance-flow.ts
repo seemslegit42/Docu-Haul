@@ -47,8 +47,11 @@ const checkComplianceFlow = ai.defineFlow(
   }
 );
 
-// Wrap the core flow logic with the authentication utility
-export const checkCompliance = createAuthenticatedFlow(checkComplianceFlow);
+// Wrap the core flow logic with the authentication utility, requiring a premium claim.
+export const checkCompliance = createAuthenticatedFlow(checkComplianceFlow, {
+    premiumRequired: true,
+    premiumCheckError: 'The Compliance Checker is a premium feature. Please upgrade your plan to validate documents.'
+});
 
 const prompt = ai.definePrompt({
   name: 'checkCompliancePrompt',

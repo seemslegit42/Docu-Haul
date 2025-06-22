@@ -178,7 +178,10 @@ export default function LabelForgePage() {
     }
 
     if (!isPremium) {
-        return <PaywallPrompt />;
+      return <PaywallPrompt 
+        title="Label Forge is a Premium Feature"
+        description="AI-powered VIN label generation requires a one-time purchase to unlock. Upgrade to gain access."
+      />;
     }
 
     return (
