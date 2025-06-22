@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview A flow for a user to securely delete their own account and all associated data.
@@ -5,6 +6,7 @@
 
 import admin from '@/lib/firebase-admin';
 import { deleteGeneratedDocumentsForUser } from '@/lib/firestore';
+import { handleFlowError } from './utils/errorHandler';
 
 /**
  * An authenticated flow for a user to delete their own account.
@@ -36,13 +38,7 @@ export const deleteUserAccount = async (_: {}, authToken: string | undefined): P
     return { success: true };
 
   } catch (error) {
-    console.error('Error during user account deletion flow:', error);
-    
-    const isFirebaseAuthError = typeof error === 'object' && error !== null && 'code' in error && typeof (error as any).code === 'string' && (error as any).code.startsWith('auth/');
-    if (isFirebaseAuthError) {
-      throw new Error('You are not authorized to perform this action. Please sign in again.');
-    }
-    
-    throw error;
+    // Use the centralized error handler
+    handleFlowError(error);
   }
 };

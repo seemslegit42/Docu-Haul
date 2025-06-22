@@ -6,6 +6,7 @@
 
 import admin from '@/lib/firebase-admin';
 import type { DecodedIdToken } from 'firebase-admin/auth';
+import { handleFlowError } from './errorHandler';
 
 interface AuthWrapperOptions {
   premiumRequired?: boolean;
@@ -53,23 +54,8 @@ export function createAuthenticatedFlow<TInput, TOutput>(
       return await flow(input);
 
     } catch (error) {
-      // The error could be from `verifyIdToken`, the premium check, or the `flow` itself.
-      // We only want to mask errors that are genuinely related to authentication tokens.
-      
-      // Firebase Admin SDK auth errors have a `code` property starting with "auth/".
-      // Any other error should be considered an application-level error and be re-thrown as-is.
-      const isFirebaseAuthError = typeof error === 'object' && error !== null && 'code' in error && typeof (error as any).code === 'string' && (error as any).code.startsWith('auth/');
-      
-      if (isFirebaseAuthError) {
-          console.error('Authentication token verification failed:', error);
-          throw new Error('You are not authorized to perform this action. Please sign in and try again.');
-      }
-
-      // If it's not a Firebase Auth error, it's an application error from the premium check or the flow itself.
-      // We should let it pass through so the client can handle it specifically.
-      // e.g., 'Invalid VIN...', 'Premium feature...', or a config error.
-      console.error('An application or configuration error occurred within an authenticated flow:', error);
-      throw error;
+      // Use the centralized error handler
+      handleFlowError(error);
     }
   };
 }

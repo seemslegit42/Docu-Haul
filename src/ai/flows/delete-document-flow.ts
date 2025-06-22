@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview A flow for securely deleting a user's generated document.
@@ -5,6 +6,7 @@
 
 import { z } from 'genkit';
 import admin from '@/lib/firebase-admin';
+import { handleFlowError } from './utils/errorHandler';
 
 // The input schema for the deletion flow.
 export const DeleteDocumentSchema = z.object({
@@ -53,14 +55,7 @@ export const deleteDocument = async (input: DeleteDocumentInput, authToken: stri
     return { success: true };
 
   } catch (error) {
-    console.error('Error during document deletion flow:', error);
-    
-    const isFirebaseAuthError = typeof error === 'object' && error !== null && 'code' in error && typeof (error as any).code === 'string' && (error as any).code.startsWith('auth/');
-    if (isFirebaseAuthError) {
-      throw new Error('You are not authorized to perform this action. Please sign in again.');
-    }
-    
-    // Re-throw other application-specific errors (e.g., 'Document not found')
-    throw error;
+    // Use the centralized error handler
+    handleFlowError(error);
   }
 };
