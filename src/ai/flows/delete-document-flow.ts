@@ -56,6 +56,7 @@ export const deleteDocument = async (input: DeleteDocumentInput, authToken: stri
 
   } catch (error) {
     // Use the centralized error handler
-    handleFlowError(error);
+    await handleFlowError(error);
+    throw new Error('This part of the code should not be reachable.'); // To satisfy Promise<{success: boolean}> return type
   }
 };

@@ -13,7 +13,7 @@
  *
  * @param error The error object caught in a try/catch block.
  */
-export function handleFlowError(error: unknown): never {
+export async function handleFlowError(error: unknown): Promise<never> {
   // Check if the error is a Firebase Admin SDK Auth error (e.g., invalid token)
   const isFirebaseAuthError =
     typeof error === 'object' &&

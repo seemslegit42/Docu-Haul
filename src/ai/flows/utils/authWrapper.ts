@@ -30,7 +30,7 @@ export function createAuthenticatedFlow<TInput, TOutput>(
   flow: (input: TInput) => Promise<TOutput>,
   options: AuthWrapperOptions = {}
 ): (input: TInput, authToken: string | undefined) => Promise<TOutput> {
-  return async (input: TInput, authToken: string | undefined) => {
+  return async (input: TInput, authToken: string | undefined): Promise<TOutput> => {
     if (!authToken) {
       throw new Error('Authentication required. Access denied.');
     }
@@ -58,9 +58,12 @@ export function createAuthenticatedFlow<TInput, TOutput>(
       // If all checks pass, execute the original flow.
       return await flow(input);
 
-    } catch (error) => {
+    } catch (error) {
       // Use the centralized error handler
-      handleFlowError(error);
+      await handleFlowError(error);
+      // This line is technically unreachable because handleFlowError always throws,
+      // but it's needed to satisfy TypeScript's return type.
+      throw new Error('This part of the code should not be reachable.');
     }
   };
 }

@@ -3,9 +3,9 @@
 import { AppLayout } from '@/components/layout/app-layout';
 import { PageHeader } from '@/components/layout/page-header';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import ProfileSettings from './components/ProfileSettings';
+import ProfileSettings from './components/AccountDetails';
 import PasswordSettings from './components/PasswordSettings';
-import BillingSettings from './components/BillingSettings';
+import BillingSettings from './components/UpgradeToPremium';
 import DangerZone from './components/DangerZone';
 
 export default function AccountPage() {
