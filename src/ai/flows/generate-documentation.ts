@@ -155,14 +155,17 @@ const generateDocumentPrompt = ai.definePrompt({
     input: { schema: GenerateDocumentPromptSchema },
     output: { schema: GenerateDocumentationOutputSchema },
     tools: [getVehicleInfoByVin],
-    prompt: `You are an AI agent specializing in vehicle documentation. Your primary goal is to generate a complete and accurate document (either NVIS or Bill of Sale) for the user.
+    prompt: `You are an AI agent specializing in vehicle documentation. Your primary goal is to generate a complete and accurate document (either NVIS or Bill of Sale) for the user, even if some information sources are unavailable.
 
 **Your Agentic Process:**
 
-1.  **Use Your Tools**: First, use the 'getVehicleInfoByVin' tool to retrieve the base specifications for the provided VIN: '{{{vin}}}'. This is your primary source of vehicle data.
-2.  **Incorporate User Details**: Analyze the user's 'Provided Details' below. This text contains supplemental information that might not be in the tool's output (e.g., buyer/seller names, addresses, sale price, specific dimensions, etc.). It can also contain overrides for the data you retrieved from the tool. User-provided details take precedence.
-3.  **Synthesize and Extract**: Combine the information from the tool and the user's details. Populate ALL fields of the required structuredData schema (NVIS or Bill of Sale). If information is missing from both the tool and the user's input, you MUST use a clear placeholder in square brackets (e.g., "[Manufacturer Address]", "[Sale Price]"). Do not omit any required fields.
-4.  **Generate Final Document**: Using the complete, synthesized data from step 3, generate the final, professionally formatted text for the document in the 'documentText' field. The tone must match the requested 'Document Tone'.
+1.  **Attempt Tool Use**: First, ATTEMPT to use the 'getVehicleInfoByVin' tool to retrieve base specifications for the provided VIN: '{{{vin}}}'.
+2.  **Handle Tool Results Gracefully**:
+    *   **If the tool succeeds**: Use the data from the tool as your primary source of vehicle information.
+    *   **If the tool fails or returns an error**: Do not stop. Acknowledge the failure and proceed using only the user's text. The user's input is now your ONLY source of vehicle data.
+3.  **Incorporate User Details**: Analyze the user's 'Provided Details' below. This text contains supplemental information (e.g., buyer/seller info) AND may contain vehicle specifications. If the tool succeeded, these details should OVERRIDE the tool's data. If the tool failed, this is your primary source for ALL vehicle data.
+4.  **Synthesize and Extract**: Combine all available information. Populate ALL fields of the required structuredData schema (NVIS or Bill of Sale). If any information is still missing after checking all sources, you MUST use a clear placeholder in square brackets (e.g., "[Manufacturer Address]", "[Sale Price]"). Do not omit any required fields.
+5.  **Generate Final Document**: Using the complete, synthesized data from the previous step, generate the final, professionally formatted text for the document in the 'documentText' field. The tone must match the requested 'Document Tone'.
 
 **User Inputs:**
 - Document Type Requested: {{{documentType}}}
