@@ -5,10 +5,12 @@
  */
 
 import admin from '@/lib/firebase-admin';
+import type { DecodedIdToken } from 'firebase-admin/auth';
 
 interface AuthWrapperOptions {
   premiumRequired?: boolean;
   premiumCheckError?: string;
+  customAuthCheck?: (decodedToken: DecodedIdToken) => void;
 }
 
 /**
@@ -20,6 +22,7 @@ interface AuthWrapperOptions {
  * @param options Configuration options for the authorization check.
  * @param options.premiumRequired If true, checks if the user has a `premium` custom claim.
  * @param options.premiumCheckError The error message to throw if the premium check fails.
+ * @param options.customAuthCheck A custom function to perform additional authorization checks.
  * @returns An async function that takes the flow input and an auth token, and returns the flow's output.
  */
 export function createAuthenticatedFlow<TInput, TOutput>(
@@ -39,6 +42,11 @@ export function createAuthenticatedFlow<TInput, TOutput>(
         if (!isPremium) {
           throw new Error(options.premiumCheckError || 'This is a premium feature. Please upgrade your plan.');
         }
+      }
+      
+      // Perform custom authorization check if provided
+      if (options.customAuthCheck) {
+        options.customAuthCheck(decodedToken);
       }
 
       // If all checks pass, execute the original flow.

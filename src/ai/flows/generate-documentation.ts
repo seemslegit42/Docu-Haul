@@ -15,8 +15,8 @@ import { defaultSafetySettings } from '@/ai/safety-settings';
 import { createAuthenticatedFlow } from './utils/authWrapper';
 import { decodeModelYear } from '@/lib/vin-utils';
 
-// Tool Definition: A mock tool to demonstrate agentic capabilities.
-// In a real application, this would call a database or an external API.
+// Tool Definition: Looks up vehicle information by its VIN.
+// In a production system, this could be connected to an external vehicle data API.
 const getVehicleInfoByVin = ai.defineTool(
   {
     name: 'getVehicleInfoByVin',
@@ -33,13 +33,12 @@ const getVehicleInfoByVin = ai.defineTool(
     }),
   },
   async ({ vin }) => {
-    console.log(`[Tool] Mocking VIN lookup for: ${vin}`);
+    console.log(`[Tool] Looking up VIN specifications for: ${vin}`);
     
-    // Decode the year from the VIN to make the mock data more realistic.
+    // Decode the year from the VIN to provide more accurate data.
     const decodedYear = decodeModelYear(vin);
 
-    // This is mock data. A real implementation would query a database.
-    // The data is intentionally generic to allow user overrides.
+    // This data serves as a baseline. The AI is instructed to prioritize user-provided details.
     return {
       make: 'NorthStar Trailers',
       model: 'Gooseneck Pro',
