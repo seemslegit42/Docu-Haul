@@ -3,9 +3,9 @@
 import { AppLayout } from '@/components/layout/app-layout';
 import { PageHeader } from '@/components/layout/page-header';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import ProfileSettings from './components/AccountDetails';
+import AccountDetails from './components/AccountDetails';
 import PasswordSettings from './components/PasswordSettings';
-import BillingSettings from './components/UpgradeToPremium';
+import UpgradeToPremium from './components/UpgradeToPremium';
 import DangerZone from './components/DangerZone';
 
 export default function AccountPage() {
@@ -23,13 +23,13 @@ export default function AccountPage() {
                     <TabsTrigger value="danger">Danger Zone</TabsTrigger>
                 </TabsList>
                 <TabsContent value="profile" className="mt-6">
-                    <ProfileSettings />
+                    <AccountDetails />
                 </TabsContent>
                  <TabsContent value="password" className="mt-6">
                     <PasswordSettings />
                 </TabsContent>
                 <TabsContent value="billing" className="mt-6">
-                    <BillingSettings />
+                    <UpgradeToPremium />
                 </TabsContent>
                 <TabsContent value="danger" className="mt-6">
                     <DangerZone />
