@@ -1,10 +1,9 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { clsx, type ClassValue } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
-
 
 /**
  * Converts a numeric value in kilograms to pounds.
@@ -26,18 +25,17 @@ export function formatWeightBilingual(kgString: string | undefined): string {
   if (!kgString || kgString.trim() === '' || kgString.includes('[PLACEHOLDER]')) {
     return ' KG ( LB)';
   }
-  
+
   const kg = parseFloat(kgString);
 
   // If parsing fails, return the original string with placeholder units
   if (isNaN(kg)) {
     return `${kgString} KG ( LB)`;
   }
-  
+
   const lbs = convertKgToLbs(kg);
   return `${kg} KG (${lbs} LB)`;
 }
-
 
 /**
  * Converts a numeric value in kilopascals (KPA) to pounds per square inch (PSI).
@@ -58,13 +56,13 @@ export function formatPressureBilingual(kpaString: string | undefined): string {
   if (!kpaString || kpaString.trim() === '' || kpaString.includes('[PLACEHOLDER]')) {
     return 'KPA ( PSI / LPC)';
   }
-  
+
   const kpa = parseFloat(kpaString);
 
   if (isNaN(kpa)) {
     return `${kpaString} KPA ( PSI / LPC)`;
   }
-  
+
   const psi = convertKpaToPsi(kpa);
   return `${kpa} KPA (${psi} PSI / LPC)`;
 }

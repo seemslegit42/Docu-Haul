@@ -53,56 +53,49 @@ const VinLabelDesignPromptSchema = LabelForgeSchema.extend({
   isMultiAxle: z.boolean(),
 });
 
-const createCompliantVinLabelFlow = ai.defineFlow(
-  {
-    name: 'createCompliantVinLabelFlow',
-    inputSchema: LabelForgeSchema,
-    outputSchema: VinLabelDataSchema,
-  },
-  async (input) => {
-    // Step 1: Deterministically validate the VIN in code FIRST.
-    const isVinValid = validateVin(input.vinData);
+const createCompliantVinLabelFlow = async (input: LabelForgeInput): Promise<VinLabelData> => {
+  // Step 1: Deterministically validate the VIN in code FIRST.
+  const isVinValid = validateVin(input.vinData);
 
-    if (!isVinValid) {
-      // If the VIN is invalid, return a structured response indicating failure.
-      // This is more graceful than throwing an error for a predictable validation failure.
-      return {
-        isVinValid: false,
-        labelData: {},
-        placementRationale:
-          'The provided VIN is invalid. The 17-character number failed the check-digit validation. Please verify the VIN and try again.',
-      };
-    }
-
-    // Prepare the input for the prompt, adding boolean flags for the template type.
-    const promptInput = {
-      ...input,
-      isStandard: input.template === 'standard',
-      isBilingualCanadian: input.template === 'bilingual_canadian',
-      isBilingualRvCanadian: input.template === 'bilingual_rv_canadian',
-      isTireAndLoading: input.template === 'tire_and_loading',
-      isMultiAxle: input.template === 'multi_axle_heavy_duty',
-    };
-
-    // Step 2: Since the VIN is valid, call the AI to perform data extraction.
-    const { output } = await vinLabelDesignPrompt(promptInput);
-
-    // This is an unexpected error. If the VIN is valid, the AI should always be able to extract data.
-    if (!output || Object.keys(output.labelData).length === 0) {
-      const errorMessage =
-        'AI failed to extract label data for a valid VIN. Please check your input specifications or try again.';
-      console.error(errorMessage, { input, receivedOutput: output });
-      throw new Error(errorMessage);
-    }
-
-    // Step 3: Combine the validation result with the AI's output.
+  if (!isVinValid) {
+    // If the VIN is invalid, return a structured response indicating failure.
+    // This is more graceful than throwing an error for a predictable validation failure.
     return {
-      isVinValid: true,
-      labelData: output.labelData,
-      placementRationale: output.placementRationale,
+      isVinValid: false,
+      labelData: {},
+      placementRationale:
+        'The provided VIN is invalid. The 17-character number failed the check-digit validation. Please verify the VIN and try again.',
     };
   }
-);
+
+  // Prepare the input for the prompt, adding boolean flags for the template type.
+  const promptInput = {
+    ...input,
+    isStandard: input.template === 'standard',
+    isBilingualCanadian: input.template === 'bilingual_canadian',
+    isBilingualRvCanadian: input.template === 'bilingual_rv_canadian',
+    isTireAndLoading: input.template === 'tire_and_loading',
+    isMultiAxle: input.template === 'multi_axle_heavy_duty',
+  };
+
+  // Step 2: Since the VIN is valid, call the AI to perform data extraction.
+  const { output } = await vinLabelDesignPrompt(promptInput);
+
+  // This is an unexpected error. If the VIN is valid, the AI should always be able to extract data.
+  if (!output || Object.keys(output.labelData).length === 0) {
+    const errorMessage =
+      'AI failed to extract label data for a valid VIN. Please check your input specifications or try again.';
+    console.error(errorMessage, { input, receivedOutput: output });
+    throw new Error(errorMessage);
+  }
+
+  // Step 3: Combine the validation result with the AI's output.
+  return {
+    isVinValid: true,
+    labelData: output.labelData,
+    placementRationale: output.placementRationale,
+  };
+};
 
 // Wrap the core flow logic with the authentication utility, requiring a premium claim.
 export const createCompliantVinLabel = createAuthenticatedFlow(createCompliantVinLabelFlow, {
