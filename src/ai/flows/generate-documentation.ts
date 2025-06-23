@@ -14,6 +14,19 @@ import { type SmartDocsInput, SmartDocsSchema } from '@/lib/schemas';
 import { defaultSafetySettings } from '@/ai/safety-settings';
 import { createAuthenticatedFlow } from './utils/authWrapper';
 
+// Type definition for the relevant parts of the NHTSA API response.
+interface NhtsaVehicleInfo {
+  Make: string;
+  Model: string;
+  ModelYear: string;
+  BodyClass: string;
+  GVWR: string;
+  NumberOfAxles: string;
+  SuggestedTire: string;
+  ErrorCode: string;
+  ErrorText?: string;
+}
+
 // Tool Definition: Looks up vehicle information by its VIN using the official NHTSA API.
 const getVehicleInfoByVin = ai.defineTool(
   {
@@ -30,6 +43,13 @@ const getVehicleInfoByVin = ai.defineTool(
       tireSize: z.string().describe("The tire specification (e.g., 'ST235/80R16E')."),
     }),
   },
+  /**
+   * Fetches vehicle data from the NHTSA API for a given VIN.
+   * @param {object} input The tool input.
+   * @param {string} input.vin The 17-character VIN.
+   * @returns {Promise<object>} A promise that resolves to the vehicle data.
+   * @throws {Error} If the API call fails or the VIN is not found.
+   */
   async ({ vin }) => {
     console.log(`[Tool] Calling NHTSA API for VIN: ${vin}`);
     const NHTSA_API_URL = `https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValues/${vin}?format=json`;
@@ -37,25 +57,31 @@ const getVehicleInfoByVin = ai.defineTool(
     try {
         const response = await fetch(NHTSA_API_URL);
         if (!response.ok) {
-            throw new Error(`NHTSA API returned an error: ${response.statusText}`);
+            // This handles network-level errors (e.g., 500, 404)
+            throw new Error(`NHTSA API request failed: ${response.status} ${response.statusText}`);
         }
         
-        const data = await response.json();
+        const data: { Results: NhtsaVehicleInfo[] } = await response.json();
         
+        // This handles API-level errors (e.g., VIN not found)
         if (!data.Results || data.Results.length === 0 || data.Results[0].ErrorCode !== '0') {
-            const errorMessage = data.Results[0]?.ErrorText || 'No results found for this VIN from the NHTSA API.';
+            const errorMessage = data.Results[0]?.ErrorText || 'No valid results found for this VIN from the NHTSA API.';
             throw new Error(errorMessage);
         }
 
         const vehicleInfo = data.Results[0];
 
-        // Helper to get a value or return a default placeholder.
-        const getValue = (key: string, defaultValue = '[Not Provided by API]') => {
+        /**
+         * Helper to get a value or return a default placeholder.
+         * @param {keyof NhtsaVehicleInfo} key The key to look for in the vehicleInfo object.
+         * @param {string} [defaultValue='[Not Provided by API]'] The default value.
+         * @returns {string} The trimmed value or the default.
+         */
+        const getValue = (key: keyof NhtsaVehicleInfo, defaultValue = '[Not Provided by API]') => {
             const value = vehicleInfo[key];
-            return (value && value.trim() && value.trim() !== 'Not Applicable') ? value.trim() : defaultValue;
-        }
+            return (value && typeof value === 'string' && value.trim() && value.trim() !== 'Not Applicable') ? value.trim() : defaultValue;
+        };
 
-        // The AI is instructed to prioritize user-provided details over this data.
         return {
             make: getValue('Make'),
             model: getValue('Model'),
@@ -66,20 +92,10 @@ const getVehicleInfoByVin = ai.defineTool(
             tireSize: getValue('SuggestedTire'),
         };
     } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
-        console.error(`[Tool] Error fetching data from NHTSA API for VIN ${vin}:`, errorMessage);
-        
-        // Provide a structured error response that the AI can understand and relay.
-        // Returning default values so the flow doesn't crash, but the AI will know they are placeholders.
-        return {
-            make: '[Data Lookup Failed]',
-            model: '[Data Lookup Failed]',
-            year: '[Data Lookup Failed]',
-            bodyType: '[Data Lookup Failed]',
-            gvwr: '[Data Lookup Failed]',
-            numberOfAxles: '[Data Lookup Failed]',
-            tireSize: '[Data Lookup Failed]',
-        };
+        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred during VIN lookup.';
+        console.error(`[Tool] Error in getVehicleInfoByVin for VIN ${vin}:`, errorMessage);
+        // Re-throw the error so the Genkit agent can handle it.
+        throw new Error(`VIN lookup failed: ${errorMessage}`);
     }
   }
 );
