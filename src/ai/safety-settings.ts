@@ -1,5 +1,3 @@
-'use server';
-
 /**
  * @fileOverview Default safety settings for Genkit AI models.
  */

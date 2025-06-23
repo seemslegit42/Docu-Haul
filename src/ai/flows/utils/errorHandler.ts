@@ -1,4 +1,3 @@
-
 /**
  * @fileOverview Centralized error handling utility for authenticated flows.
  */
