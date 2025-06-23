@@ -1,11 +1,10 @@
-'use server';
 /**
  * @fileOverview A higher-order function to wrap Genkit flows with authentication and authorization checks.
  */
 
 import admin from '@/lib/firebase-admin';
 import type { DecodedIdToken } from 'firebase-admin/auth';
-import { handleFlowError } from './utils/errorHandler';
+import { handleFlowError } from './errorHandler';
 
 interface AuthWrapperOptions {
   premiumRequired?: boolean;
