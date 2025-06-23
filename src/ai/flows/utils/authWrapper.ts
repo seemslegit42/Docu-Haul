@@ -1,3 +1,4 @@
+'use server';
 /**
  * @fileOverview A higher-order function to wrap Genkit flows with authentication and authorization checks.
  */
@@ -58,7 +59,7 @@ export function createAuthenticatedFlow<TInput, TOutput>(
 
     } catch (error) {
       // Use the centralized error handler
-      handleFlowError(error);
+      await handleFlowError(error);
       // This line is technically unreachable because handleFlowError always throws,
       // but it's needed to satisfy TypeScript's return type.
       throw new Error('This part of the code should not be reachable.');
