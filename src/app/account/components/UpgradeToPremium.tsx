@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from 'next/link';
@@ -12,7 +13,7 @@ import { cn } from '@/lib/utils';
 const LEMON_SQUEEZY_SUBSCRIPTION_URL = process.env.NEXT_PUBLIC_LEMON_SQUEEZY_SUBSCRIPTION_URL || "#";
 const LEMON_SQUEEZY_CUSTOMER_PORTAL_URL = process.env.NEXT_PUBLIC_LEMON_SQUEEZY_CUSTOMER_PORTAL_URL || "#";
 
-export default function BillingSettings({ className, ...props }: CardProps) {
+export default function UpgradeToPremium({ className, ...props }: CardProps) {
     const { user, isPremium, isAdmin } = useAuth();
     
     // Append user details to checkout URL for webhook mapping
