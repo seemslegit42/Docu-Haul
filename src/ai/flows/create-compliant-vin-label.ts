@@ -6,8 +6,8 @@
  * - VinLabelData - The return type for the createCompliantVinLabel function.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import { ai } from '@/ai/genkit';
+import { z } from 'genkit';
 import { type LabelForgeInput, LabelForgeSchema } from '@/lib/schemas';
 import { defaultSafetySettings } from '@/ai/safety-settings';
 import { createAuthenticatedFlow } from './utils/authWrapper';
@@ -15,24 +15,42 @@ import { validateVin } from '@/lib/vin-utils';
 
 // Schema for the AI prompt's output. It only focuses on what the AI generates.
 const VinLabelDesignOutputSchema = z.object({
-  labelData: z.record(z.string()).describe("A JSON object where keys are the label field names (e.g., 'VIN', 'GVWR') and values are the extracted data."),
-  placementRationale: z.string().describe("The AI's rationale for the data extraction choices, including any placeholders used."),
+  labelData: z
+    .record(z.string())
+    .describe(
+      "A JSON object where keys are the label field names (e.g., 'VIN', 'GVWR') and values are the extracted data."
+    ),
+  placementRationale: z
+    .string()
+    .describe(
+      "The AI's rationale for the data extraction choices, including any placeholders used."
+    ),
 });
 
 // The final output schema for the entire flow, including the validation result.
 export const VinLabelDataSchema = z.object({
-  isVinValid: z.boolean().describe("The result of the VIN validation. True if the VIN is valid, false otherwise."),
-  labelData: z.record(z.string()).describe("A JSON object where keys are the label field names (e.g., 'VIN', 'GVWR') and values are the extracted data. This will be an empty object if the VIN is invalid."),
-  placementRationale: z.string().describe("The AI's rationale or an explanation that the VIN was invalid."),
+  isVinValid: z
+    .boolean()
+    .describe('The result of the VIN validation. True if the VIN is valid, false otherwise.'),
+  labelData: z
+    .record(z.string())
+    .describe(
+      "A JSON object where keys are the label field names (e.g., 'VIN', 'GVWR') and values are the extracted data. This will be an empty object if the VIN is invalid."
+    ),
+  placementRationale: z
+    .string()
+    .describe("The AI's rationale or an explanation that the VIN was invalid."),
 });
 export type VinLabelData = z.infer<typeof VinLabelDataSchema>;
 
 // Create a schema for the prompt's input, extending the base schema with boolean flags.
 // This makes the prompt logic simpler and more robust, avoiding non-standard Handlebars helpers.
 const VinLabelDesignPromptSchema = LabelForgeSchema.extend({
-    isStandard: z.boolean(),
-    isBilingualCanadian: z.boolean(),
-    isBilingualRvCanadian: z.boolean(),
+  isStandard: z.boolean(),
+  isBilingualCanadian: z.boolean(),
+  isBilingualRvCanadian: z.boolean(),
+  isTireAndLoading: z.boolean(),
+  isMultiAxle: z.boolean(),
 });
 
 const createCompliantVinLabelFlow = ai.defineFlow(
@@ -46,54 +64,59 @@ const createCompliantVinLabelFlow = ai.defineFlow(
     const isVinValid = validateVin(input.vinData);
 
     if (!isVinValid) {
-        // If the VIN is invalid, return a structured response indicating failure.
-        // This is more graceful than throwing an error for a predictable validation failure.
-        return {
-            isVinValid: false,
-            labelData: {},
-            placementRationale: 'The provided VIN is invalid. The 17-character number failed the check-digit validation. Please verify the VIN and try again.',
-        };
+      // If the VIN is invalid, return a structured response indicating failure.
+      // This is more graceful than throwing an error for a predictable validation failure.
+      return {
+        isVinValid: false,
+        labelData: {},
+        placementRationale:
+          'The provided VIN is invalid. The 17-character number failed the check-digit validation. Please verify the VIN and try again.',
+      };
     }
 
     // Prepare the input for the prompt, adding boolean flags for the template type.
     const promptInput = {
-        ...input,
-        isStandard: input.template === 'standard',
-        isBilingualCanadian: input.template === 'bilingual_canadian',
-        isBilingualRvCanadian: input.template === 'bilingual_rv_canadian',
+      ...input,
+      isStandard: input.template === 'standard',
+      isBilingualCanadian: input.template === 'bilingual_canadian',
+      isBilingualRvCanadian: input.template === 'bilingual_rv_canadian',
+      isTireAndLoading: input.template === 'tire_and_loading',
+      isMultiAxle: input.template === 'multi_axle_heavy_duty',
     };
 
     // Step 2: Since the VIN is valid, call the AI to perform data extraction.
     const { output } = await vinLabelDesignPrompt(promptInput);
-    
+
     // This is an unexpected error. If the VIN is valid, the AI should always be able to extract data.
     if (!output || Object.keys(output.labelData).length === 0) {
-        const errorMessage = 'AI failed to extract label data for a valid VIN. Please check your input specifications or try again.';
-        console.error(errorMessage, { input, receivedOutput: output });
-        throw new Error(errorMessage);
+      const errorMessage =
+        'AI failed to extract label data for a valid VIN. Please check your input specifications or try again.';
+      console.error(errorMessage, { input, receivedOutput: output });
+      throw new Error(errorMessage);
     }
-    
+
     // Step 3: Combine the validation result with the AI's output.
     return {
-        isVinValid: true,
-        labelData: output.labelData,
-        placementRationale: output.placementRationale,
+      isVinValid: true,
+      labelData: output.labelData,
+      placementRationale: output.placementRationale,
     };
   }
 );
 
 // Wrap the core flow logic with the authentication utility, requiring a premium claim.
-export const createCompliantVinLabel = createAuthenticatedFlow(createCompliantVinLabelFlow, { 
-    premiumRequired: true,
-    premiumCheckError: 'The Label Forge is a premium feature. Please upgrade your plan to generate VIN labels.'
+export const createCompliantVinLabel = createAuthenticatedFlow(createCompliantVinLabelFlow, {
+  premiumRequired: true,
+  premiumCheckError:
+    'The Label Forge is a premium feature. Please upgrade your plan to generate VIN labels.',
 });
 
 // Prompt for designing label content and rationale.
 // This prompt is now much simpler because it can assume the VIN is already valid.
 const vinLabelDesignPrompt = ai.definePrompt({
   name: 'vinLabelDesignPrompt',
-  input: {schema: VinLabelDesignPromptSchema},
-  output: {schema: VinLabelDesignOutputSchema},
+  input: { schema: VinLabelDesignPromptSchema },
+  output: { schema: VinLabelDesignOutputSchema },
   prompt: `You are an expert system for designing compliant VIN (Vehicle Identification Number) labels.
 The VIN provided has already been validated and is correct. Your task is to extract structured data for the label based on the user's input.
 
@@ -134,6 +157,26 @@ Extract data for the following keys: "BRAND", "DATE", "RESP_MFR", "GVWR_LBS", "G
 - Extract PSI and KPA values separately for front and rear axles.
 - "COMPLIANCE_STATEMENT_VEHICLE" is the block of text under the heading "TYPE OF VEHICLE/TYPE DE VÉHICULE".
 - "COMPLIANCE_STATEMENT_TRAILER" is the block of text under the heading "TRAILER/REMORQUE".
+{{/if}}
+
+{{#if isTireAndLoading}}
+**Template Style: Tire and Loading Information Placard**
+This is a specific safety placard, usually yellow and black.
+Extract data for the following keys: "SEATING_CAPACITY_TOTAL", "SEATING_CAPACITY_FRONT", "SEATING_CAPACITY_REAR", "VEHICLE_CAPACITY_WEIGHT_LBS", "VEHICLE_CAPACITY_WEIGHT_KG", "TIRE_SIZE_FRONT", "TIRE_SIZE_REAR", "TIRE_SIZE_SPARE", "COLD_TIRE_PRESSURE_FRONT_PSI", "COLD_TIRE_PRESSURE_REAR_PSI", "COLD_TIRE_PRESSURE_SPARE_PSI". The VIN should also be included as "VIN".
+- The combined weight of occupants and cargo should never exceed the listed vehicle capacity weight.
+- Seating capacity is the total number of occupants.
+- Extract LBS and KG values for Vehicle Capacity Weight separately.
+- Extract PSI values for Front, Rear, and Spare tires.
+{{/if}}
+
+{{#if isMultiAxle}}
+**Template Style: Multi-Axle Heavy Duty**
+This template is for heavy-duty trailers with multiple axles, potentially with different weight ratings per axle.
+Extract data for the following keys: "MANUFACTURER", "DATE_OF_MFG", "GVWR", "GAWR_AXLE_1", "GAWR_AXLE_2", "GAWR_AXLE_3", "TIRES", "RIMS", "COLD_INFL_PRESS", "VIN", "TYPE", and "COMPLIANCE_STATEMENT".
+- If the trailer has more than 3 axles, add keys like "GAWR_AXLE_4", etc.
+- If the user provides a single GAWR for all axles, apply it to Axle 1, 2, and 3.
+- If details are missing, use placeholders (e.g., "[Axle 3 GAWR]").
+- For the compliance statement, use the provided regulatory standard or a default US/FMVSS statement.
 {{/if}}
 
 
